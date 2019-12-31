@@ -33,7 +33,7 @@ def get_parser(valid_commands):
 	# whether their argument is an ArgumentParser.
 	for name, func in valid_commands.items():
 		# Create the subparser.
-		cmd = subp.add_parser(name)
+		cmd = subp.add_parser(name, description=func.__doc__)
 		# Delegate subparser setup.
 		func(cmd)
 		# Store function for later execution
