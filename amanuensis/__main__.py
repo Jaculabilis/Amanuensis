@@ -1,21 +1,24 @@
 # Standard library imports
 import argparse
+import os
 import traceback
 
-# Application imports
+# Module imports
 import cli
 import configs
 
 
-@cli.no_argument
 def repl(args):
 	"""Runs a REPL with the given lexicon"""
+	# Get all the cli commands' descriptions and add help and exit.
 	commands = {
 		name[8:]: func.__doc__ for name, func in vars(cli).items()
 		if name.startswith("command_")}
 	commands['help'] = "Print this message"
+	commands['exit'] = "Exit"
 	print("Amanuensis running on Lexicon {}".format(args.lexicon))
 	while True:
+		# Read input in a loop.
 		try:
 			data = input("{}> ".format(args.lexicon))
 		except EOFError:
@@ -30,7 +33,12 @@ def repl(args):
 			print("Available commands:")
 			for name, func in commands.items():
 				print("  {}: {}".format(name, func))
+		elif data.strip() == "exit":
+			print()
+			break
 		elif data.strip():
+			# Execute the command by appending it to the argv the
+			# REPL was invoked with.
 			try:
 				argv = sys.argv[1:] + data.split()
 				main(argv)
@@ -64,9 +72,9 @@ def get_parser(valid_commands):
 	# command_ functions perform setup or execution depending on
 	# whether their argument is an ArgumentParser.
 	for name, func in valid_commands.items():
-		# Create the subparser.
+		# Create the subparser, set the docstring as the description.
 		cmd = subp.add_parser(name, description=func.__doc__)
-		# Delegate subparser setup.
+		# Delegate subparser setup to the command.
 		func(cmd)
 		# Store function for later execution.
 		cmd.set_defaults(func=func)
