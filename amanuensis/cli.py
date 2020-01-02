@@ -67,6 +67,6 @@ def command_init(args):
 def command_dump(args):
 	"""Dumps the global config or the config for the given lexicon"""
 	import json
-	import configs
-	print(json.dumps(configs.GLOBAL_CONFIG, indent=2))
+	import config
+	print(json.dumps(config.GLOBAL_CONFIG, indent=2))
 

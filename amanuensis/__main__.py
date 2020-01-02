@@ -5,7 +5,7 @@ import traceback
 
 # Module imports
 import cli
-import configs
+import config
 
 
 def repl(args):
@@ -58,7 +58,7 @@ def get_parser(valid_commands):
 	# The config directory.
 	parser.add_argument("--config-dir",
 		dest="config_dir",
-		default=os.environ.get(configs.ENV_CONFIG_DIR, "./config"),
+		default=os.environ.get(config.ENV_CONFIG_DIR, "./config"),
 		help="The config directory for Amanuensis")
 	# Logging settings.
 	parser.add_argument("--verbose", "-v",
@@ -67,15 +67,15 @@ def get_parser(valid_commands):
 		help="Enable verbose console logging")
 	parser.add_argument("--log-file",
 		dest="log_file",
-		default=os.environ.get(configs.ENV_LOG_FILE),
+		default=os.environ.get(config.ENV_LOG_FILE),
 		help="Enable verbose file logging")
 	parser.add_argument("--log-file-size",
 		dest="log_file_size",
-		default=os.environ.get(configs.ENV_LOG_FILE_SIZE),
+		default=os.environ.get(config.ENV_LOG_FILE_SIZE),
 		help="Maximum rolling log file size")
 	parser.add_argument("--log-file-num",
 		dest="log_file_num",
-		default=os.environ.get(configs.ENV_LOG_FILE_NUM),
+		default=os.environ.get(config.ENV_LOG_FILE_NUM),
 		help="Maximum rolling file count")
 	# Lexicon settings.
 	parser.add_argument("-n",
@@ -93,7 +93,9 @@ def get_parser(valid_commands):
 	# whether their argument is an ArgumentParser.
 	for name, func in valid_commands.items():
 		# Create the subparser, set the docstring as the description.
-		cmd = subp.add_parser(name, description=func.__doc__)
+		cmd = subp.add_parser(name,
+			description=func.__doc__,
+			formatter_class=argparse.RawDescriptionHelpFormatter)
 		# Delegate subparser setup to the command.
 		func(cmd)
 		# Store function for later execution.
@@ -114,7 +116,7 @@ def main(argv):
 	# initialized at args.config_dir. Otherwise, initialize configs using
 	# that directory.
 	if args.command and args.command != "init":
-		configs.init(args)
+		config.init(args)
 
 	# Execute command.
 	args.func(args)
