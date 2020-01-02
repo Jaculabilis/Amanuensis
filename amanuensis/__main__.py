@@ -55,15 +55,34 @@ def get_parser(valid_commands):
 	parser = argparse.ArgumentParser(
 		description="Available commands:\n{}\n".format(command_descs),
 		formatter_class=argparse.RawDescriptionHelpFormatter)
+	# The config directory.
+	parser.add_argument("--config-dir",
+		dest="config_dir",
+		default=os.environ.get(configs.ENV_CONFIG_DIR, "./config"),
+		help="The config directory for Amanuensis")
+	# Logging settings.
+	parser.add_argument("--verbose", "-v",
+		action="store_true",
+		dest="verbose",
+		help="Enable verbose console logging")
+	parser.add_argument("--log-file",
+		dest="log_file",
+		default=os.environ.get(configs.ENV_LOG_FILE),
+		help="Enable verbose file logging")
+	parser.add_argument("--log-file-size",
+		dest="log_file_size",
+		default=os.environ.get(configs.ENV_LOG_FILE_SIZE),
+		help="Maximum rolling log file size")
+	parser.add_argument("--log-file-num",
+		dest="log_file_num",
+		default=os.environ.get(configs.ENV_LOG_FILE_NUM),
+		help="Maximum rolling file count")
+	# Lexicon settings.
 	parser.add_argument("-n",
 		metavar="LEXICON",
 		dest="lexicon",
 		help="The name of the lexicon to operate on")
-	parser.add_argument("-v",
-		action="store_true",
-		dest="verbose",
-		help="Enable debug logging")
-	parser.set_defaults(func=repl)
+	parser.set_defaults(func=lambda args: repl(args) if args.lexicon else parser.print_help())
 	subp = parser.add_subparsers(
 		metavar="COMMAND",
 		help="The command to execute")
@@ -90,9 +109,8 @@ def main(argv):
 
 	args = get_parser(commands).parse_args(argv)
 
-	# Configure logging.
-	if args.verbose:
-		configs.log_verbose()
+	# With the arguments parsed, initialize the configs.
+	configs.init(args)
 
 	# Execute command.
 	args.func(args)
