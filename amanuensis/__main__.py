@@ -47,8 +47,9 @@ def get_parser(valid_commands):
 	parser = argparse.ArgumentParser(
 		description="Available commands:\n{}\n".format(command_descs),
 		formatter_class=argparse.RawDescriptionHelpFormatter)
-	parser.add_argument("lexicon",
+	parser.add_argument("-n",
 		metavar="LEXICON",
+		dest="lexicon",
 		help="The name of the lexicon to operate on")
 	parser.add_argument("-v",
 		action="store_true",
