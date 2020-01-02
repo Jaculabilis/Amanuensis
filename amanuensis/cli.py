@@ -38,6 +38,31 @@ def no_argument(command):
 			command(cmd_args)
 	return augmented_command
 
+
+@no_argument
+def command_init(args):
+	"""Initialize an Amanuensis config directory at the directory given by
+	 --config-dir"""
+	import os
+	import pkg_resources
+	cfd = args.config_dir
+	# Create the directory if it doesn't exist.
+	if not os.path.isdir(cfd):
+		os.mkdir(cfd)
+	# Check if the directory is empty, check with user if not.
+	if len(os.listdir(cfd)) > 0:
+		check = input("Directory {} is not empty, proceed? [y/N] ".format(cfd))
+		if check != "y":
+			return -1
+	# Directory validated, set up config directory.
+	def_cfg = pkg_resources.resource_stream(__name__, "resources/default_config.json")
+	with open(os.path.join(cfd, "config.json"), 'wb') as f:
+		f.write(def_cfg.read())
+	with open(os.path.join(cfd, "pid"), 'w') as f:
+		f.write(str(os.getpid()))
+	os.mkdir(os.path.join(cfd, "lexicon"))
+	os.mkdir(os.path.join(cfd, "user"))
+
 @add_argument("--foo", action="store_true")
 def command_dump(args):
 	"""Dumps the global config or the config for the given lexicon"""

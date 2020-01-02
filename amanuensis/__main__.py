@@ -85,6 +85,7 @@ def get_parser(valid_commands):
 	parser.set_defaults(func=lambda args: repl(args) if args.lexicon else parser.print_help())
 	subp = parser.add_subparsers(
 		metavar="COMMAND",
+		dest="command",
 		help="The command to execute")
 
 	# Set up command subparsers.
@@ -109,8 +110,11 @@ def main(argv):
 
 	args = get_parser(commands).parse_args(argv)
 
-	# With the arguments parsed, initialize the configs.
-	configs.init(args)
+	# If the command is the init command, a config directory will be
+	# initialized at args.config_dir. Otherwise, initialize configs using
+	# that directory.
+	if args.command and args.command != "init":
+		configs.init(args)
 
 	# Execute command.
 	args.func(args)

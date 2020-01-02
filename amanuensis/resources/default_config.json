@@ -1,0 +1,49 @@
+{
+	"address": "127.0.0.1",
+	"port": "5000",
+	"lexicon_data": "./lexicon",
+	"logging": {
+		"version": 1,
+		"formatters": {
+			"fmt_basic": {
+				"format": "[{levelname}] {message}",
+				"style": "{"
+			},
+			"fmt_verbose": {
+				"format": "[{asctime}] [{levelname}:{filename}:{lineno}] {message}",
+				"style": "{"
+			}
+		},
+		"handlers": {
+			"cli_basic": {
+				"class": "logging.StreamHandler",
+				"formatter": "fmt_basic",
+				"level": "INFO"
+			},
+			"cli_verbose": {
+				"class": "logging.StreamHandler",
+				"formatter": "fmt_verbose",
+				"level": "DEBUG"
+			},
+			"file": {
+				"class": "logging.handlers.RotatingFileHandler",
+				"formatter": "fmt_verbose",
+				"level": "DEBUG",
+				"filename": "./amanuensis.log",
+				"delay": true,
+				"encoding": "utf8",
+				"maxBytes": 1000000,
+				"backupCount": 10
+			}
+		},
+		"loggers": {
+			"amanuensis": {
+				"level": "DEBUG",
+				"handlers": [
+					"cli_basic"
+				]
+			}
+		},
+		"disable_existing_loggers": false
+	}
+}
