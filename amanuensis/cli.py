@@ -21,12 +21,14 @@ from functools import wraps
 def add_argument(*args, **kwargs):
 	"""Passes the given args and kwargs to subparser.add_argument"""
 	def argument_adder(command):
+		second_layer = command.__dict__.get('wrapper', False)
 		@wraps(command)
 		def augmented_command(cmd_args):
 			if type(cmd_args) is AP:
 				cmd_args.add_argument(*args, **kwargs)
-			else:
+			if type(cmd_args) is not AP or second_layer:
 				command(cmd_args)
+		augmented_command.__dict__['wrapper'] = True
 		return augmented_command
 	return argument_adder
 
