@@ -116,7 +116,7 @@ def main(argv):
 	# initialized at args.config_dir. Otherwise, initialize configs using
 	# that directory.
 	if args.command and args.command != "init":
-		config.init(args)
+		config.init_config(args)
 
 	# Execute command.
 	args.func(args)

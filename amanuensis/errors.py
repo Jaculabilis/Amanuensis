@@ -7,3 +7,6 @@ class MissingConfigError(AmanuensisError):
 
 class MalformedConfigError(AmanuensisError):
 	pass
+
+class ReadOnlyError(AmanuensisError):
+	pass
