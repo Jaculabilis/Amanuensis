@@ -41,29 +41,57 @@ def no_argument(command):
 	return augmented_command
 
 
-@no_argument
+@add_argument("--update", action="store_true", help="Refresh an existing config directory")
 def command_init(args):
 	"""Initialize an Amanuensis config directory at the directory given by
 	 --config-dir"""
+	from collections import OrderedDict
+	import fcntl
+	import json
 	import os
 	import pkg_resources
+
 	cfd = args.config_dir
 	# Create the directory if it doesn't exist.
 	if not os.path.isdir(cfd):
 		os.mkdir(cfd)
-	# Check if the directory is empty, check with user if not.
-	if len(os.listdir(cfd)) > 0:
-		check = input("Directory {} is not empty, proceed? [y/N] ".format(cfd))
-		if check != "y":
-			return -1
-	# Directory validated, set up config directory.
+	# The directory should be empty if we're not updating an existing one.
+	if len(os.listdir(cfd)) > 0 and not args.update:
+		print("Directory {} is not empty".format(cfd))
+		return -1
+
+	# Update or create global config.
 	def_cfg = pkg_resources.resource_stream(__name__, "resources/default_config.json")
-	with open(os.path.join(cfd, "config.json"), 'wb') as f:
-		f.write(def_cfg.read())
-	with open(os.path.join(cfd, "pid"), 'w') as f:
-		f.write(str(os.getpid()))
-	os.mkdir(os.path.join(cfd, "lexicon"))
-	os.mkdir(os.path.join(cfd, "user"))
+	if args.update and os.path.isfile(os.path.join(cfd, "config.json")):
+		with open(os.path.join(cfd, "config.json"), 'r+', encoding='utf8') as cfg_file:
+			fcntl.lockf(cfg_file, fcntl.LOCK_EX)
+			old_cfg = json.load(cfg_file, object_pairs_hook=OrderedDict)
+			new_cfg = json.load(def_cfg, object_pairs_hook=OrderedDict)
+			merged = {}
+			for key in new_cfg:
+				merged[key] = old_cfg[key] if key in old_cfg else new_cfg[key]
+				if key not in old_cfg:
+					print("Added key '{}' to config".format(key))
+			for key in old_cfg:
+				if key not in new_cfg:
+					print("Config contains unknown key '{}'".format(key))
+					merged[key] = old_cfg[key]
+			cfg_file.seek(0)
+			json.dump(merged, cfg_file, allow_nan=False, indent='\t')
+			cfg_file.truncate()
+			fcntl.lockf(cfg_file, fcntl.LOCK_UN)
+	else:
+		with open(os.path.join(cfd, "config.json"), 'wb') as f:
+			f.write(def_cfg.read())
+	# Ensure pidfile exists.
+	if not os.path.isfile(os.path.join(cfd, "pid")):
+		with open(os.path.join(cfd, "pid"), 'w') as f:
+			f.write(str(os.getpid()))
+	# Ensure subdirs exist.
+	if not os.path.isdir(os.path.join(cfd, "lexicon")):
+		os.mkdir(os.path.join(cfd, "lexicon"))
+	if not os.path.isdir(os.path.join(cfd, "user")):
+		os.mkdir(os.path.join(cfd, "user"))
 
 @add_argument("-a", "--address", default="127.0.0.1")
 @add_argument("-p", "--port", default="5000")
