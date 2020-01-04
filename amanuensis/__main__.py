@@ -12,7 +12,7 @@ def repl(args):
 	"""Runs a REPL with the given lexicon"""
 	# Get all the cli commands' descriptions and add help and exit.
 	commands = {
-		name[8:]: func.__doc__ for name, func in vars(cli).items()
+		name[8:].replace("_", "-"): func.__doc__ for name, func in vars(cli).items()
 		if name.startswith("command_")}
 	commands['help'] = "Print this message"
 	commands['exit'] = "Exit"
@@ -106,7 +106,7 @@ def get_parser(valid_commands):
 def main(argv):
 	# Enumerate valid commands from the CLI module.
 	commands = {
-		name[8:] : func
+		name[8:].replace("_", "-") : func
 		for name, func in vars(cli).items()
 		if name.startswith("command_")}
 
