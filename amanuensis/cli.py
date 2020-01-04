@@ -109,8 +109,14 @@ def command_generate_secret(args):
 @add_argument("-p", "--port", default="5000")
 def command_run(args):
 	"""Runs the default Flask development server"""
-	from app import app
-	app.run(host=args.address, port=args.port)
+	import app
+	import config
+
+	if config.get("secret_key") is None:
+		config.logger.error("Can't run server without a secret_key. Run generate-secret first")
+		return -1
+	app.app.run(host=args.address, port=args.port)
+
 
 @add_argument("--foo", action="store_true")
 def command_dump(args):

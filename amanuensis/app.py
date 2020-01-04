@@ -1,6 +1,9 @@
 from flask import Flask, render_template
 
-app = Flask(__name__)
+import config
+
+app = Flask("amanuensis")
+app.secret_key = bytes.fromhex(config.get('secret_key'))
 
 @app.route("/")
 def root():
