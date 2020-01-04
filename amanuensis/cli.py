@@ -117,6 +117,29 @@ def command_run(args):
 		return -1
 	app.app.run(host=args.address, port=args.port)
 
+@add_argument("--username", help="User's login handle")
+@add_argument("--displayname", help="User's publicly displayed name")
+@add_argument("--email", help="User's email")
+def command_user_add(args):
+	"""Creates a user"""
+	import user
+	import config
+
+	# Verify or query parameters
+	if not args.username:
+		args.username = input("username: ").strip()
+	if not user.valid_username(args.username):
+		config.logger.error("Invalid username: usernames may only contain alphanumeric characters, dashes, and underscores")
+		return -1
+	if not args.displayname:
+		args.displayname = args.username
+	if not args.email:
+		args.email = input("email: ").strip()
+	if not user.valid_email(args.email):
+		config.logger.error("Invalid email")
+		return -1
+	# Create user
+	new_user = user.create_user(args.username, args.displayname, args.email)
 
 @add_argument("--foo", action="store_true")
 def command_dump(args):
