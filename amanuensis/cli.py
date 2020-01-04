@@ -43,8 +43,7 @@ def no_argument(command):
 
 @add_argument("--update", action="store_true", help="Refresh an existing config directory")
 def command_init(args):
-	"""Initialize an Amanuensis config directory at the directory given by
-	 --config-dir"""
+	"""Initialize a config directory at the directory given by --config-dir"""
 	from collections import OrderedDict
 	import fcntl
 	import json
@@ -92,6 +91,19 @@ def command_init(args):
 		os.mkdir(os.path.join(cfd, "lexicon"))
 	if not os.path.isdir(os.path.join(cfd, "user")):
 		os.mkdir(os.path.join(cfd, "user"))
+
+@no_argument
+def command_generate_secret(args):
+	"""Generate a secret key for Flask"""
+	import os
+
+	import config
+	from config.loader import WritableConfig
+
+	secret_key = os.urandom(32)
+	with WritableConfig(os.path.join(config.CONFIG_DIR, "config.json")) as cfg:
+		cfg['secret_key'] = secret_key.hex()
+	config.logger.info("Regenerated Flask secret key")
 
 @add_argument("-a", "--address", default="127.0.0.1")
 @add_argument("-p", "--port", default="5000")
