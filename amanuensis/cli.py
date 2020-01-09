@@ -121,6 +121,8 @@ def command_run(args):
 @add_argument("--email", help="User's email")
 def command_user_add(args):
 	"""Creates a user"""
+	import json
+
 	import user
 	import config
 
@@ -139,6 +141,24 @@ def command_user_add(args):
 		return -1
 	# Create user
 	new_user = user.create_user(args.username, args.displayname, args.email)
+	with config.json_ro(new_user.config) as js:
+		print(json.dumps(js, indent=2))
+
+@no_argument
+def command_user_list(args):
+	"""Lists users"""
+	import os
+
+	import config
+
+	user_dirs = os.listdir(config.prepend('user'))
+	users = []
+	for uid in user_dirs:
+		with config.json_ro('user', uid, 'config.json') as user:
+			users.append(user)
+	users.sort(key=lambda u: u['username'])
+	for user in users:
+		print("{0}  {1} ({2})".format(user['uid'], user['displayname'], user['username']))
 
 @add_argument("--foo", action="store_true")
 def command_dump(args):

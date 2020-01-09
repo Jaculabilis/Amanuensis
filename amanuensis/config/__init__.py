@@ -40,8 +40,8 @@ def init_config(args):
 def get(key):
 	return GLOBAL_CONFIG[key]
 
-def prepend(path):
-	return os.path.join(CONFIG_DIR, path)
+def prepend(*path):
+	return os.path.join(CONFIG_DIR, *path)
 
 def open_sh(path, mode):
 	return config.loader.open_sh(prepend(path), mode)
@@ -49,14 +49,14 @@ def open_sh(path, mode):
 def open_ex(path, mode):
 	return config.loader.open_ex(prepend(path), mode)
 
-def json_ro(path):
-	return config.loader.json_ro(prepend(path))
+def json_ro(*path):
+	return config.loader.json_ro(prepend(*path))
 
-def json_rw(path):
-	return config.loader.json_rw(prepend(path))
+def json_rw(*path):
+	return config.loader.json_rw(prepend(*path))
 
-def json(*args, mode='r'):
-	if not args[-1].endswith(".json"):
-		args[-1] = args[-1] + ".json"
-	path = os.path.join(CONFIG_DIR, *args)
-
+def new_user(user_json):
+	user_dir = prepend("user", user_json['uid'])
+	os.mkdir(user_dir)
+	with config.loader.open_ex(os.path.join(user_dir, "config.json"), 'w') as f:
+		json.dump(user_json, f, allow_nan=False, indent='\t')
