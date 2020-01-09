@@ -98,10 +98,9 @@ def command_generate_secret(args):
 	import os
 
 	import config
-	from config.loader import WritableConfig
 
 	secret_key = os.urandom(32)
-	with WritableConfig(os.path.join(config.CONFIG_DIR, "config.json")) as cfg:
+	with config.json_rw("config.json") as cfg:
 		cfg['secret_key'] = secret_key.hex()
 	config.logger.info("Regenerated Flask secret key")
 
