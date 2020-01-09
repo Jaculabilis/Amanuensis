@@ -154,11 +154,31 @@ def command_user_list(args):
 	user_dirs = os.listdir(config.prepend('user'))
 	users = []
 	for uid in user_dirs:
+		if uid == "index.json": continue
 		with config.json_ro('user', uid, 'config.json') as user:
 			users.append(user)
 	users.sort(key=lambda u: u['username'])
 	for user in users:
 		print("{0}  {1} ({2})".format(user['uid'], user['displayname'], user['username']))
+
+@add_argument("--username", help="The user to change password for")
+def command_user_passwd(args):
+	"""Set a user's password"""
+	import getpass
+	import os
+
+	import config
+	from user import User, get_user_by_username
+
+	if not args.username:
+		args.username = input("Username: ")
+	uid = get_user_by_username(args.username)
+	if uid is None:
+		print("No user with username '{}'".format(args.username))
+		return -1
+	user = User(uid)
+	pw = getpass.getpass("Password: ")
+	user.set_password(pw)
 
 @add_argument("--foo", action="store_true")
 def command_dump(args):

@@ -57,6 +57,14 @@ def json_rw(*path):
 
 def new_user(user_json):
 	user_dir = prepend("user", user_json['uid'])
+	# Create user dir and put config in it
 	os.mkdir(user_dir)
 	with config.loader.open_ex(os.path.join(user_dir, "config.json"), 'w') as f:
 		json.dump(user_json, f, allow_nan=False, indent='\t')
+	# Ensure index exists
+	if not os.path.isdir(prepend('user', 'index.json')):
+		with open_ex(prepend('user', 'index.json'), 'w') as f:
+			json.dump({}, f)
+	# Update index
+	with json_rw('user', 'index.json') as j:
+		j[user_json['username']] = user_json['uid']
