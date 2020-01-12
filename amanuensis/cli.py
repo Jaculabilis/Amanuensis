@@ -91,6 +91,9 @@ def command_init(args):
 		os.mkdir(os.path.join(cfd, "lexicon"))
 	if not os.path.isdir(os.path.join(cfd, "user")):
 		os.mkdir(os.path.join(cfd, "user"))
+	if not os.path.isfile(os.path.join(cfd, 'user', 'index.json')):
+		with open(os.path.join(cfd, 'user', 'index.json'), 'w') as f:
+			json.dump({}, f)
 
 @no_argument
 def command_generate_secret(args):
@@ -132,6 +135,9 @@ def command_user_add(args):
 	if not user.valid_username(args.username):
 		config.logger.error("Invalid username: usernames may only contain alphanumeric characters, dashes, and underscores")
 		return -1
+	if user.get_user_by_username(args.username) is not None:
+		config.logger.error("Invalid username: username is already taken")
+		return -1
 	if not args.displayname:
 		args.displayname = args.username
 	if not args.email:
@@ -140,9 +146,10 @@ def command_user_add(args):
 		config.logger.error("Invalid email")
 		return -1
 	# Create user
-	new_user = user.create_user(args.username, args.displayname, args.email)
+	new_user, tmp_pw = user.create_user(args.username, args.displayname, args.email)
 	with config.json_ro(new_user.config) as js:
 		print(json.dumps(js, indent=2))
+	print("Username: {}\nUser ID:  {}\nPassword: {}".format(args.username, new_user.uid, tmp_pw))
 
 @no_argument
 def command_user_list(args):

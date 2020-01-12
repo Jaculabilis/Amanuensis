@@ -63,7 +63,7 @@ def new_user(user_json):
 		json.dump(user_json, f, allow_nan=False, indent='\t')
 	# Ensure index exists
 	if not os.path.isdir(prepend('user', 'index.json')):
-		with open_ex(prepend('user', 'index.json'), 'w') as f:
+		with open_ex(os.path.join('user', 'index.json'), 'w') as f:
 			json.dump({}, f)
 	# Update index
 	with json_rw('user', 'index.json') as j:

@@ -36,6 +36,7 @@ def valid_email(email):
 def create_user(username, displayname, email):
 	uid = uuid.uuid4().hex
 	now = int(time.time())
+	temp_pw = os.urandom(32).hex()
 	user_json = {
 		'uid': uid,
 		'username': username,
@@ -43,9 +44,12 @@ def create_user(username, displayname, email):
 		'email': email,
 		'password': None,
 		'created': now,
+		'newPasswordRequired': True,
 	}
 	config.new_user(user_json)
-	return User(uid)
+	u = User(uid)
+	u.set_password(temp_pw)
+	return u, temp_pw
 
 def get_user_by_username(username):
 	with config.json_ro('user', 'index.json') as index:
