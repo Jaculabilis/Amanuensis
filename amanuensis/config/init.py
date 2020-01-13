@@ -42,7 +42,7 @@ def init_logging(args, logging_config):
 	# Apply any commandline settings to what was defined in the config file
 	handlers = cfg['loggers']['amanuensis']['handlers']
 	if args.verbose:
-		if 'cli-basic' in handlers:
+		if 'cli_basic' in handlers:
 			handlers.remove('cli_basic')
 		handlers.append('cli_verbose')
 	if args.log_file:
