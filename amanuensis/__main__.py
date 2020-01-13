@@ -118,6 +118,12 @@ def main(argv):
 	if args.command and args.command != "init":
 		config.init_config(args)
 
+	# If verbose logging, dump args namespace
+	if args.verbose:
+		config.logger.debug("amanuensis")
+		for key, val in vars(args).items():
+			config.logger.debug("  {}: {}".format(key, val))
+
 	# Execute command.
 	args.func(args)
 
