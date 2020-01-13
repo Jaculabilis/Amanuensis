@@ -3,24 +3,33 @@ import re
 import time
 import uuid
 
+from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 import config
 
-class User():
+class User(UserMixin):
 	def __init__(self, uid):
 		if not os.path.isdir(config.prepend('user', uid)):
 			raise ValueError("No user with uid {}".format(uid))
-		self.uid = uid
-		self.config = os.path.join('user', uid, 'config.json')
+		self.uid = str(uid)
+		self.config_path = os.path.join('user', uid, 'config.json')
+		with config.json_ro(self.config_path) as j:
+			self.config = j
+
+	def get_id(self):
+		return self.uid
+
+	def get(self, key):
+		return self.config.get(key)
 
 	def set_password(self, pw):
 		h = generate_password_hash(pw)
-		with config.json_rw(self.config) as j:
+		with config.json_rw(self.config_path) as j:
 			j['password'] = h
 
 	def check_password(self, pw):
-		with config.json_ro(self.config) as j:
+		with config.json_ro(self.config_path) as j:
 			return check_password_hash(j['password'], pw)
 
 def valid_username(username):
@@ -34,6 +43,10 @@ def valid_email(email):
 	return re.match(addrspec, email)
 
 def create_user(username, displayname, email):
+	if not valid_username(username):
+		raise ValueError("Invalid username: '{}'".format(username))
+	if not valid_email(email):
+		raise ValueError("Invalid email: '{}'".format(email))
 	uid = uuid.uuid4().hex
 	now = int(time.time())
 	temp_pw = os.urandom(32).hex()
@@ -51,6 +64,20 @@ def create_user(username, displayname, email):
 	u.set_password(temp_pw)
 	return u, temp_pw
 
-def get_user_by_username(username):
+def uid_from_username(username):
+	"""Gets the internal uid of a user given a username"""
+	if username is None:
+		raise ValueError("username must not be None")
+	if not username:
+		raise ValueError("username must not be empty")
 	with config.json_ro('user', 'index.json') as index:
-		return index.get(username)
+		uid = index.get(username)
+	if uid is None:
+		config.logger.debug("uid_from_username('{}') returned None".format(username))
+	return uid
+
+def user_from_uid(uid):
+	if not os.path.isdir(config.prepend('user', uid)):
+		config.logger.debug("No user with uid '{}'".format(uid))
+		return None
+	return User(uid)

@@ -179,7 +179,7 @@ def command_user_passwd(args):
 
 	if not args.username:
 		args.username = input("Username: ")
-	uid = get_user_by_username(args.username)
+	uid = uid_from_username(args.username)
 	if uid is None:
 		print("No user with username '{}'".format(args.username))
 		return -1
