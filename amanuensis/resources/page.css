@@ -106,11 +106,13 @@ span.signature {
 		float: inherit;
 		margin: 5px auto;
 	}
-	div#content {
+	div#content{
+		margin: 5px auto;
+	}
+	div.content-2col {
 		max-width: 564px;
 		position: static;
 		right: inherit;
-		margin: 5px auto;
 	}
 	img#logo {
 		max-width: inherit;

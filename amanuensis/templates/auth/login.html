@@ -1,11 +1,22 @@
 {% extends "page_1col.html" %}
 {% block title %}Login | Amanuensis{% endblock %}
-{% block header %}<h2>Login</h2>{% endblock %}
-{% block primary_content %}
-<h1>Log in</h1>
+{% block header %}<h2>Amanuensis - Login</h2>{% endblock %}
+{% block main %}
 <form action="" method="post" novalidate>
 	{{ form.hidden_tag() }}
-	<p>{{ form.username.label }}<br>{{ form.username(size=32) }}</p>
+	<p>{{ form.username.label }}<br>{{ form.username(size=32) }}
+	{% for error in form.username.errors %}
+	<br><span style="color: #ff0000">{{ error }}</span>
+	{% endfor %}</p>
+	<p>{{ form.password.label }}<br>{{ form.password(size=32) }}
+	{% for error in form.password.errors %}
+	<br><span style="color: #ff0000">{{ error }}</span>
+	{% endfor %}</p>
+	<p>{{ form.remember }} {{ form.remember.label }}</p>
 	<p>{{ form.submit() }}</p>
 </form>
+{% for message in get_flashed_messages() %}
+<span style="color: #ff0000">{{ message }}</span><br>
+{% endfor %}
 {% endblock %}
+{% set template_content_blocks = [self.main()] %}

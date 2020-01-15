@@ -1,7 +1,10 @@
 {% extends "page_2col.html" %}
 {% block title %}Home | Amanuensis{% endblock %}
-{% block header %}<h2>Amanuensis</h2>{% endblock %}
-{% block primary_content %}
-<p><a href="{{ url_for('home.home') }}">Home</a></p>
-<p><a href="{{ url_for('auth.logout') }}">Logout</a></p>
+{% block header %}<h2>Amanuensis - Dashboard</h2>{% endblock %}
+{% block sb_topline %}<b>{{ current_user.get('displayname') }}</b>{% endblock %}
+{% block sb_logout %}<a href="{{ url_for('auth.logout') }}">Log out</a>{% endblock %}
+{% set template_sidebar_rows = [self.sb_topline(), self.sb_logout()] %}
+{% block main %}
+<h1>Home Page</h1>
 {% endblock %}
+{% set template_content_blocks = [self.main()] %}

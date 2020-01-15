@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for
+from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired
@@ -9,8 +9,8 @@ import user
 
 class LoginForm(FlaskForm):
 	username = StringField('Username', validators=[DataRequired()])
-	#password = PasswordField('Password', validators=[DataRequired()])
-	#remember = BooleanField('Remember Me')
+	password = PasswordField('Password', validators=[DataRequired()])
+	remember = BooleanField('Stay logged in')
 	submit = SubmitField('Log in')
 
 def get_bp(login_manager):
@@ -27,15 +27,18 @@ def get_bp(login_manager):
 		if form.validate_on_submit():
 			username = form.username.data
 			uid = user.uid_from_username(username)
-			if uid is None:
-				pass
-			u = user.user_from_uid(uid)
-			login_user(u)
-			config.logger.info("Logged in user '{}' ({})".format(u.get('username'), u.uid))
-			name = u.get('username')
+			if uid is not None:
+				u = user.user_from_uid(uid)
+				if u.check_password(form.password.data):
+					remember_me = form.remember.data
+					login_user(u, remember=remember_me)
+					config.logger.info("Logged in user '{}' ({})".format(
+						u.get('username'), u.uid))
+					return redirect(url_for('home.home'))
+			flash("Login not recognized")
 		else:
-			name = "guest"
-		return render_template('auth/login.html', form=form, username=name)
+			pass
+		return render_template('auth/login.html', form=form)
 
 	@bp.route("/logout/", methods=['GET'])
 	@login_required

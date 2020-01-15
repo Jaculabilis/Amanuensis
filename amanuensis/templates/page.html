@@ -11,9 +11,9 @@
 		<div id="header">{% block header %}{% endblock %}</div>
 		{% block sidebar %}{% endblock %}
 		<div id="content" class="{% block content_class %}{% endblock %}">
-			<div class="contentblock">
-				{% block primary_content %}{% endblock %}</div>{% for content_block in additional_content %}
-			<div class="contentblock">
+			{% if not template_content_blocks %}{% set template_content_blocks = [] %}{% endif %}
+			{% if not content_blocks %}{% set content_blocks = [] %}{% endif %}
+			{% for content_block in template_content_blocks + content_blocks %}<div class="contentblock">
 				{{ content_block|safe }}</div>
 			{% endfor %}
 		</div>

@@ -11,8 +11,6 @@ def get_bp():
 	@bp.route('/', methods=['GET'])
 	@login_required
 	def home():
-		return render_template(
-			'home/home.html',
-			sidebar_rows=[current_user.get('username'), current_user.get('displayname'), current_user.uid])
+		return render_template('home/home.html')
 
 	return bp
