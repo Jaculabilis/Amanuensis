@@ -175,17 +175,17 @@ def command_user_passwd(args):
 	import os
 
 	import config
-	from user import User, get_user_by_username
+	import user
 
 	if not args.username:
 		args.username = input("Username: ")
-	uid = uid_from_username(args.username)
+	uid = user.uid_from_username(args.username)
 	if uid is None:
-		print("No user with username '{}'".format(args.username))
+		config.logger.error("No user with username '{}'".format(args.username))
 		return -1
-	user = User(uid)
+	u = user.user_from_uid(uid)
 	pw = getpass.getpass("Password: ")
-	user.set_password(pw)
+	u.set_password(pw)
 
 @add_argument("--foo", action="store_true")
 def command_dump(args):
