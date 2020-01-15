@@ -3,6 +3,7 @@
 	"address": "127.0.0.1",
 	"port": "5000",
 	"lexicon_data": "./lexicon",
+	"static_root": "./static",
 	"logging": {
 		"version": 1,
 		"formatters": {

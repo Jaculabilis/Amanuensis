@@ -1,8 +1,8 @@
-import flask
+from flask import Blueprint, render_template, redirect, url_for
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired
-from flask_login import current_user, login_user
+from flask_login import current_user, login_user, logout_user, login_required
 
 import config
 import user
@@ -15,7 +15,7 @@ class LoginForm(FlaskForm):
 
 def get_bp(login_manager):
 	"""Create a blueprint for the auth functions"""
-	bp = flask.Blueprint('auth', __name__, url_prefix='/auth')
+	bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 	@login_manager.user_loader
 	def load_user(uid):
@@ -35,6 +35,12 @@ def get_bp(login_manager):
 			name = u.get('username')
 		else:
 			name = "guest"
-		return flask.render_template('auth/login.html', form=form, username=name)
+		return render_template('auth/login.html', form=form, username=name)
+
+	@bp.route("/logout/", methods=['GET'])
+	@login_required
+	def logout():
+		logout_user()
+		return redirect(url_for('auth.login'))
 
 	return bp

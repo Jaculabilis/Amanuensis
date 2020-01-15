@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{% block title %}{% endblock %}</title>
+	<link rel="stylesheet" href="{{ url_for("static", filename="page.css") }}">
+</head>
+<body>
+	<div id="wrapper">
+		<div id="header">{% block header %}{% endblock %}</div>
+		{% block sidebar %}{% endblock %}
+		<div id="content" class="{% block content_class %}{% endblock %}">
+			<div class="contentblock">
+				{% block primary_content %}{% endblock %}</div>{% for content_block in additional_content %}
+			<div class="contentblock">
+				{{ content_block|safe }}</div>
+			{% endfor %}
+		</div>
+	</div>
+</body>
+</html>
