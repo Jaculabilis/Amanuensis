@@ -4,6 +4,13 @@
 	"port": "5000",
 	"lexicon_data": "./lexicon",
 	"static_root": "./static",
+	"email": {
+		"server": null,
+		"port": null,
+		"tls": null,
+		"username": null,
+		"password": null
+	},
 	"logging": {
 		"version": 1,
 		"formatters": {
