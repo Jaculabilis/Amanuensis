@@ -7,8 +7,8 @@ import config
 import user
 
 class DashboardForm(FlaskForm):
+	admin_config_text = TextAreaField()
 	submit = SubmitField("Submit")
-	text = TextAreaField()
 
 def get_bp():
 	"""Create a blueprint for pages outside of a specific lexicon"""
@@ -34,7 +34,7 @@ def get_bp():
 		if form.is_submitted():
 			return "k"
 		else:
-			form.text.data = text
+			form.admin_config_text.data = text
 			return render_template('home/admin.html', form=form)
 
 	return bp

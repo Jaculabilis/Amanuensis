@@ -92,6 +92,11 @@ div.citeblock a.phantom {
 span.signature {
 	text-align: right;
 }
+textarea#admin_config_text {
+	resize: vertical;
+	width: 100%;
+	box-sizing: border-box;
+}
 @media only screen and (max-width: 816px) {
 	div#wrapper {
 		padding: 5px;

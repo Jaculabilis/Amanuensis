@@ -10,7 +10,7 @@
 {% block main %}
 <form action="" method="post" novalidate>
 		{{ form.hidden_tag() }}
-		<p>{{ form.text() }}</p>
+		{{ form.admin_config_text() }}
 		<p>{{ form.submit() }}</p>
 	</form>
 {% endblock %}
