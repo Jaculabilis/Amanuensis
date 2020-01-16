@@ -1,5 +1,5 @@
 # Standard library imports
-from argparse import ArgumentParser as AP
+from argparse import ArgumentParser, Namespace
 from functools import wraps
 
 # These function wrappers allow us to use the same function for executing a
@@ -13,9 +13,9 @@ def add_argument(*args, **kwargs):
 		second_layer = command.__dict__.get('wrapper', False)
 		@wraps(command)
 		def augmented_command(cmd_args):
-			if type(cmd_args) is AP:
+			if type(cmd_args) is ArgumentParser:
 				cmd_args.add_argument(*args, **kwargs)
-			if type(cmd_args) is not AP or second_layer:
+			if type(cmd_args) is not ArgumentParser or second_layer:
 				command(cmd_args)
 		augmented_command.__dict__['wrapper'] = True
 		return augmented_command
@@ -25,6 +25,25 @@ def no_argument(command):
 	"""Noops for subparsers"""
 	@wraps(command)
 	def augmented_command(cmd_args):
-		if type(cmd_args) is not AP:
+		if type(cmd_args) is not ArgumentParser:
 			command(cmd_args)
 	return augmented_command
+
+# This wrapper is another verification step
+
+def requires(argument, verify=lambda a: a is not None):
+	"""Errors out if the given argument is not present"""
+	def req_checker(command):
+		second_layer = command.__dict__.get('wrapper', False)
+		@wraps(command)
+		def augmented_command(cmd_args):
+			if type(cmd_args) is Namespace:
+				if not hasattr(cmd_args, argument) or not verify(getattr(cmd_args, argument)):
+					import config
+					config.logger.error(
+						"This command requires specifying {}".format(argument))
+					return -1
+			command(cmd_args)
+		augmented_command.__dict__['wrapper'] = True
+		return augmented_command
+	return req_checker
