@@ -58,6 +58,7 @@ def create_user(username, displayname, email):
 		'password': None,
 		'created': now,
 		'newPasswordRequired': True,
+		'admin': False,
 	}
 	config.new_user(user_json)
 	u = User(uid)
