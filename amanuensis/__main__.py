@@ -46,14 +46,9 @@ def repl(args):
 				traceback.print_exc()
 
 def get_parser(valid_commands):
-	# Pull out the command functions' docstrings to describe them.
-	command_descs = "\n".join([
-		"- {0}: {1}".format(name, func.__doc__)
-		for name, func in valid_commands.items()])
-
 	# Set up the top-level parser.
 	parser = argparse.ArgumentParser(
-		description="Available commands:\n{}\n".format(command_descs),
+		description=cli.describe_commands(),
 		formatter_class=argparse.RawDescriptionHelpFormatter)
 	# The config directory.
 	parser.add_argument("--config-dir",
@@ -105,10 +100,7 @@ def get_parser(valid_commands):
 
 def main(argv):
 	# Enumerate valid commands from the CLI module.
-	commands = {
-		name[8:].replace("_", "-") : func
-		for name, func in vars(cli).items()
-		if name.startswith("command_")}
+	commands = cli.get_commands()
 
 	args = get_parser(commands).parse_args(argv)
 
