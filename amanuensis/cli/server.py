@@ -15,7 +15,8 @@ def command_init(args):
 	import fcntl
 	import json
 	import os
-	import pkg_resources
+
+	import resources
 
 	cfd = args.config_dir
 	# Create the directory if it doesn't exist.
@@ -27,7 +28,7 @@ def command_init(args):
 		return -1
 
 	# Update or create global config.
-	def_cfg = pkg_resources.resource_stream(__name__, "resources/default_config.json")
+	def_cfg = resources.get_stream("global.json")
 	if args.update and os.path.isfile(os.path.join(cfd, "config.json")):
 		with open(os.path.join(cfd, "config.json"), 'r+', encoding='utf8') as cfg_file:
 			fcntl.lockf(cfg_file, fcntl.LOCK_EX)

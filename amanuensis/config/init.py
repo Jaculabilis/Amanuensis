@@ -3,11 +3,11 @@ import copy
 import json
 import logging.config
 import os
-import pkg_resources
 
 # Module imports
 from errors import MissingConfigError, MalformedConfigError
 from config.loader import json_ro
+import resources
 
 
 def verify_config_dir(config_dir):
@@ -23,7 +23,7 @@ def verify_config_dir(config_dir):
 	if not os.path.isfile(global_config_path):
 		raise MissingConfigError("Config directory missing global config file: {}".format(config_dir))
 	# Check that global config file has all the default settings
-	def_cfg_s = pkg_resources.resource_stream("__main__", "resources/default_config.json")
+	def_cfg_s = resources.get_stream("global.json")
 	def_cfg = json.load(def_cfg_s)
 	with json_ro(global_config_path) as global_config_file:
 		for key in def_cfg.keys():
