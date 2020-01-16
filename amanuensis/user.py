@@ -25,9 +25,6 @@ class User(UserMixin):
 	def get_id(self):
 		return self.uid
 
-	def get(self, key):
-		return self.config.get(key)
-
 	def set_password(self, pw):
 		h = generate_password_hash(pw)
 		with config.json_rw(self.config_path) as j:

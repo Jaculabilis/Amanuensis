@@ -33,7 +33,7 @@ def get_bp(login_manager):
 					remember_me = form.remember.data
 					login_user(u, remember=remember_me)
 					config.logger.info("Logged in user '{}' ({})".format(
-						u.get('username'), u.uid))
+						u.username, u.uid))
 					return redirect(url_for('home.home'))
 			flash("Login not recognized")
 		else:

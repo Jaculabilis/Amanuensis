@@ -2,11 +2,11 @@
 {% block title %}Home | Amanuensis{% endblock %}
 {% block header %}<h2>Amanuensis - Dashboard</h2>{% endblock %}
 
-{% block sb_topline %}<b>{{ current_user.get('displayname') }}</b>{% endblock %}
+{% block sb_topline %}<b>{{ current_user.displayname }}</b>{% endblock %}
 {% block sb_logout %}<a href="{{ url_for('auth.logout') }}">Log out</a>{% endblock %}
 {% set template_sidebar_rows = [self.sb_topline(), self.sb_logout()] %}
 
-{% if current_user.get('admin') %}
+{% if current_user.admin %}
 	{% block sb_admin %}<a href="{{ url_for('home.admin') }}">Admin</a>{% endblock %}
 	{% set template_sidebar_rows = template_sidebar_rows + [self.sb_admin()] %}
 {% endif %}
