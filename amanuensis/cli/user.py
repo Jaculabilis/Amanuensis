@@ -3,8 +3,10 @@ from cli.helpers import add_argument, no_argument
 @add_argument("--username", help="User's login handle")
 @add_argument("--displayname", help="User's publicly displayed name")
 @add_argument("--email", help="User's email")
-def command_add(args):
-	"""Creates a user"""
+def command_create(args):
+	"""
+	Create a user
+	"""
 	import json
 
 	import user
@@ -34,6 +36,9 @@ def command_add(args):
 
 @add_argument("--id", help="id of user to delete")
 def command_delete(args):
+	"""
+	Delete a user
+	"""
 	import os
 
 	import config
@@ -50,7 +55,7 @@ def command_delete(args):
 
 @no_argument
 def command_list(args):
-	"""Lists users"""
+	"""List all users"""
 	import os
 
 	import config
@@ -65,9 +70,18 @@ def command_list(args):
 	for user in users:
 		print("{0}  {1} ({2})".format(user['uid'], user['displayname'], user['username']))
 
+@no_argument
+def command_config(args):
+	"""
+	Interact with a user's config
+	"""
+	raise NotImplementedError()
+
 @add_argument("--username", help="The user to change password for")
 def command_passwd(args):
-	"""Set a user's password"""
+	"""
+	Set a user's password
+	"""
 	import getpass
 	import os
 
