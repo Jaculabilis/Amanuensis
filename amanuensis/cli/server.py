@@ -4,7 +4,13 @@ CONFIG_GET_ROOT_VALUE = object()
 
 @add_argument("--update", action="store_true", help="Refresh an existing config directory")
 def command_init(args):
-	"""Initialize a config directory at the directory given by --config-dir"""
+	"""
+	Initialize a config directory at --config-dir
+
+	A clean config directory will contain a config.json, a
+	pidfile, a lexicon config directory, and a user config
+	directory.
+	"""
 	from collections import OrderedDict
 	import fcntl
 	import json
@@ -58,7 +64,12 @@ def command_init(args):
 
 @no_argument
 def command_generate_secret(args):
-	"""Generate a secret key for Flask"""
+	"""
+	Generate a Flask secret key
+
+	The Flask server will not run unless a secret key has
+	been generated.
+	"""
 	import os
 
 	import config
@@ -71,7 +82,12 @@ def command_generate_secret(args):
 @add_argument("-a", "--address", default="127.0.0.1")
 @add_argument("-p", "--port", default="5000")
 def command_run(args):
-	"""Run the default Flask server"""
+	"""
+	Run the default Flask server
+	
+	The default Flask server is not secure, and should
+	only be used for development.
+	"""
 	import server
 	import config
 
@@ -85,7 +101,12 @@ def command_run(args):
 @add_argument("--set", metavar=("PATHSPEC", "VALUE"), dest="set",
 	nargs=2, help="Set the value of a config key")
 def command_config(args):
-	"""Interact with the global config"""
+	"""
+	Interact with the global config
+
+	PATHSPEC is a path into the config object formatted as
+	a dot-separated sequence of keys.
+	"""
 	import json
 	import config
 

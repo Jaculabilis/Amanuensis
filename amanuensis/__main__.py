@@ -45,6 +45,9 @@ def repl(args):
 			except Exception as e:
 				traceback.print_exc()
 
+def process_doc(docstring):
+	return '\n'.join([line.strip() for line in (docstring or "").strip().splitlines()])
+
 def get_parser(valid_commands):
 	# Set up the top-level parser.
 	parser = argparse.ArgumentParser(
@@ -89,7 +92,7 @@ def get_parser(valid_commands):
 	for name, func in valid_commands.items():
 		# Create the subparser, set the docstring as the description.
 		cmd = subp.add_parser(name,
-			description=func.__doc__,
+			description=process_doc(func.__doc__),
 			formatter_class=argparse.RawDescriptionHelpFormatter)
 		# Delegate subparser setup to the command.
 		func(cmd)

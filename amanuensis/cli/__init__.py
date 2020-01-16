@@ -38,22 +38,25 @@ def user_commands(commands={}):
 def get_commands():
 	return {**server_commands(), **lexicon_commands(), **user_commands()}
 
+def cmd_desc(func):
+	return ((func.__doc__ or "").strip() or '\n').splitlines()[0]
+
 def describe_commands():
 	longest = max(map(len, server_commands().keys()))
 	server_desc = "General commands:\n{}\n".format("\n".join([
-		" {1:<{0}} : {2}".format(longest, name, func.__doc__ or "")
+		" {1:<{0}} : {2}".format(longest, name, cmd_desc(func))
 		for name, func in server_commands().items()
 	]))
 
 	longest = max(map(len, lexicon_commands().keys()))
 	lexicon_desc = "Lexicon commands:\n{}\n".format("\n".join([
-		" {1:<{0}} : {2}".format(longest, name, func.__doc__ or "")
+		" {1:<{0}} : {2}".format(longest, name, cmd_desc(func))
 		for name, func in lexicon_commands().items()
 	]))
 
 	longest = max(map(len, user_commands().keys()))
 	user_desc = "User commands:\n{}\n".format("\n".join([
-		" {1:<{0}} : {2}".format(longest, name, func.__doc__ or "")
+		" {1:<{0}} : {2}".format(longest, name, cmd_desc(func))
 		for name, func in user_commands().items()
 	]))
 
