@@ -151,6 +151,22 @@ def command_user_add(args):
 		print(json.dumps(js, indent=2))
 	print("Username: {}\nUser ID:  {}\nPassword: {}".format(args.username, new_user.uid, tmp_pw))
 
+@add_argument("--id", help="id of user to delete")
+def command_user_delete(args):
+	import os
+
+	import config
+
+	user_path = config.prepend('user', args.uid)
+	if not os.path.isdir(user_path):
+		config.logger.error("No user with that id")
+		return -1
+	else:
+		os.remove(user_path)
+	with config.json_rw('user', 'index.json') as j:
+		if args.uid in j:
+			del j[uid]
+
 @no_argument
 def command_user_list(args):
 	"""Lists users"""
