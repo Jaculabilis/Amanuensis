@@ -1,5 +1,7 @@
 from cli.helpers import add_argument, no_argument
 
+CONFIG_GET_ROOT_VALUE = object()
+
 @add_argument("--update", action="store_true", help="Refresh an existing config directory")
 def command_init(args):
 	"""Initialize a config directory at the directory given by --config-dir"""
@@ -69,7 +71,7 @@ def command_generate_secret(args):
 @add_argument("-a", "--address", default="127.0.0.1")
 @add_argument("-p", "--port", default="5000")
 def command_run(args):
-	"""Runs the default Flask development server"""
+	"""Run the default Flask server"""
 	import server
 	import config
 
@@ -78,10 +80,32 @@ def command_run(args):
 		return -1
 	server.app.run(host=args.address, port=args.port)
 
-@add_argument("--foo", action="store_true")
-def command_dump(args):
-	"""Dumps the global config or the config for the given lexicon"""
+@add_argument("--get", metavar="PATHSPEC", dest="get",
+	nargs="?", const=CONFIG_GET_ROOT_VALUE, help="Get the value of a config key")
+@add_argument("--set", metavar=("PATHSPEC", "VALUE"), dest="set",
+	nargs=2, help="Set the value of a config key")
+def command_config(args):
+	"""Interact with the global config"""
 	import json
 	import config
-	print(json.dumps(config.GLOBAL_CONFIG, indent=2))
+
+	if args.get and args.set:
+		config.logger.error("Specify one of --get and --set")
+		return -1
+
+	if args.get:
+		if args.get is CONFIG_GET_ROOT_VALUE:
+			path = []
+		else:
+			path = args.get.split(".")
+		with config.json_ro('config.json') as cfg:
+			for spec in path:
+				if spec not in cfg:
+					config.logger.error("Path not found")
+					return -1
+				cfg = cfg.get(spec)
+		print(json.dumps(cfg, indent=2))
+
+	if args.set:
+		raise NotImplementedError()
 
