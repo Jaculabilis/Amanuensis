@@ -1,0 +1,53 @@
+{
+	"lid": null,
+	"name": null,
+	"editor": null,
+	"turn": {
+		"current": 1,
+		"max": 8
+	},
+	"join": {
+		"open": true,
+		"password": null,
+		"max_players": 4
+	},
+	"publish": {
+		"policy": null,
+		"timespecs": null,
+		"quorum": null,
+		"lock_on_ready": false
+	},
+	"article": {
+		"index": {
+			"list": null,
+			"capacity": null
+		},
+		"citation": {
+			"allow_self": null,
+			"min_extant": null,
+			"max_extant": null,
+			"min_phantom": null,
+			"max_phantom": null,
+			"min_total": null,
+			"max_total": null,
+			"min_chars": null,
+			"max_chars": null
+		},
+		"word_limit": {
+			"soft": null,
+			"hard": null
+		},
+		"addendum": {
+			"allowed": false,
+			"max": null
+		}
+	},
+	"character": {
+		"default": {
+			"cid": "default",
+			"name": "Ersatz Scrivener",
+			"player": null,
+			"signature": "~Ersatz Scrivener"
+		}
+	}
+}

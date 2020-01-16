@@ -1,0 +1,10 @@
+{
+	"uid": null,
+	"username": null,
+	"displayname": null,
+	"email": null,
+	"password": null,
+	"created": null,
+	"new_password_required": true,
+	"is_admin": false
+}
