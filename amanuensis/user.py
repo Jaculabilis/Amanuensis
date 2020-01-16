@@ -17,6 +17,11 @@ class User(UserMixin):
 		with config.json_ro(self.config_path) as j:
 			self.config = j
 
+	def __getattr__(self, key):
+		if key not in self.config:
+			raise AttributeError(key)
+		return self.config.get(key)
+
 	def get_id(self):
 		return self.uid
 
