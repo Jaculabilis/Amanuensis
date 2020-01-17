@@ -3,8 +3,11 @@
 	"name": null,
 	"editor": null,
 	"turn": {
-		"current": 1,
-		"max": 8
+		"current": null,
+		"start": 1,
+		"max": 8,
+		"index": {
+		}
 	},
 	"join": {
 		"open": true,
