@@ -1,6 +1,4 @@
-from cli.helpers import add_argument, no_argument
-
-CONFIG_GET_ROOT_VALUE = object()
+from cli.helpers import add_argument, no_argument, config_get, config_set, CONFIG_GET_ROOT_VALUE
 
 @add_argument("--update", action="store_true", help="Refresh an existing config directory")
 def command_init(args):
@@ -116,18 +114,9 @@ def command_config(args):
 		return -1
 
 	if args.get:
-		if args.get is CONFIG_GET_ROOT_VALUE:
-			path = []
-		else:
-			path = args.get.split(".")
 		with config.json_ro('config.json') as cfg:
-			for spec in path:
-				if spec not in cfg:
-					config.logger.error("Path not found")
-					return -1
-				cfg = cfg.get(spec)
-		print(json.dumps(cfg, indent=2))
+			config_get(cfg, args.get)
 
 	if args.set:
-		raise NotImplementedError()
-
+		with config.json_rw('config.json') as cfg:
+			config_set(cfg, args.set)

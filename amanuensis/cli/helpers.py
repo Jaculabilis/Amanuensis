@@ -47,3 +47,52 @@ def requires(argument, verify=lambda a: a is not None):
 		augmented_command.__dict__['wrapper'] = True
 		return augmented_command
 	return req_checker
+
+# Helpers for common command tasks
+
+CONFIG_GET_ROOT_VALUE = object()
+def config_get(cfg, pathspec):
+	"""
+	Performs config --get for a given config
+
+	cfg is from a with json_ro context
+	path is the full pathspec, unsplit
+	"""
+	import json
+	from config import logger
+
+	if pathspec is CONFIG_GET_ROOT_VALUE:
+		path = []
+	else:
+		path = pathspec.split(".")
+	for spec in path:
+		if spec not in cfg:
+			logger.error("Path not found: {}".format(pathspec))
+			return -1
+		cfg = cfg.get(spec)
+	print(json.dumps(cfg, indent=2))
+
+def config_set(cfg, set_tuple):
+	"""
+	Performs config --set for a given config
+
+	config is from a with json_rw context
+	set_tuple is a tuple of the pathspec and the value
+	"""
+	from config import logger
+	pathspec, value = set_tuple
+	if not pathspec:
+		logger.error("Path must be non-empty")
+	path = pathspec.split('.')
+	if not value:
+		value = None
+	for spec in path[:-1]:
+		if spec not in cfg:
+			logger.error("Path not found")
+			return -1
+		cfg = cfg.get(spec)
+	key = path[-1]
+	if key not in cfg:
+		logger.error("Path not found")
+		return -1
+	cfg[key] = value
