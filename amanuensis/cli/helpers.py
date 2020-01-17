@@ -43,7 +43,8 @@ def requires(argument, verify=lambda a: a is not None):
 					config.logger.error(
 						"This command requires specifying {}".format(argument))
 					return -1
-			command(cmd_args)
+			if type(cmd_args) is not ArgumentParser or second_layer:
+				command(cmd_args)
 		augmented_command.__dict__['wrapper'] = True
 		return augmented_command
 	return req_checker
@@ -79,13 +80,16 @@ def config_set(cfg, set_tuple):
 	config is from a with json_rw context
 	set_tuple is a tuple of the pathspec and the value
 	"""
+	import json
 	from config import logger
 	pathspec, value = set_tuple
 	if not pathspec:
 		logger.error("Path must be non-empty")
 	path = pathspec.split('.')
-	if not value:
-		value = None
+	try:
+		value = json.loads(value)
+	except:
+		pass # Leave value as string
 	for spec in path[:-1]:
 		if spec not in cfg:
 			logger.error("Path not found")

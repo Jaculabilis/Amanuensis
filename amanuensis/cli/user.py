@@ -1,4 +1,4 @@
-from cli.helpers import add_argument, no_argument
+from cli.helpers import add_argument, no_argument, requires, config_get, config_set, CONFIG_GET_ROOT_VALUE
 
 @add_argument("--username", help="User's login handle")
 @add_argument("--displayname", help="User's publicly displayed name")
@@ -71,12 +71,35 @@ def command_list(args):
 	for user in users:
 		print("{0}  {1} ({2})".format(user['uid'], user['displayname'], user['username']))
 
-@no_argument
+@add_argument("--get", metavar="PATHSPEC", dest="get",
+	nargs="?", const=CONFIG_GET_ROOT_VALUE, help="Get the value of a config key")
+@add_argument("--set", metavar=("PATHSPEC", "VALUE"), dest="set",
+	nargs=2, help="Set the value of a config key")
+@requires("username")
 def command_config(args):
 	"""
 	Interact with a user's config
 	"""
-	raise NotImplementedError()
+	import json
+	import config
+	import user
+
+	if args.get and args.set:
+		config.logger.error("Specify one of --get and --set")
+		return -1
+
+	uid = user.uid_from_username(args.username)
+	if not uid:
+		config.logger.error("User not found")
+		return -1
+
+	if args.get:
+		with config.json_ro('user', uid, 'config.json') as cfg:
+			config_get(cfg, args.get)
+
+	if args.set:
+		with config.json_rw('user', uid, 'config.json') as cfg:
+			config_set(cfg, args.set)
 
 @add_argument("--username", help="The user to change password for")
 def command_passwd(args):
