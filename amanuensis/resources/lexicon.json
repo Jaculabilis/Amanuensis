@@ -2,6 +2,10 @@
 	"lid": null,
 	"name": null,
 	"editor": null,
+	"time": {
+		"created": null,
+		"completed": null
+	},
 	"turn": {
 		"current": null,
 		"start": 1,
@@ -10,7 +14,7 @@
 		}
 	},
 	"join": {
-		"open": true,
+		"open": false,
 		"password": null,
 		"max_players": 4
 	},
@@ -31,7 +35,7 @@
 			"capacity": null
 		},
 		"citation": {
-			"allow_self": null,
+			"allow_self": false,
 			"min_extant": null,
 			"max_extant": null,
 			"min_phantom": null,
@@ -57,5 +61,7 @@
 			"player": null,
 			"signature": "~Ersatz Scrivener"
 		}
-	}
+	},
+	"log": [
+	]
 }
