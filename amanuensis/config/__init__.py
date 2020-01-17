@@ -41,13 +41,16 @@ def get(key):
 	return GLOBAL_CONFIG[key]
 
 def prepend(*path):
-	return os.path.join(CONFIG_DIR, *path)
+	joined = os.path.join(*path)
+	if not joined.startswith(CONFIG_DIR):
+		joined = os.path.join(CONFIG_DIR, joined)
+	return joined
 
-def open_sh(path, mode):
-	return config.loader.open_sh(prepend(path), mode)
+def open_sh(*path, mode):
+	return config.loader.open_sh(prepend(*path), mode)
 
-def open_ex(path, mode):
-	return config.loader.open_ex(prepend(path), mode)
+def open_ex(*path, mode):
+	return config.loader.open_ex(prepend(*path), mode)
 
 def json_ro(*path):
 	return config.loader.json_ro(prepend(*path))
@@ -59,11 +62,11 @@ def new_user(user_json):
 	user_dir = prepend("user", user_json['uid'])
 	# Create user dir and put config in it
 	os.mkdir(user_dir)
-	with config.loader.open_ex(os.path.join(user_dir, "config.json"), 'w') as f:
+	with open_ex(user_dir, "config.json", mode='w') as f:
 		json.dump(user_json, f, allow_nan=False, indent='\t')
 	# Ensure index exists
-	if not os.path.isdir(prepend('user', 'index.json')):
-		with open_ex(os.path.join('user', 'index.json'), 'w') as f:
+	if not os.path.isfile(prepend('user', 'index.json')):
+		with open_ex('user', 'index.json', mode='w') as f:
 			json.dump({}, f)
 	# Update index
 	with json_rw('user', 'index.json') as j:
