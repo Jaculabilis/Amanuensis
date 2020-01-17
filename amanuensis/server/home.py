@@ -22,7 +22,7 @@ def get_bp():
 	@bp.route('/admin/', methods=['GET'])
 	@login_required
 	def admin():
-		if not current_user.admin:
+		if not current_user.is_admin:
 			return redirect(url_for('home.home'))
 
 		with config.json_ro('config.json') as j:

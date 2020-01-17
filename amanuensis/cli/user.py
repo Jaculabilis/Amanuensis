@@ -18,7 +18,7 @@ def command_create(args):
 	if not user.valid_username(args.username):
 		config.logger.error("Invalid username: usernames may only contain alphanumeric characters, dashes, and underscores")
 		return -1
-	if user.get_user_by_username(args.username) is not None:
+	if user.uid_from_username(args.username) is not None:
 		config.logger.error("Invalid username: username is already taken")
 		return -1
 	if not args.displayname:
@@ -28,9 +28,10 @@ def command_create(args):
 	if not user.valid_email(args.email):
 		config.logger.error("Invalid email")
 		return -1
+
 	# Create user
 	new_user, tmp_pw = user.create_user(args.username, args.displayname, args.email)
-	with config.json_ro(new_user.config) as js:
+	with config.json_ro(new_user.config_path) as js:
 		print(json.dumps(js, indent=2))
 	print("Username: {}\nUser ID:  {}\nPassword: {}".format(args.username, new_user.uid, tmp_pw))
 

@@ -6,7 +6,7 @@
 {% block sb_logout %}<a href="{{ url_for('auth.logout') }}">Log out</a>{% endblock %}
 {% set template_sidebar_rows = [self.sb_topline(), self.sb_logout()] %}
 
-{% if current_user.admin %}
+{% if current_user.is_admin %}
 	{% block sb_admin %}<a href="{{ url_for('home.admin') }}">Admin</a>{% endblock %}
 	{% set template_sidebar_rows = template_sidebar_rows + [self.sb_admin()] %}
 {% endif %}

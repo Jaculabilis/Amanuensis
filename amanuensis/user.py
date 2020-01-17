@@ -7,13 +7,16 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 import config
+import resources
 
 class User(UserMixin):
 	def __init__(self, uid):
 		if not os.path.isdir(config.prepend('user', uid)):
 			raise ValueError("No user with uid {}".format(uid))
-		self.uid = str(uid)
-		self.config_path = os.path.join('user', uid, 'config.json')
+		if not os.path.isfile(config.prepend('user', uid, 'config.json')):
+			raise FileNotFoundError("User {} missing config.json".format(uid))
+		self.id = str(uid) # Flask-Login checks for this
+		self.config_path = config.prepend('user', uid, 'config.json')
 		with config.json_ro(self.config_path) as j:
 			self.config = j
 
@@ -45,26 +48,40 @@ def valid_email(email):
 	return re.match(addrspec, email)
 
 def create_user(username, displayname, email):
+	"""
+	Creates a new user
+	"""
+	# Validate arguments
 	if not valid_username(username):
 		raise ValueError("Invalid username: '{}'".format(username))
 	if not valid_email(email):
 		raise ValueError("Invalid email: '{}'".format(email))
+
+	# Create the user directory and initialize it with a blank user
 	uid = uuid.uuid4().hex
-	now = int(time.time())
+	user_dir = config.prepend("user", uid)
+	os.mkdir(user_dir)
+	with resources.get_stream("user.json") as s:
+		with open(config.prepend(user_dir, 'config.json'), 'wb') as f:
+			f.write(s.read())
+
+	# Fill out the new user
+	with config.json_rw(user_dir, 'config.json') as cfg:
+		cfg['uid'] = uid
+		cfg['username'] = username
+		cfg['displayname'] = displayname
+		cfg['email'] = email
+		cfg['created'] = int(time.time())
+
+	# Update the index with the new user
+	with config.json_rw('user', 'index.json') as index:
+		index[username] = uid
+
+	# Set a temporary password
 	temp_pw = os.urandom(32).hex()
-	user_json = {
-		'uid': uid,
-		'username': username,
-		'displayname': displayname,
-		'email': email,
-		'password': None,
-		'created': now,
-		'newPasswordRequired': True,
-		'admin': False,
-	}
-	config.new_user(user_json)
 	u = User(uid)
 	u.set_password(temp_pw)
+
 	return u, temp_pw
 
 def uid_from_username(username):
