@@ -9,57 +9,9 @@ def command_init(args):
 	pidfile, a lexicon config directory, and a user config
 	directory.
 	"""
-	from collections import OrderedDict
-	import fcntl
-	import json
-	import os
+	import config.init
 
-	import resources
-
-	cfd = args.config_dir
-	# Create the directory if it doesn't exist.
-	if not os.path.isdir(cfd):
-		os.mkdir(cfd)
-	# The directory should be empty if we're not updating an existing one.
-	if len(os.listdir(cfd)) > 0 and not args.update:
-		print("Directory {} is not empty".format(cfd))
-		return -1
-
-	# Update or create global config.
-	def_cfg = resources.get_stream("global.json")
-	if args.update and os.path.isfile(os.path.join(cfd, "config.json")):
-		with open(os.path.join(cfd, "config.json"), 'r+', encoding='utf8') as cfg_file:
-			fcntl.lockf(cfg_file, fcntl.LOCK_EX)
-			old_cfg = json.load(cfg_file, object_pairs_hook=OrderedDict)
-			new_cfg = json.load(def_cfg, object_pairs_hook=OrderedDict)
-			merged = {}
-			for key in new_cfg:
-				merged[key] = old_cfg[key] if key in old_cfg else new_cfg[key]
-				if key not in old_cfg:
-					print("Added key '{}' to config".format(key))
-			for key in old_cfg:
-				if key not in new_cfg:
-					print("Config contains unknown key '{}'".format(key))
-					merged[key] = old_cfg[key]
-			cfg_file.seek(0)
-			json.dump(merged, cfg_file, allow_nan=False, indent='\t')
-			cfg_file.truncate()
-			fcntl.lockf(cfg_file, fcntl.LOCK_UN)
-	else:
-		with open(os.path.join(cfd, "config.json"), 'wb') as f:
-			f.write(def_cfg.read())
-	# Ensure pidfile exists.
-	if not os.path.isfile(os.path.join(cfd, "pid")):
-		with open(os.path.join(cfd, "pid"), 'w') as f:
-			f.write(str(os.getpid()))
-	# Ensure subdirs exist.
-	if not os.path.isdir(os.path.join(cfd, "lexicon")):
-		os.mkdir(os.path.join(cfd, "lexicon"))
-	if not os.path.isdir(os.path.join(cfd, "user")):
-		os.mkdir(os.path.join(cfd, "user"))
-	if not os.path.isfile(os.path.join(cfd, 'user', 'index.json')):
-		with open(os.path.join(cfd, 'user', 'index.json'), 'w') as f:
-			json.dump({}, f)
+	config.init.create_config_dir(args.config_dir, args.update)
 
 @no_argument
 def command_generate_secret(args):
