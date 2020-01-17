@@ -12,10 +12,15 @@
 		"max_players": 4
 	},
 	"publish": {
-		"policy": null,
-		"timespecs": null,
+		"notify": {
+			"editor_on_ready": true,
+			"player_on_reject": true,
+			"player_on_accept": false
+		},
+		"deadlines": null,
+		"asap": false,
 		"quorum": null,
-		"lock_on_ready": false
+		"block_on_ready": true
 	},
 	"article": {
 		"index": {
