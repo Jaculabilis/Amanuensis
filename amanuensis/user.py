@@ -25,9 +25,6 @@ class User(UserMixin):
 			raise AttributeError(key)
 		return self.config.get(key)
 
-	def get_id(self):
-		return self.uid
-
 	def set_password(self, pw):
 		h = generate_password_hash(pw)
 		with config.json_rw(self.config_path) as j:
