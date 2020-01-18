@@ -5,7 +5,7 @@ from wtforms.validators import DataRequired
 from flask_login import current_user, login_user, logout_user, login_required
 
 import config
-import user
+from user import UserModel
 
 class LoginForm(FlaskForm):
 	username = StringField('Username', validators=[DataRequired()])
@@ -19,25 +19,21 @@ def get_bp(login_manager):
 
 	@login_manager.user_loader
 	def load_user(uid):
-		return user.user_from_uid(str(uid))
+		return UserModel.by(uid=str(uid))
 
 	@bp.route('/login/', methods=['GET', 'POST'])
 	def login():
 		form = LoginForm()
 		if form.validate_on_submit():
 			username = form.username.data
-			uid = user.uid_from_username(username)
-			if uid is not None:
-				u = user.user_from_uid(uid)
-				if u.check_password(form.password.data):
-					remember_me = form.remember.data
-					login_user(u, remember=remember_me)
-					config.logger.info("Logged in user '{}' ({})".format(
-						u.username, u.uid))
-					return redirect(url_for('home.home'))
+			u = UserModel.by(name=username)
+			if u is not None and u.check_password(form.password.data):
+				remember_me = form.remember.data
+				login_user(u, remember=remember_me)
+				config.logger.info("Logged in user '{}' ({})".format(
+					u.username, u.uid))
+				return redirect(url_for('home.home'))
 			flash("Login not recognized")
-		else:
-			pass
 		return render_template('auth/login.html', form=form)
 
 	@bp.route("/logout/", methods=['GET'])

@@ -17,11 +17,10 @@ def command_create(args):
 	settings are as desired before opening the lexicon for player joins.
 	"""
 	from lexicon.manage import create_lexicon
-	import user
+	from user import UserModel
 	# TODO verify args
-	uid = user.uid_from_username(args.editor)
-	u = user.user_from_uid(uid)
-	create_lexicon(args.name, u)
+	editor = UserModel.by(name=args.editor)
+	create_lexicon(args.name, editor)
 
 @requires_lexicon
 def command_delete(args):

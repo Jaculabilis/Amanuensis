@@ -6,15 +6,37 @@ import uuid
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from errors import InternalMisuseError, MissingConfigError, IndexMismatchError
 import config
 import resources
 
-class User(UserMixin):
-	def __init__(self, uid):
+class UserModel(UserMixin):
+	@staticmethod
+	def by(uid=None, name=None):
+		"""
+		Gets the UserModel with the given uid or username
+
+		If the uid or name simply does not match an existing user, returns
+		None. If the uid matches the index but there is something wrong with
+		the user's config, raises an error.
+		"""
+		if uid and name:
+			raise InternalMisuseError("uid and name both specified to UserModel.by()")
+		if not uid and not name:
+			raise ValueError("One of uid or name must be not None")
+		if not uid:
+			with config.json_ro('user', 'index.json') as index:
+				uid = index.get(name)
+		if not uid:
+			return None
 		if not os.path.isdir(config.prepend('user', uid)):
-			raise ValueError("No user with uid {}".format(uid))
+			raise IndexMismatchError("username={} uid={}".format(name, uid))
 		if not os.path.isfile(config.prepend('user', uid, 'config.json')):
-			raise FileNotFoundError("User {} missing config.json".format(uid))
+			raise MissingConfigError("uid={}".format(uid))
+		return UserModel(uid)
+
+	def __init__(self, uid):
+		"""User model initializer, assume all checks were done by by()"""
 		self.id = str(uid) # Flask-Login checks for this
 		self.config_path = config.prepend('user', uid, 'config.json')
 		with config.json_ro(self.config_path) as j:
@@ -76,25 +98,7 @@ def create_user(username, displayname, email):
 
 	# Set a temporary password
 	temp_pw = os.urandom(32).hex()
-	u = User(uid)
+	u = UserModel.by(uid=uid)
 	u.set_password(temp_pw)
 
 	return u, temp_pw
-
-def uid_from_username(username):
-	"""Gets the internal uid of a user given a username"""
-	if username is None:
-		raise ValueError("username must not be None")
-	if not username:
-		raise ValueError("username must not be empty")
-	with config.json_ro('user', 'index.json') as index:
-		uid = index.get(username)
-	if uid is None:
-		config.logger.debug("uid_from_username('{}') returned None".format(username))
-	return uid
-
-def user_from_uid(uid):
-	if not os.path.isdir(config.prepend('user', uid)):
-		config.logger.debug("No user with uid '{}'".format(uid))
-		return None
-	return User(uid)
