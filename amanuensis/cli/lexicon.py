@@ -1,13 +1,13 @@
 from cli.helpers import (
-	add_argument, no_argument, requires,
+	add_argument, no_argument, requires_lexicon, requires_username,
 	config_get, config_set, CONFIG_GET_ROOT_VALUE)
 
 #
 # CRUD commands
 #
 
-@add_argument("--name", required=True, help="Name of the lexicon")
-@add_argument("--editor", required=True, help="Name of the user who will be editor")
+@requires_lexicon
+@add_argument("--editor", "-e", required=True, help="Name of the user who will be editor")
 def command_create(args):
 	"""
 	Create a lexicon
@@ -23,8 +23,7 @@ def command_create(args):
 	u = user.user_from_uid(uid)
 	create_lexicon(args.name, u)
 
-@no_argument
-@requires("lexicon")
+@requires_lexicon
 def command_delete(args):
 	"""
 	Delete a lexicon and all its data
@@ -38,8 +37,7 @@ def command_list(args):
 	"""
 	raise NotImplementedError() # TODO
 
-@no_argument
-@requires("lexicon")
+@requires_lexicon
 def command_config(args):
 	"""
 	Interact with a lexicon's config
@@ -50,16 +48,16 @@ def command_config(args):
 # Player/character commands
 #
 
-@no_argument
-@requires("lexicon")
+@requires_lexicon
+@requires_username
 def command_player_add(args):
 	"""
 	Add a player to a lexicon
 	"""
 	raise NotImplementedError() # TODO
 
-@no_argument
-@requires("lexicon")
+@requires_lexicon
+@requires_username
 def command_player_remove(args):
 	"""
 	Remove a player from a lexicon
@@ -69,24 +67,22 @@ def command_player_remove(args):
 	"""
 	raise NotImplementedError() # TODO
 
-@no_argument
-@requires("lexicon")
+@requires_lexicon
+@requires_username
 def command_player_list(args):
 	"""
 	List all players in a lexicon
 	"""
 	raise NotImplementedError() # TODO
 
-@no_argument
-@requires("lexicon")
+@requires_lexicon
 def command_char_create(args):
 	"""
 	Create a character for a lexicon
 	"""
 	raise NotImplementedError() # TODO
 
-@no_argument
-@requires("lexicon")
+@requires_lexicon
 def command_char_delete(args):
 	"""
 	Delete a character from a lexicon
@@ -96,8 +92,7 @@ def command_char_delete(args):
 	"""
 	raise NotImplementedError() # TODO
 
-@no_argument
-@requires("lexicon")
+@requires_lexicon
 def command_char_list(args):
 	"""
 	List all characters in a lexicon
@@ -108,8 +103,7 @@ def command_char_list(args):
 # Procedural commands
 #
 
-@no_argument
-@requires("lexicon")
+@requires_lexicon
 def command_publish_turn(args):
 	"""
 	Publishes the current turn of a lexicon

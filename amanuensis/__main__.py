@@ -78,11 +78,11 @@ def get_parser(valid_commands):
 	# Lexicon settings.
 	parser.add_argument("-n",
 		metavar="LEXICON",
-		dest="lexicon",
+		dest="tl_lexicon",
 		help="Specify a lexicon to operate on")
 	parser.add_argument("-u",
 		metavar="USERNAME",
-		dest="username",
+		dest="tl_username",
 		help="Specify a user to operate on")
 	parser.set_defaults(func=lambda args: repl(args) if args.lexicon else parser.print_help())
 	subp = parser.add_subparsers(

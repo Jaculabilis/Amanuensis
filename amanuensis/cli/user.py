@@ -1,4 +1,6 @@
-from cli.helpers import add_argument, no_argument, requires, config_get, config_set, CONFIG_GET_ROOT_VALUE
+from cli.helpers import (
+	add_argument, no_argument, requires_username,
+	config_get, config_set, CONFIG_GET_ROOT_VALUE)
 
 @add_argument("--username", help="User's login handle")
 @add_argument("--displayname", help="User's publicly displayed name")
@@ -71,11 +73,11 @@ def command_list(args):
 	for user in users:
 		print("{0}  {1} ({2})".format(user['uid'], user['displayname'], user['username']))
 
+@requires_username
 @add_argument("--get", metavar="PATHSPEC", dest="get",
 	nargs="?", const=CONFIG_GET_ROOT_VALUE, help="Get the value of a config key")
 @add_argument("--set", metavar=("PATHSPEC", "VALUE"), dest="set",
 	nargs=2, help="Set the value of a config key")
-@requires("username")
 def command_config(args):
 	"""
 	Interact with a user's config

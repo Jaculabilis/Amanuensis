@@ -29,25 +29,35 @@ def no_argument(command):
 			command(cmd_args)
 	return augmented_command
 
-# This wrapper is another verification step
+# Wrapper for commands requiring lexicon or username options
 
-def requires(argument, verify=lambda a: a is not None):
-	"""Errors out if the given argument is not present"""
+def requires(arg, metavar, dest, fallback, help):
+	"""Subparser fallback for -u and -n options"""
 	def req_checker(command):
-		second_layer = command.__dict__.get('wrapper', False)
 		@wraps(command)
 		def augmented_command(cmd_args):
+			if type(cmd_args) is ArgumentParser:
+				cmd_args.add_argument(arg, metavar=metavar, dest=dest, help=help)
+				if command.__dict__.get('wrapper', False):
+					command(cmd_args)
 			if type(cmd_args) is Namespace:
-				if not hasattr(cmd_args, argument) or not verify(getattr(cmd_args, argument)):
+				base_val = hasattr(cmd_args, fallback) and getattr(cmd_args, fallback)
+				subp_val = hasattr(cmd_args, dest) and getattr(cmd_args, dest)
+				val = subp_val or base_val or None
+				if not val:
 					import config
-					config.logger.error(
-						"This command requires specifying {}".format(argument))
+					config.logger.error("This command requires {}".format(arg))
 					return -1
-			if type(cmd_args) is not ArgumentParser or second_layer:
+				setattr(cmd_args, dest, val)
 				command(cmd_args)
 		augmented_command.__dict__['wrapper'] = True
 		return augmented_command
 	return req_checker
+
+requires_lexicon = requires("-n", "LEXICON", "lexicon", "tl_lexicon",
+	"Specify a lexicon to operate on")
+requires_username = requires("-u", "USERNAME", "username", "tl_username",
+	"Specify a user to operate on")
 
 # Helpers for common command tasks
 
