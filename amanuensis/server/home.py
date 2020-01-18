@@ -1,4 +1,6 @@
-from flask import Blueprint, render_template, url_for
+from functools import wraps
+
+from flask import Blueprint, render_template, url_for, redirect
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from wtforms import TextAreaField, SubmitField
@@ -10,6 +12,15 @@ class DashboardForm(FlaskForm):
 	admin_config_text = TextAreaField()
 	submit = SubmitField("Submit")
 
+def admin_required(route):
+	"""Requires the user to be an admin"""
+	@wraps(route)
+	def admin_route(*args, **kwargs):
+		if not current_user.is_admin:
+			return redirect(url_for('home.home'))
+		return route(*args, **kwargs)
+	return admin_route
+
 def get_bp():
 	"""Create a blueprint for pages outside of a specific lexicon"""
 	bp = Blueprint('home', __name__, url_prefix='/home')
@@ -20,11 +31,8 @@ def get_bp():
 		return render_template('home/home.html')
 
 	@bp.route('/admin/', methods=['GET'])
-	@login_required
+	@admin_required
 	def admin():
-		if not current_user.is_admin:
-			return redirect(url_for('home.home'))
-
 		with config.json_ro('config.json') as j:
 			global_config = j
 		import json
