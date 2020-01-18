@@ -1,15 +1,18 @@
 from functools import wraps
+import json
 
 from flask import Blueprint, render_template, url_for, redirect
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
-from wtforms import TextAreaField, SubmitField
+from wtforms import TextAreaField, SubmitField, StringField
 
 import config
 import user
+import lexicon
 
-class DashboardForm(FlaskForm):
-	admin_config_text = TextAreaField()
+class AdminDashboardForm(FlaskForm):
+	lexiconName = StringField("Lexicon name")
+	configText = TextAreaField("Config file")
 	submit = SubmitField("Submit")
 
 def admin_required(route):
@@ -30,19 +33,25 @@ def get_bp():
 	def home():
 		return render_template('home/home.html')
 
-	@bp.route('/admin/', methods=['GET'])
+	@bp.route('/admin/', methods=['GET', 'POST'])
 	@admin_required
 	def admin():
-		with config.json_ro('config.json') as j:
-			global_config = j
-		import json
-		text = json.dumps(j, indent=2, allow_nan=False)
-
-		form = DashboardForm()
-		if form.is_submitted():
-			return "k"
-		else:
-			form.admin_config_text.data = text
+		form = AdminDashboardForm()
+		if not form.is_submitted():
 			return render_template('home/admin.html', form=form)
+
+		if form.lexiconName.data:
+			lid = None
+			with config.json_ro('lexicon', 'index.json') as index:
+				lid = index.get(form.lexiconName.data)
+			if lid is not None:
+				with config.json_ro('lexicon', lid, 'config.json') as cfg:
+					form.configText.data = json.dumps(cfg, indent=2)
+					form.lexiconName.data = ""
+		elif form.configText.data:
+			return "Update config"
+		else:
+			pass
+		return render_template('home/admin.html', form=form)
 
 	return bp

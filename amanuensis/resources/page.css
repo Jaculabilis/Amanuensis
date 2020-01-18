@@ -92,7 +92,7 @@ div.citeblock a.phantom {
 span.signature {
 	text-align: right;
 }
-textarea#admin_config_text {
+textarea#configText {
 	resize: vertical;
 	width: 100%;
 	box-sizing: border-box;
