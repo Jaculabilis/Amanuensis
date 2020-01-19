@@ -90,4 +90,4 @@ def command_config(args):
 
 	if args.set:
 		with config.json_rw('config.json') as cfg:
-			config_set(cfg, args.set)
+			config_set("config", cfg, args.set)

@@ -99,7 +99,7 @@ def command_config(args):
 
 	if args.set:
 		with config.json_rw('user', u.id, 'config.json') as cfg:
-			config_set(cfg, args.set)
+			config_set(u.id, cfg, args.set)
 
 @add_argument("--username", help="The user to change password for")
 def command_passwd(args):

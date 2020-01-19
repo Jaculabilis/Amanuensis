@@ -83,11 +83,11 @@ def config_get(cfg, pathspec):
 		cfg = cfg.get(spec)
 	print(json.dumps(cfg, indent=2))
 
-def config_set(cfg, set_tuple):
+def config_set(obj_id, cfg, set_tuple):
 	"""
 	Performs config --set for a given config
 
-	config is from a with json_rw context
+	config is from a "with json_rw" context
 	set_tuple is a tuple of the pathspec and the value
 	"""
 	import json
@@ -109,4 +109,6 @@ def config_set(cfg, set_tuple):
 	if key not in cfg:
 		logger.error("Path not found")
 		return -1
+	old_value = cfg[key]
 	cfg[key] = value
+	logger.info("{}.{}: {} -> {}".format(obj_id, pathspec, old_value, value))

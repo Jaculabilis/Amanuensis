@@ -110,7 +110,7 @@ def command_config(args):
 
 	if args.set:
 		with json_rw(lex.config_path) as cfg:
-			config_set(cfg, args.set)
+			config_set(lex.id, cfg, args.set)
 
 #
 # Player/character commands
