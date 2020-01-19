@@ -156,9 +156,3 @@ def remove_player(lex, player):
 			cfg.join.joined.remove(player.id)
 
 	# TODO Reassign the player's characters to the editor
-
-
-def list_players(lex):
-	"""
-	"""
-	pass

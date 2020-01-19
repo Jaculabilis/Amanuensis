@@ -179,7 +179,25 @@ def command_player_list(args):
 	"""
 	List all players in a lexicon
 	"""
-	raise NotImplementedError() # TODO
+	import json
+	# Module imports
+	from lexicon import LexiconModel
+	from user import UserModel
+
+	# Verify arguments
+	lex = LexiconModel.by(name=args.lexicon)
+	if lex is None:
+		logger.error("Could not find lexicon '{}'".format(args.lexicon))
+		return -1
+
+	# Internal call
+	players = []
+	for uid in lex.join.joined:
+		u = UserModel.by(uid=uid)
+		players.append(u.username)
+
+	print(json.dumps(players, indent=2))
+
 
 @requires_lexicon
 @requires_username
