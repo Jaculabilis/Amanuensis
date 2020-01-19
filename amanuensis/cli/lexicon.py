@@ -16,32 +16,101 @@ def command_create(args):
 	configuration before it is playable. The editor should ensure that all
 	settings are as desired before opening the lexicon for player joins.
 	"""
-	from lexicon.manage import create_lexicon
+	# Module imports
+	import config
+	from lexicon.manage import valid_name, create_lexicon
 	from user import UserModel
-	# TODO verify args
+
+	# Verify arguments
+	if not valid_name(args.lexicon):
+		config.logger.error("Lexicon name contains illegal characters: '{}'".format(
+			args.lexicon))
+		return -1
 	editor = UserModel.by(name=args.editor)
-	create_lexicon(args.name, editor)
+	if editor is None:
+		config.logger.error("Could not find user '{}'".format(args.editor))
+		return -1
+
+	# Internal call
+	create_lexicon(args.lexicon, editor)
+
 
 @requires_lexicon
+@add_argument("--purge", action="store_true", help="Delete the lexicon's data")
 def command_delete(args):
 	"""
-	Delete a lexicon and all its data
+	Delete a lexicon and optionally its data
 	"""
-	raise NotImplementedError() # TODO
+	# Module imports
+	from config import logger
+	from lexicon import LexiconModel
+	from lexicon.manage import delete_lexicon
+
+	# Verify arguments
+	lex = LexiconModel.by(name=args.lexicon)
+	if lex is None:
+		logger.error("Could not find lexicon '{}'".format(args.lexicon))
+		return -1
+
+	# Internal call
+	delete_lexicon(lex, args.purge)
+	logger.info("Deleted lexicon '{}'".format(args.lexicon))
+
 
 @no_argument
 def command_list(args):
 	"""
 	List all lexicons and their statuses
 	"""
-	raise NotImplementedError() # TODO
+	# Module imports
+	from lexicon.manage import get_all_lexicons
+
+	# Internal call
+	lexicons = get_all_lexicons()
+	statuses = []
+	for lex in lexicons:
+		if lex.turn['current'] is None:
+			statuses.append("{0.lid}  {0.name} ({1})".format(lex, "Unstarted"))
+		elif lex.turn['current'] > lex.turn['max']:
+			statuses.append("{0.lid}  {0.name} ({1})".format(lex, "Completed"))
+		else:
+			statuses.append("{0.lid}  {0.name} (Turn {1}/{2})".format(lex, lex.turn['current'], lex.turn['max']))
+	for s in statuses:
+		print(s)
+
 
 @requires_lexicon
+@add_argument(
+	"--get", metavar="PATHSPEC", dest="get",
+	nargs="?", const=CONFIG_GET_ROOT_VALUE, help="Get the value of a config key")
+@add_argument(
+	"--set", metavar=("PATHSPEC", "VALUE"), dest="set",
+	nargs=2, help="Set the value of a config key")
 def command_config(args):
 	"""
 	Interact with a lexicon's config
 	"""
-	raise NotImplementedError() # TODO
+	# Module imports
+	from config import logger
+	from lexicon import LexiconModel
+
+	# Verify arguments
+	if args.get and args.set:
+		logger.error("Specify one of --get and --set")
+		return -1
+	lex = LexiconModel.by(name=args.lexicon)
+	if lex is None:
+		logger.error("Could not find lexicon '{}'".format(args.lexicon))
+		return -1
+
+	# Internal call
+	if args.get:
+		with config.json_ro(lex.config_path) as cfg:
+			config_get(cfg, args.get)
+
+	if args.set:
+		with config.json_rw(lex.config_path) as cfg:
+			config_set(cfg, args.set)
 
 #
 # Player/character commands
