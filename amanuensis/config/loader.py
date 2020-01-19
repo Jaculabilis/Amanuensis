@@ -7,6 +7,20 @@ import os
 # Module imports
 from errors import ReadOnlyError
 
+
+class AttrOrderedDict(OrderedDict):
+	"""An ordered dictionary with access via __getattr__"""
+	def __getattr__(self, key):
+		if key not in self:
+			raise AttributeError(key)
+		return self[key]
+
+	def __setattr__(self, key, value):
+		if key not in self:
+			raise AttributeError(key)
+		self[key] = value
+
+
 class ReadOnlyOrderedDict(OrderedDict):
 	"""An ordered dictionary that cannot be modified"""
 	def __readonly__(self, *args, **kwargs):
@@ -21,6 +35,11 @@ class ReadOnlyOrderedDict(OrderedDict):
 		self.clear = self.__readonly__
 		self.update = self.__readonly__
 		self.setdefault = self.__readonly__
+
+	def __getattr__(self, key):
+		if key not in self:
+			raise AttributeError(key)
+		return self[key]
 
 class open_lock():
 	def __init__(self, path, mode, lock_type):
@@ -57,7 +76,7 @@ class json_rw(open_ex):
 		self.config = None
 
 	def __enter__(self):
-		self.config = json.load(self.fd, object_pairs_hook=OrderedDict)
+		self.config = json.load(self.fd, object_pairs_hook=AttrOrderedDict)
 		return self.config
 
 	def __exit__(self, exc_type, exc_value, traceback):
