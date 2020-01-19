@@ -70,9 +70,11 @@ def command_list(args):
 		print("{0}  {1} ({2})".format(user['uid'], user['displayname'], user['username']))
 
 @requires_username
-@add_argument("--get", metavar="PATHSPEC", dest="get",
+@add_argument(
+	"--get", metavar="PATHSPEC", dest="get",
 	nargs="?", const=CONFIG_GET_ROOT_VALUE, help="Get the value of a config key")
-@add_argument("--set", metavar=("PATHSPEC", "VALUE"), dest="set",
+@add_argument(
+	"--set", metavar=("PATHSPEC", "VALUE"), dest="set",
 	nargs=2, help="Set the value of a config key")
 def command_config(args):
 	"""
