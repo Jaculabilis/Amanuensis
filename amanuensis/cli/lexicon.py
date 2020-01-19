@@ -122,7 +122,25 @@ def command_player_add(args):
 	"""
 	Add a player to a lexicon
 	"""
-	raise NotImplementedError() # TODO
+	# Module imports
+	from config import logger
+	from lexicon import LexiconModel
+	from lexicon.manage import add_player
+	from user import UserModel
+
+	# Verify arguments
+	u = UserModel.by(name=args.username)
+	if u is None:
+		logger.error("Could not find user '{}'".format(args.username))
+		return -1
+	lex = LexiconModel.by(name=args.lexicon)
+	if lex is None:
+		logger.error("Could not find lexicon '{}'".format(args.lexicon))
+		return -1
+
+	# Internal call
+	add_player(lex, u)
+
 
 @requires_lexicon
 @requires_username
@@ -133,7 +151,28 @@ def command_player_remove(args):
 	Removing a player dissociates them from any characters
 	they control but does not delete any character data.
 	"""
-	raise NotImplementedError() # TODO
+	# Module imports
+	from config import logger
+	from lexicon import LexiconModel
+	from lexicon.manage import remove_player
+	from user import UserModel
+
+	# Verify arguments
+	u = UserModel.by(name=args.username)
+	if u is None:
+		logger.error("Could not find user '{}'".format(args.username))
+		return -1
+	lex = LexiconModel.by(name=args.lexicon)
+	if lex is None:
+		logger.error("Could not find lexicon '{}'".format(args.lexicon))
+		return -1
+	if lex.editor == u.id:
+		logger.error("Can't remove the editor of a lexicon")
+		return -1
+
+	# Internal call
+	remove_player(lex, u)
+
 
 @requires_lexicon
 def command_player_list(args):

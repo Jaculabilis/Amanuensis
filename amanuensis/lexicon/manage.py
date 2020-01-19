@@ -95,3 +95,70 @@ def get_all_lexicons():
 	lexes = map(lambda id: lexicon.LexiconModel.by(lid=id), lids)
 
 	return lexes
+
+
+def valid_add(lex, player, password=None):
+	"""
+	Checks whether the given player can join a lexicon
+	"""
+	# Trivial failures
+	if lex is None:
+		return False
+	if player is None:
+		return False
+	# Can't join if already in the game
+	if player.id in lex.join.joined:
+		return False
+	# Can't join if the game is closed
+	if not lex.join.open:
+		return False
+	# Can't join if the player max is reached
+	if len(lex.join.joined) >= lex.join.max_players:
+		return False
+	# Can't join if the password doesn't check out
+	if lex.join.password is not None and lex.join.password != password:
+		return False
+
+	return True
+
+
+def add_player(lex, player):
+	"""
+	Unconditionally adds a player to a lexicon
+	"""
+	# Verify arguments
+	if lex is None:
+		raise ValueError("Invalid lexicon: '{}'".format(lex))
+	if player is None:
+		raise ValueError("Invalid player: '{}'".format(player))
+
+	# Idempotently add player
+	with config.json_rw(lex.config_path) as cfg:
+		if player.id not in cfg.join.joined:
+			cfg.join.joined.append(player.id)
+
+
+def remove_player(lex, player):
+	"""
+	Remove a player from a lexicon
+	"""
+	# Verify arguments
+	if lex is None:
+		raise ValueError("Invalid lexicon: '{}'".format(lex))
+	if player is None:
+		raise ValueError("Invalid player: '{}'".format(player))
+	if lex.editor == player.id:
+		raise ValueError("Can't remove the editor '{}' from lexicon '{}'".format(player.username, lex.name))
+
+	# Idempotently remove player
+	with config.json_rw(lex.config_path) as cfg:
+		if player.id in cfg.join.joined:
+			cfg.join.joined.remove(player.id)
+
+	# TODO Reassign the player's characters to the editor
+
+
+def list_players(lex):
+	"""
+	"""
+	pass
