@@ -17,18 +17,18 @@ def command_create(args):
 	settings are as desired before opening the lexicon for player joins.
 	"""
 	# Module imports
-	import config
+	from config import logger
 	from lexicon.manage import valid_name, create_lexicon
 	from user import UserModel
 
 	# Verify arguments
 	if not valid_name(args.lexicon):
-		config.logger.error("Lexicon name contains illegal characters: '{}'".format(
+		logger.error("Lexicon name contains illegal characters: '{}'".format(
 			args.lexicon))
 		return -1
 	editor = UserModel.by(name=args.editor)
 	if editor is None:
-		config.logger.error("Could not find user '{}'".format(args.editor))
+		logger.error("Could not find user '{}'".format(args.editor))
 		return -1
 
 	# Internal call
@@ -91,7 +91,7 @@ def command_config(args):
 	Interact with a lexicon's config
 	"""
 	# Module imports
-	from config import logger
+	from config import logger, json_ro, json_rw
 	from lexicon import LexiconModel
 
 	# Verify arguments
@@ -105,11 +105,11 @@ def command_config(args):
 
 	# Internal call
 	if args.get:
-		with config.json_ro(lex.config_path) as cfg:
+		with json_ro(lex.config_path) as cfg:
 			config_get(cfg, args.get)
 
 	if args.set:
-		with config.json_rw(lex.config_path) as cfg:
+		with json_rw(lex.config_path) as cfg:
 			config_set(cfg, args.set)
 
 #
