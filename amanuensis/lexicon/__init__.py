@@ -1,11 +1,33 @@
 import os
 import time
 
+from errors import InternalMisuseError, IndexMismatchError, MissingConfigError
 import config
 
 class LexiconModel():
-	"""
-	"""
+	def by(lid=None, name=None):
+		"""
+		Gets the LexiconModel with the given lid or username
+
+		If the lid or name simply does not match an existing lexicon, returns
+		None. If the lid matches the index but there is something wrong with
+		the lexicon's config, raises an error.
+		"""
+		if lid and name:
+			raise InternalMisuseError("lid and name both specified to LexiconModel.by()")
+		if not lid and not name:
+			raise ValueError("One of lid or name must be not None")
+		if not lid:
+			with config.json_ro('lexicon', 'index.json') as index:
+				lid = index.get(name)
+		if not lid:
+			return None
+		if not os.path.isdir(config.prepend('lexicon', lid)):
+			raise IndexMismatchError("lexicon={} lid={}".format(name, lid))
+		if not os.path.isfile(config.prepend('lexicon', lid, 'config.json')):
+			raise MissingConfigError("lid={}".format(lid))
+		return LexiconModel(lid)
+
 	def __init__(self, lid):
 		if not os.path.isdir(config.prepend('lexicon', lid)):
 			raise ValueError("No lexicon with lid {}".format(lid))
