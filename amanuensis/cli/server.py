@@ -1,6 +1,12 @@
-from cli.helpers import add_argument, no_argument, config_get, config_set, CONFIG_GET_ROOT_VALUE
+import os
 
-@add_argument("--update", action="store_true", help="Refresh an existing config directory")
+from cli.helpers import (
+	add_argument, no_argument,
+	config_get, config_set, CONFIG_GET_ROOT_VALUE)
+
+@add_argument(
+	"--refresh", action="store_true",
+	help="Refresh an existing config directory")
 def command_init(args):
 	"""
 	Initialize a config directory at --config-dir
@@ -8,10 +14,21 @@ def command_init(args):
 	A clean config directory will contain a config.json, a
 	pidfile, a lexicon config directory, and a user config
 	directory.
-	"""
-	import config.init
 
-	config.init.create_config_dir(args.config_dir, args.update)
+	Refreshing an existing directory will add keys to the global config that
+	are present in the default configs. Users and lexicons that are missing
+	from the indexes will be deleted, and stale index entries will be removed.
+	"""
+	# Module imports
+	from config.init import create_config_dir
+
+	# Verify arguments
+	if args.refresh and not os.path.isdir(args.config_dir):
+		print("Error: couldn't find directory '{}'".format(args.config_dir))
+
+	# Internal call
+	create_config_dir(args.config_dir, args.refresh)
+
 
 @no_argument
 def command_generate_secret(args):
@@ -30,6 +47,7 @@ def command_generate_secret(args):
 		cfg['secret_key'] = secret_key.hex()
 	config.logger.info("Regenerated Flask secret key")
 
+
 @add_argument("-a", "--address", default="127.0.0.1")
 @add_argument("-p", "--port", default="5000")
 def command_run(args):
@@ -46,6 +64,7 @@ def command_run(args):
 		config.logger.error("Can't run server without a secret_key. Run generate-secret first")
 		return -1
 	server.app.run(host=args.address, port=args.port)
+
 
 @add_argument("--get", metavar="PATHSPEC", dest="get",
 	nargs="?", const=CONFIG_GET_ROOT_VALUE, help="Get the value of a config key")

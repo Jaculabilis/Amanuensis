@@ -3,6 +3,7 @@ import copy
 import json
 import logging.config
 import os
+import shutil
 
 # Module imports
 from errors import MissingConfigError, MalformedConfigError
@@ -10,9 +11,9 @@ import config
 from config.loader import json_ro
 import resources
 
-def create_config_dir(config_dir, update=False):
+def create_config_dir(config_dir, refresh=False):
 	"""
-	Create or update a config directory
+	Create or refresh a config directory
 	"""
 	from collections import OrderedDict
 	import fcntl
@@ -27,14 +28,14 @@ def create_config_dir(config_dir, update=False):
 	config.CONFIG_DIR = config_dir
 
 	# The directory should be empty if we're not updating an existing one.
-	if len(os.listdir(config_dir)) > 0 and not update:
+	if len(os.listdir(config_dir)) > 0 and not refresh:
 		print("Directory {} is not empty".format(config_dir))
 		return -1
 
 	# Update or create global config.
 	def_cfg = resources.get_stream("global.json")
 	global_config_path = path("config.json")
-	if update and os.path.isfile(global_config_path):
+	if refresh and os.path.isfile(global_config_path):
 		# We need to write an entirely different ordereddict to the config
 		# file, so we mimic the config.loader functionality manually.
 		with open(global_config_path, 'r+', encoding='utf8') as cfg_file:
@@ -77,6 +78,30 @@ def create_config_dir(config_dir, update=False):
 		with open(path('user', 'index.json'), 'w') as f:
 			json.dump({}, f)
 
+	if refresh:
+		for dir_name in ('lexicon', 'user'):
+			# Clean up unindexed folders
+			with config.json_ro(dir_name, 'index.json') as index:
+				known = list(index.values())
+			entries = os.listdir(path(dir_name))
+			for dir_entry in entries:
+				if dir_entry == "index.json":
+					continue
+				if dir_entry in known:
+					continue
+				print("Removing unindexed folder: '{}/{}'"
+					.format(dir_name, dir_entry))
+				shutil.rmtree(path(dir_name, dir_entry))
+
+			# Remove orphaned index listings
+			with config.json_rw(dir_name, 'index.json') as index:
+				for name, entry in index.items():
+					if not os.path.isdir(path(dir_name, entry)):
+						print("Removing stale {} index entry '{}: {}'"
+							.format(dir_name, name, entry))
+						del index[name]
+
+
 def verify_config_dir(config_dir):
 	"""
 	Verifies that the given directory has a valid global config in it and
@@ -98,6 +123,7 @@ def verify_config_dir(config_dir):
 				raise MalformedConfigError("Missing '{}' in global config. If you updated Amanuensis, run init --update to pick up new config keys".format(key))
 	# Configs verified
 	return True
+
 
 def init_logging(args, logging_config):
 	"""
