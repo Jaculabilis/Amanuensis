@@ -136,7 +136,6 @@ def command_player_remove(args):
 	raise NotImplementedError() # TODO
 
 @requires_lexicon
-@requires_username
 def command_player_list(args):
 	"""
 	List all players in a lexicon
@@ -144,13 +143,18 @@ def command_player_list(args):
 	raise NotImplementedError() # TODO
 
 @requires_lexicon
+@requires_username
+@add_argument("--charname", required=True, help="The character's name")
 def command_char_create(args):
 	"""
 	Create a character for a lexicon
+
+	The specified player will be set as the character's player.
 	"""
 	raise NotImplementedError() # TODO
 
 @requires_lexicon
+@add_argument("--charname", required=True, help="The character's name")
 def command_char_delete(args):
 	"""
 	Delete a character from a lexicon
@@ -172,11 +176,20 @@ def command_char_list(args):
 #
 
 @requires_lexicon
+@add_argument(
+	"--as-deadline", action="store_true",
+	help="Notifies players of the publish result")
+@add_argument(
+	"--force", action="store_true",
+	help="Publish all approved articles, regardless of other checks")
 def command_publish_turn(args):
 	"""
 	Publishes the current turn of a lexicon
 
-	Ability to publish is checked against the lexicon's
-	turn publish policy unless --force is specified.
+	The --as-deadline flag is intended to be used only by the scheduled publish
+	attempts controlled by the publish.deadlines setting.
+
+	The --force flag bypasses the publish.quorum and publish.block_on_ready
+	settings.
 	"""
 	raise NotImplementedError() # TODO
