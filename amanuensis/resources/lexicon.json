@@ -17,7 +17,8 @@
 	"join": {
 		"open": false,
 		"password": null,
-		"max_players": 4
+		"max_players": 4,
+		"joined": []
 	},
 	"publish": {
 		"notify": {
@@ -56,12 +57,6 @@
 		}
 	},
 	"character": {
-		"default": {
-			"cid": "default",
-			"name": "Ersatz Scrivener",
-			"player": null,
-			"signature": "~Ersatz Scrivener"
-		}
 	},
 	"log": [
 	]
