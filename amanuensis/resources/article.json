@@ -1,0 +1,11 @@
+{
+	"aid": null,
+	"character": null,
+	"title": null,
+	"turn": null,
+	"status": {
+		"ready": false,
+		"approved": false
+	},
+	"contents": null
+}
