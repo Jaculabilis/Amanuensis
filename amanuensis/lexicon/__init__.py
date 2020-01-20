@@ -51,7 +51,7 @@ class LexiconModel():
 	def status(self):
 		if self.turn.current is None:
 			return "unstarted"
-		elif self.turn.current > lex.turn.max:
+		elif self.turn.current > self.turn.max:
 			return "completed"
 		else:
 			return "ongoing"
