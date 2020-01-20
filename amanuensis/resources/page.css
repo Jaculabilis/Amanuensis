@@ -124,11 +124,11 @@ div.dashboard-lexicon-item p {
 		padding: 5px;
 	}
 	div#header {
-		max-width: 554;
+		max-width: 554px;
 		margin: 0 auto;
 	}
 	div#sidebar {
-		max-width: 548;
+		max-width: 548px;
 		width: inherit;
 		float: inherit;
 		margin: 5px auto;
