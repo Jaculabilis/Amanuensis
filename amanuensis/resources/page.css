@@ -97,6 +97,28 @@ textarea#configText {
 	width: 100%;
 	box-sizing: border-box;
 }
+div.dashboard-lexicon-item {
+	margin: 0 10px;
+	padding: 0 10px;
+	border-left: 3px solid black;
+}
+div.dashboard-lexicon-unstarted {
+	border-left-color: blue;
+}
+div.dashboard-lexicon-ongoing {
+	border-left-color: goldenrod;
+}
+div.dashboard-lexicon-completed {
+	border-left-color: green;
+}
+div.dashboard-lexicon-item span.dashboard-lexicon-item-title {
+	font-size: 1.5em;
+	font-weight: bold;
+}
+div.dashboard-lexicon-item p {
+	margin-block-start: 0.5em;
+	margin-block-end: 0.5em;
+}
 @media only screen and (max-width: 816px) {
 	div#wrapper {
 		padding: 5px;

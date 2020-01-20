@@ -47,3 +47,11 @@ class LexiconModel():
 		now = int(time.time())
 		with config.json_rw(self.config_path) as j:
 			j['log'].append([now, message])
+
+	def status(self):
+		if self.turn.current is None:
+			return "unstarted"
+		elif self.turn.current > lex.turn.max:
+			return "completed"
+		else:
+			return "ongoing"

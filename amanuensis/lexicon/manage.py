@@ -92,7 +92,7 @@ def get_all_lexicons():
 		lids = list(index.values())
 
 	# Load all of the lexicons
-	lexes = map(lambda id: lexicon.LexiconModel.by(lid=id), lids)
+	lexes = list(map(lambda id: lexicon.LexiconModel.by(lid=id), lids))
 
 	return lexes
 

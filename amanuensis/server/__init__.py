@@ -6,6 +6,7 @@ from flask_login import LoginManager
 import config
 from server.auth import get_bp as get_auth_bp
 from server.home import get_bp as get_home_bp
+from server.lexicon import get_bp as get_lex_bp
 
 # Flask app init
 static_root = os.path.abspath(config.get("static_root"))
@@ -22,3 +23,6 @@ app.register_blueprint(auth_bp)
 
 home_bp = get_home_bp()
 app.register_blueprint(home_bp)
+
+lex_bp = get_lex_bp()
+app.register_blueprint(lex_bp)

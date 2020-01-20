@@ -9,6 +9,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from errors import InternalMisuseError, MissingConfigError, IndexMismatchError
 import config
 import resources
+import lexicon.manage
 
 class UserModel(UserMixin):
 	@staticmethod
@@ -55,6 +56,14 @@ class UserModel(UserMixin):
 	def check_password(self, pw):
 		with config.json_ro(self.config_path) as j:
 			return check_password_hash(j['password'], pw)
+
+	def lexicons_in(self):
+		return [
+			lex
+			for lex in lexicon.manage.get_all_lexicons()
+			if self.id in lex.join.joined
+		]
+
 
 def valid_username(username):
 	return re.match(r"^[A-Za-z0-9-_]{3,}$", username) is not None
