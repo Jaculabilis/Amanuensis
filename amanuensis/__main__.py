@@ -16,11 +16,11 @@ def repl(args):
 		if name.startswith("command_")}
 	commands['help'] = "Print this message"
 	commands['exit'] = "Exit"
-	print("Amanuensis running on Lexicon {}".format(args.lexicon))
+	print("Amanuensis running on Lexicon {}".format(args.tl_lexicon))
 	while True:
 		# Read input in a loop.
 		try:
-			data = input("{}> ".format(args.lexicon))
+			data = input("{}> ".format(args.tl_lexicon))
 		except EOFError:
 			print()
 			break
@@ -84,7 +84,7 @@ def get_parser(valid_commands):
 		metavar="USERNAME",
 		dest="tl_username",
 		help="Specify a user to operate on")
-	parser.set_defaults(func=lambda args: repl(args) if args.lexicon else parser.print_help())
+	parser.set_defaults(func=lambda args: repl(args) if args.tl_lexicon else parser.print_help())
 	subp = parser.add_subparsers(
 		metavar="COMMAND",
 		dest="command",
