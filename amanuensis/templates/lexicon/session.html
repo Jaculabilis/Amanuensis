@@ -1,0 +1,11 @@
+{% extends "lexicon/lexicon.html" %}
+{% block title %}Session | {{ lexicon.name }}{% endblock %}
+
+{% block main %}
+
+<h1>Session</h1>
+
+{% set lexicons = current_user.lexicons_in() %}
+
+{% endblock %}
+{% set template_content_blocks = [self.main()] %}
