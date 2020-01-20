@@ -1,7 +1,7 @@
 from functools import wraps
 import json
 
-from flask import Blueprint, render_template, url_for, redirect
+from flask import Blueprint, render_template, url_for, redirect, flash
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from wtforms import TextAreaField, SubmitField, StringField
@@ -20,6 +20,7 @@ def admin_required(route):
 	@wraps(route)
 	def admin_route(*args, **kwargs):
 		if not current_user.is_admin:
+			flash("Access is forbidden")
 			return redirect(url_for('home.home'))
 		return route(*args, **kwargs)
 	return admin_route

@@ -1,0 +1,14 @@
+{% extends "lexicon/lexicon.html" %}
+{% block title %}Edit | {{ lexicon_title }}{% endblock %}
+
+{% block main %}
+<form action="" method="post" novalidate>
+	{{ form.hidden_tag() }}
+	<p>{{ form.configText.label }}<br>{{ form.configText(rows=20) }}</p>
+	<p>{{ form.submit() }}</p>
+</form>
+{% for message in get_flashed_messages() %}
+<span style="color: #ff0000">{{ message }}</span><br>
+{% endfor %}
+{% endblock %}
+{% set template_content_blocks = [self.main()] %}

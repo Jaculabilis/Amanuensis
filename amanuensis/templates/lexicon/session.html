@@ -2,10 +2,13 @@
 {% block title %}Session | {{ lexicon_title }}{% endblock %}
 
 {% block main %}
-
 <h1>Session</h1>
-
-{% set lexicons = current_user.lexicons_in() %}
-
 {% endblock %}
 {% set template_content_blocks = [self.main()] %}
+
+{% if current_user.id == lexicon.editor %}
+{% block editor_edit %}
+<a href="{{ url_for('lexicon.session_edit', name=lexicon.name) }}" style="display:block; text-align:center;">Edit lexicon settings</a>
+{% endblock %}
+{% set template_content_blocks = [self.editor_edit()] + template_content_blocks %}
+{% endif %}
