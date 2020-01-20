@@ -17,12 +17,14 @@ def get_bp():
 	@bp.route('/contents/', methods=['GET'])
 	@login_required
 	def contents(name):
-		return "Lexicon " + str(name)
+		lex = lexicon.LexiconModel.by(name=name)
+		return render_template('lexicon/contents.html', lexicon=lex)
 
 	@bp.route('/rules/', methods=['GET'])
 	@login_required
 	def rules(name):
-		return "Lexicon " + str(name)
+		lex = lexicon.LexiconModel.by(name=name)
+		return render_template('lexicon/rules.html', lexicon=lex)
 
 	@bp.route('/session/', methods=['GET'])
 	@login_required
@@ -33,6 +35,7 @@ def get_bp():
 	@bp.route('/statistics/', methods=['GET'])
 	@login_required
 	def stats(name):
-		return "Lexicon " + str(name)
+		lex = lexicon.LexiconModel.by(name=name)
+		return render_template('lexicon/statistics.html', lexicon=lex)
 
 	return bp

@@ -1,12 +1,20 @@
 {% extends "page_2col.html" %}
-{% block header %}<h2>{{ lexicon.title }}</h2>{% endblock %}
+{% if lexicon.title %}
+{% set lexicon_title = lexicon.title %}
+{% else %}
+{% set lexicon_title = "Lexicon " + lexicon.name %}
+{% endif %}
+
+{% block header %}
+<h2>{{ lexicon_title }}</h2>
+{% endblock %}
 
 {% block sb_logo %}{% endblock %}
 {% block sb_home %}<a href="{{ url_for('home.home') }}">Home</a>{% endblock %}
 {% block sb_contents %}<a href="{{ url_for('lexicon.contents', name=lexicon.name) }}">Contents</a>{% endblock %}
 {% block sb_rules %}<a href="{{ url_for('lexicon.rules', name=lexicon.name) }}">Rules</a>{% endblock %}
 {% block sb_session %}<a href="{{ url_for('lexicon.session', name=lexicon.name) }}">Session</a>{% endblock %}
-{% block sb_stats %}<a href="{{ url_for('lexicon.stats', name=lexicon.name) }}">Stats</a>{% endblock %}
+{% block sb_stats %}<a href="{{ url_for('lexicon.stats', name=lexicon.name) }}">Statistics</a>{% endblock %}
 
 {% set template_sidebar_rows = [
 	self.sb_logo(),
