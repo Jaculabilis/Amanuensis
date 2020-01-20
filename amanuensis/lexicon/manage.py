@@ -56,6 +56,9 @@ def create_lexicon(name, editor):
 	config.logger.info("Created Lexicon {0.name}, ed. {1.displayname} ({0.id})".format(
 		l, editor))
 
+	# Add the editor
+	add_player(l, editor)
+
 	return l
 
 
@@ -136,6 +139,8 @@ def add_player(lex, player):
 	with config.json_rw(lex.config_path) as cfg:
 		if player.id not in cfg.join.joined:
 			cfg.join.joined.append(player.id)
+			# Log to the lexicon's log
+			lex.log("Player '{0.username}' joined ({0.id})".format(player))
 
 
 def remove_player(lex, player):
