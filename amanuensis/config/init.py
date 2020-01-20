@@ -120,7 +120,7 @@ def verify_config_dir(config_dir):
 	with json_ro(global_config_path) as global_config_file:
 		for key in def_cfg.keys():
 			if key not in global_config_file.keys():
-				raise MalformedConfigError("Missing '{}' in global config. If you updated Amanuensis, run init --update to pick up new config keys".format(key))
+				raise MalformedConfigError("Missing '{}' in global config. If you updated Amanuensis, run init --refresh to pick up new config keys".format(key))
 	# Configs verified
 	return True
 
