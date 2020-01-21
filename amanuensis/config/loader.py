@@ -20,6 +20,12 @@ class AttrOrderedDict(OrderedDict):
 			raise AttributeError(key)
 		self[key] = value
 
+	def new(self, key, value):
+		"""Setter for adding new keys"""
+		if key in self:
+			raise KeyError("Key already exists: '{}'".format(key))
+		self[key] = value
+
 
 class ReadOnlyOrderedDict(OrderedDict):
 	"""An ordered dictionary that cannot be modified"""
