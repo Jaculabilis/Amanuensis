@@ -8,7 +8,7 @@
 
 {% if current_user.id == g.lexicon.editor %}
 {% block editor_edit %}
-<a href="{{ url_for('lexicon.session_edit', name=lexicon.name) }}" style="display:block; text-align:center;">Edit lexicon settings</a>
+<a href="{{ url_for('lexicon.session_edit', name=g.lexicon.name) }}" style="display:block; text-align:center;">Edit lexicon settings</a>
 {% endblock %}
 {% set template_content_blocks = [self.editor_edit()] + template_content_blocks %}
 {% endif %}
