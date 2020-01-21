@@ -1,3 +1,5 @@
+import shutil
+
 from cli.helpers import (
 	add_argument, no_argument, requires_username,
 	config_get, config_set, CONFIG_GET_ROOT_VALUE)
@@ -42,14 +44,14 @@ def command_delete(args):
 
 	import config
 
-	user_path = config.prepend('user', args.uid)
+	user_path = config.prepend('user', args.id)
 	if not os.path.isdir(user_path):
 		config.logger.error("No user with that id")
 		return -1
 	else:
-		os.remove(user_path)
+		shutil.rmtree(user_path)
 	with config.json_rw('user', 'index.json') as j:
-		if args.uid in j:
+		if args.id in j:
 			del j[uid]
 
 @no_argument
