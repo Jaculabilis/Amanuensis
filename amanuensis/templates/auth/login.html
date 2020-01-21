@@ -1,6 +1,7 @@
 {% extends "page_1col.html" %}
 {% block title %}Login | Amanuensis{% endblock %}
 {% block header %}<h2>Amanuensis - Login</h2>{% endblock %}
+{% block login_status_attr %}style="display:none"{% endblock %}
 {% block main %}
 <form action="" method="post" novalidate>
 	{{ form.hidden_tag() }}

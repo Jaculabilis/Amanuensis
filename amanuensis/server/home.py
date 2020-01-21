@@ -30,7 +30,6 @@ def get_bp():
 	bp = Blueprint('home', __name__, url_prefix='/home')
 
 	@bp.route('/', methods=['GET'])
-	@login_required
 	def home():
 		return render_template('home/home.html')
 

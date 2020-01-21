@@ -40,6 +40,6 @@ def get_bp(login_manager):
 	@login_required
 	def logout():
 		logout_user()
-		return redirect(url_for('auth.login'))
+		return redirect(url_for('home.home'))
 
 	return bp
