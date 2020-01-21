@@ -208,7 +208,26 @@ def command_char_create(args):
 
 	The specified player will be set as the character's player.
 	"""
-	raise NotImplementedError() # TODO
+	# Module imports
+	from config import logger
+	from lexicon import LexiconModel
+	from lexicon.manage import add_character
+	from user import UserModel
+
+	# Verify arguments
+	u = UserModel.by(name=args.username)
+	if u is None:
+		logger.error("Could not find user '{}'".format(args.username))
+		return -1
+	lex = LexiconModel.by(name=args.lexicon)
+	if lex is None:
+		logger.error("Could not find lexicon '{}'".format(args.lexicon))
+		return -1
+	# u in lx
+
+	# Internal call
+	add_character(lex, u, args.charname)
+
 
 @requires_lexicon
 @add_argument("--charname", required=True, help="The character's name")

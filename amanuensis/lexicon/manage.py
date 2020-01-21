@@ -2,6 +2,7 @@
 Functions for managing lexicons, primarily within the context of the
 Amanuensis config directory.
 """
+import json
 import os
 import re
 import shutil
@@ -9,6 +10,7 @@ import time
 import uuid
 
 import config
+from config.loader import AttrOrderedDict
 import lexicon
 import resources
 
@@ -161,3 +163,30 @@ def remove_player(lex, player):
 			cfg.join.joined.remove(player.id)
 
 	# TODO Reassign the player's characters to the editor
+
+
+def add_character(lex, player, charname):
+	"""
+	Unconditionally adds a character to a lexicon
+	"""
+	# Verify arguments
+	if lex is None:
+		raise ValueError("Invalid lexicon: '{}'".format(lex))
+	if player is None:
+		raise ValueError("Invalid player: '{}'".format(player))
+	if not charname:
+		raise ValueError("Invalid character name: '{}'".format(charname))
+
+	# Load the character template
+	with resources.get_stream('character.json') as template:
+		character = json.load(template, object_pairs_hook=AttrOrderedDict)
+
+	# Fill out the character's information
+	character.cid = uuid.uuid4().hex
+	character.name = charname
+	character.player = player.id
+	character.signature = "~" + charname
+
+	# Add the character to the lexicon
+	with config.json_rw(lex.config_path) as cfg:
+		cfg.character.new(character.cid, character)
