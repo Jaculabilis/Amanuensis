@@ -1,13 +1,13 @@
 {% extends "page_2col.html" %}
-{% if lexicon.title %}
-{% set lexicon_title = lexicon.title %}
+{% if g.lexicon.title %}
+{% set lexicon_title = g.lexicon.title %}
 {% else %}
-{% set lexicon_title = "Lexicon " + lexicon.name %}
+{% set lexicon_title = "Lexicon " + g.lexicon.name %}
 {% endif %}
 
 {% block header %}
 <h2>{{ lexicon_title }}</h2>
-<p><i>{{ lexicon.prompt }}</i></p>
+<p><i>{{ g.lexicon.prompt }}</i></p>
 {% endblock %}
 
 {% block sb_logo %}{% endblock %}

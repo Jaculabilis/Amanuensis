@@ -6,7 +6,7 @@
 {% endblock %}
 {% set template_content_blocks = [self.main()] %}
 
-{% if current_user.id == lexicon.editor %}
+{% if current_user.id == g.lexicon.editor %}
 {% block editor_edit %}
 <a href="{{ url_for('lexicon.session_edit', name=lexicon.name) }}" style="display:block; text-align:center;">Edit lexicon settings</a>
 {% endblock %}
