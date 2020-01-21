@@ -257,7 +257,18 @@ def command_char_list(args):
 	"""
 	List all characters in a lexicon
 	"""
-	raise NotImplementedError() # TODO
+	import json
+	# Module imports
+	from lexicon import LexiconModel
+
+	# Verify arguments
+	lex = LexiconModel.by(name=args.lexicon)
+	if lex is None:
+		logger.error("Could not find lexicon '{}'".format(args.lexicon))
+		return -1
+
+	# Internal call
+	print(json.dumps(lex.character, indent=2))
 
 #
 # Procedural commands
