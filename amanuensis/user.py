@@ -95,11 +95,11 @@ def create_user(username, displayname, email):
 
 	# Fill out the new user
 	with config.json_rw(user_dir, 'config.json') as cfg:
-		cfg['uid'] = uid
-		cfg['username'] = username
-		cfg['displayname'] = displayname
-		cfg['email'] = email
-		cfg['created'] = int(time.time())
+		cfg.uid = uid
+		cfg.username = username
+		cfg.displayname = displayname
+		cfg.email = email
+		cfg.created = int(time.time())
 
 	# Update the index with the new user
 	with config.json_rw('user', 'index.json') as index:
