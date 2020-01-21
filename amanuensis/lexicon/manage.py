@@ -61,6 +61,13 @@ def create_lexicon(name, editor):
 	# Add the editor
 	add_player(l, editor)
 
+	# Add the fallback character
+	add_character(l, editor, {
+		"cid": "default",
+		"name": "Ersatz Scrivener",
+		"player": None,
+	})
+
 	return l
 
 
