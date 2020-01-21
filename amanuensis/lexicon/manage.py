@@ -165,28 +165,54 @@ def remove_player(lex, player):
 	# TODO Reassign the player's characters to the editor
 
 
-def add_character(lex, player, charname):
+def add_character(lex, player, charinfo={}):
 	"""
 	Unconditionally adds a character to a lexicon
+
+	charinfo is a dictionary of character settings
 	"""
 	# Verify arguments
 	if lex is None:
 		raise ValueError("Invalid lexicon: '{}'".format(lex))
 	if player is None:
 		raise ValueError("Invalid player: '{}'".format(player))
-	if not charname:
-		raise ValueError("Invalid character name: '{}'".format(charname))
+	if not charinfo or not charinfo.get("name"):
+		raise ValueError("Invalid character info: '{}'".format(charinfo))
+	charname = charinfo.get("name")
+	if any([char.name for char in lex.character.values() if char.name == charname]):
+		raise ValueError("Duplicate character name: '{}'".format(charinfo))
 
 	# Load the character template
 	with resources.get_stream('character.json') as template:
 		character = json.load(template, object_pairs_hook=AttrOrderedDict)
 
 	# Fill out the character's information
-	character.cid = uuid.uuid4().hex
+	character.cid = charinfo.get("cid") or uuid.uuid4().hex
 	character.name = charname
-	character.player = player.id
-	character.signature = "~" + charname
+	character.player = charinfo.get("player") or player.id
+	character.signature = charinfo.get("signature") or ("~" + character.name)
 
 	# Add the character to the lexicon
 	with config.json_rw(lex.config_path) as cfg:
 		cfg.character.new(character.cid, character)
+
+
+def delete_character(lex, charname):
+	"""
+	Delete a character from a lexicon
+	"""
+	# Verify arguments
+	if lex is None:
+		raise ValueError("Invalid lexicon: '{}'".format(lex))
+	if charname is None:
+		raise ValueError("Invalid character name: '{}'".format(charinfo))
+
+	# Find character in this lexicon
+	matches = [char for cid, char in lex.character.items() if char.name == charname]
+	if len(matches) != 1:
+		raise ValueError(matches)
+	char = matches[0]
+
+	# Remove character from character list
+	with config.json_rw(lex.config_path) as cfg:
+		del cfg.character[char.cid]

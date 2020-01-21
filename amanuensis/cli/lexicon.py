@@ -226,7 +226,7 @@ def command_char_create(args):
 	# u in lx
 
 	# Internal call
-	add_character(lex, u, args.charname)
+	add_character(lex, u, {"name": args.charname})
 
 
 @requires_lexicon
@@ -238,7 +238,19 @@ def command_char_delete(args):
 	Deleting a character dissociates them from any content
 	they have contributed rather than deleting it.
 	"""
-	raise NotImplementedError() # TODO
+	# Module imports
+	from config import logger
+	from lexicon import LexiconModel
+	from lexicon.manage import delete_character
+
+	# Verify arguments
+	lex = LexiconModel.by(name=args.lexicon)
+	if lex is None:
+		logger.error("Could not find lexicon '{}'".format(args.lexicon))
+		return -1
+
+	# Internal call
+	delete_character(lex, args.charname)
 
 @requires_lexicon
 def command_char_list(args):
