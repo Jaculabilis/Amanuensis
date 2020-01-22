@@ -65,6 +65,12 @@ div#sidebar table a {
 table a:hover {
 	background-color: #cccccc;
 }
+div#sidebar table a.current-page {
+	background-color: #bbbbbb;
+}
+div#sidebar table a.current-page:hover {
+	background-color: #bbbbbb;
+}
 div#sidebar table td {
 	padding: 0px; margin: 3px 0;
 	border-bottom: 8px solid transparent;

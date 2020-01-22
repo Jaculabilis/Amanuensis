@@ -11,11 +11,24 @@
 {% endblock %}
 
 {% block sb_logo %}{% endblock %}
-{% block sb_home %}<a href="{{ url_for('home.home') }}">Home</a>{% endblock %}
-{% block sb_contents %}<a href="{{ url_for('lexicon.contents', name=g.lexicon.name) }}">Contents</a>{% endblock %}
-{% block sb_rules %}<a href="{{ url_for('lexicon.rules', name=g.lexicon.name) }}">Rules</a>{% endblock %}
-{% block sb_session %}<a href="{{ url_for('lexicon.session', name=g.lexicon.name) }}">Session</a>{% endblock %}
-{% block sb_stats %}<a href="{{ url_for('lexicon.stats', name=g.lexicon.name) }}">Statistics</a>{% endblock %}
+{% block sb_home %}<a href="{{ url_for('home.home') }}">Home</a>
+{% endblock %}
+{% block sb_contents %}<a 
+	{% if current_page == "contents" %}class="current-page"
+	{% else %}href="{{ url_for('lexicon.contents', name=g.lexicon.name) }}"
+	{% endif %}>Contents</a>{% endblock %}
+{% block sb_rules %}<a 
+	{% if current_page == "rules" %}class="current-page"
+	{% else %}href="{{ url_for('lexicon.rules', name=g.lexicon.name) }}"
+	{% endif %}>Rules</a>{% endblock %}
+{% block sb_session %}<a 
+	{% if current_page == "session" %}class="current-page"
+	{% else %}href="{{ url_for('lexicon.session', name=g.lexicon.name) }}"
+	{% endif %}>Session</a>{% endblock %}
+{% block sb_stats %}<a 
+	{% if current_page == "statistics" %}class="current-page"
+	{% else %}href="{{ url_for('lexicon.stats', name=g.lexicon.name) }}"
+	{% endif %}>Statistics</a>{% endblock %}
 
 {% set template_sidebar_rows = [
 	self.sb_logo(),
