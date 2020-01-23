@@ -29,35 +29,49 @@ def no_argument(command):
 			command(cmd_args)
 	return augmented_command
 
-# Wrapper for commands requiring lexicon or username options
+# Wrappers for commands requiring lexicon or username options
 
-def requires(arg, metavar, dest, fallback, help):
-	"""Subparser fallback for -u and -n options"""
-	def req_checker(command):
-		@wraps(command)
-		def augmented_command(cmd_args):
-			if type(cmd_args) is ArgumentParser:
-				cmd_args.add_argument(arg, metavar=metavar, dest=dest, help=help)
-				if command.__dict__.get('wrapper', False):
-					command(cmd_args)
-			if type(cmd_args) is Namespace:
-				base_val = hasattr(cmd_args, fallback) and getattr(cmd_args, fallback)
-				subp_val = hasattr(cmd_args, dest) and getattr(cmd_args, dest)
-				val = subp_val or base_val or None
-				if not val:
-					import config
-					config.logger.error("This command requires {}".format(arg))
-					return -1
-				setattr(cmd_args, dest, val)
+def requires_lexicon(command):
+	@wraps(command)
+	def augmented_command(cmd_args):
+		if type(cmd_args) is ArgumentParser:
+			cmd_args.add_argument("-n", metavar="LEXICON", dest="lexicon", help="Specify a lexicon to operate on")
+			if command.__dict__.get('wrapper', False):
 				command(cmd_args)
-		augmented_command.__dict__['wrapper'] = True
-		return augmented_command
-	return req_checker
+		if type(cmd_args) is Namespace:
+			base_val = hasattr(cmd_args, "tl_lexicon") and getattr(cmd_args, "tl_lexicon")
+			subp_val = hasattr(cmd_args, "lexicon") and getattr(cmd_args, "lexicon")
+			val = subp_val or base_val or None
+			if not val:
+				import config
+				config.logger.error("This command requires specifying a lexicon")
+				return -1
+			from lexicon import LexiconModel
+			cmd_args.lexicon = val#LexiconModel.by(name=val).name
+			command(cmd_args)
+	augmented_command.__dict__['wrapper'] = True
+	return augmented_command
 
-requires_lexicon = requires("-n", "LEXICON", "lexicon", "tl_lexicon",
-	"Specify a lexicon to operate on")
-requires_username = requires("-u", "USERNAME", "username", "tl_username",
-	"Specify a user to operate on")
+def requires_username(command):
+	@wraps(command)
+	def augmented_command(cmd_args):
+		if type(cmd_args) is ArgumentParser:
+			cmd_args.add_argument("-u", metavar="USERNAME", dest="username", help="Specify a user to operate on")
+			if command.__dict__.get('wrapper', False):
+				command(cmd_args)
+		if type(cmd_args) is Namespace:
+			base_val = hasattr(cmd_args, "tl_username") and getattr(cmd_args, "tl_lexicon")
+			subp_val = hasattr(cmd_args, "username") and getattr(cmd_args, "username")
+			val = subp_val or base_val or None
+			if not val:
+				import config
+				config.logger.error("This command requires specifying a user")
+				return -1
+			from user import UserModel
+			cmd_args.username = val#UserModel.by(name=val).name
+			command(cmd_args)
+	augmented_command.__dict__['wrapper'] = True
+	return augmented_command
 
 # Helpers for common command tasks
 
