@@ -12,6 +12,8 @@ from server.lexicon import get_bp as get_lex_bp
 static_root = os.path.abspath(config.get("static_root"))
 app = Flask(__name__, template_folder="../templates", static_folder=static_root)
 app.secret_key = bytes.fromhex(config.get('secret_key'))
+app.jinja_options['trim_blocks'] = True
+app.jinja_options['lstrip_blocks'] = True
 
 # Flask-Login init
 login = LoginManager(app)
