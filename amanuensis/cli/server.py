@@ -50,6 +50,7 @@ def command_generate_secret(args):
 
 @add_argument("-a", "--address", default="127.0.0.1")
 @add_argument("-p", "--port", default="5000")
+@add_argument("--debug", action="store_true")
 def command_run(args):
 	"""
 	Run the default Flask server
@@ -63,7 +64,7 @@ def command_run(args):
 	if get("secret_key") is None:
 		logger.error("Can't run server without a secret_key. Run generate-secret first")
 		return -1
-	app.run(host=args.address, port=args.port)
+	app.run(host=args.address, port=args.port, debug=args.debug)
 
 
 @add_argument("--get", metavar="PATHSPEC", dest="get",
