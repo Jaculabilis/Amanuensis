@@ -6,16 +6,16 @@ from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from wtforms import TextAreaField, SubmitField
 
-import config
-from config.loader import ReadOnlyOrderedDict
-import user
-import lexicon
+from amanuensis.config import json_ro, open_ex
+from amanuensis.config.loader import ReadOnlyOrderedDict
+from amanuensis.lexicon import LexiconModel
+from amanuensis.user import UserModel
 
 
 def lexicon_param(route):
 	@wraps(route)
 	def with_lexicon(name):
-		g.lexicon = lexicon.LexiconModel.by(name=name)
+		g.lexicon = LexiconModel.by(name=name)
 		if g.lexicon is None:
 			flash("Couldn't find a lexicon with the name '{}'".format(name))
 			return redirect(url_for("home.home"))
@@ -63,7 +63,7 @@ def get_bp():
 
 		# Load the config for the lexicon on load
 		if not form.is_submitted():
-			with config.json_ro(g.lexicon.config_path) as cfg:
+			with json_ro(g.lexicon.config_path) as cfg:
 				form.configText.data = json.dumps(cfg, indent=2)
 			return render_template("lexicon/session_edit.html", form=form)
 
@@ -78,7 +78,7 @@ def get_bp():
 			# TODO
 			# Write the new config
 			form.submit.submitted = False
-			with config.open_ex(g.lexicon.config_path, mode='w') as f:
+			with open_ex(g.lexicon.config_path, mode='w') as f:
 				json.dump(cfg, f, indent='\t')
 				flash("Config updated")
 			return redirect(url_for('lexicon.session_edit', name=name))

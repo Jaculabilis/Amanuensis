@@ -1,6 +1,6 @@
 import shutil
 
-from cli.helpers import (
+from amanuensis.cli.helpers import (
 	add_argument, no_argument, requires_username,
 	config_get, config_set, CONFIG_GET_ROOT_VALUE)
 
@@ -12,26 +12,26 @@ def command_create(args):
 	Create a user
 	"""
 	import json
-
-	import user
-	import config
+	# Module imports
+	from amanuensis.config import logger, json_ro
+	from amanuensis.user import UserModel, valid_username, valid_email, create_user
 
 	# Verify or query parameters
-	if not user.valid_username(args.username):
-		config.logger.error("Invalid username: usernames may only contain alphanumeric characters, dashes, and underscores")
+	if not valid_username(args.username):
+		logger.error("Invalid username: usernames may only contain alphanumeric characters, dashes, and underscores")
 		return -1
-	if user.UserModel.by(name=args.username) is not None:
-		config.logger.error("Invalid username: username is already taken")
+	if UserModel.by(name=args.username) is not None:
+		logger.error("Invalid username: username is already taken")
 		return -1
 	if not args.displayname:
 		args.displayname = args.username
-	if not user.valid_email(args.email):
-		config.logger.error("Invalid email")
+	if not valid_email(args.email):
+		logger.error("Invalid email")
 		return -1
 
 	# Create user
-	new_user, tmp_pw = user.create_user(args.username, args.displayname, args.email)
-	with config.json_ro(new_user.config_path) as js:
+	new_user, tmp_pw = create_user(args.username, args.displayname, args.email)
+	with json_ro(new_user.config_path) as js:
 		print(json.dumps(js, indent=2))
 	print("Username: {}\nUser ID:  {}\nPassword: {}".format(args.username, new_user.uid, tmp_pw))
 
@@ -41,31 +41,33 @@ def command_delete(args):
 	Delete a user
 	"""
 	import os
+	# Module imports
+	from amanuensis.config import logger, prepend
 
-	import config
-
-	user_path = config.prepend('user', args.id)
+	user_path = prepend('user', args.id)
 	if not os.path.isdir(user_path):
-		config.logger.error("No user with that id")
+		logger.error("No user with that id")
 		return -1
 	else:
 		shutil.rmtree(user_path)
-	with config.json_rw('user', 'index.json') as j:
+	with json_rw('user', 'index.json') as j:
 		if args.id in j:
 			del j[uid]
+
+	# TODO
 
 @no_argument
 def command_list(args):
 	"""List all users"""
 	import os
+	# Module imports
+	from amanuensis.config import prepend, json_ro
 
-	import config
-
-	user_dirs = os.listdir(config.prepend('user'))
+	user_dirs = os.listdir(prepend('user'))
 	users = []
 	for uid in user_dirs:
 		if uid == "index.json": continue
-		with config.json_ro('user', uid, 'config.json') as user:
+		with json_ro('user', uid, 'config.json') as user:
 			users.append(user)
 	users.sort(key=lambda u: u['username'])
 	for user in users:
@@ -83,24 +85,25 @@ def command_config(args):
 	Interact with a user's config
 	"""
 	import json
-	import config
-	from user import UserModel
+	# Module imports
+	from amanuensis.config import logger, json_ro, json_rw
+	from amanuensis.user import UserModel
 
 	if args.get and args.set:
-		config.logger.error("Specify one of --get and --set")
+		logger.error("Specify one of --get and --set")
 		return -1
 
 	u = UserModel.by(name=args.username)
 	if not u:
-		config.logger.error("User not found")
+		logger.error("User not found")
 		return -1
 
 	if args.get:
-		with config.json_ro('user', u.id, 'config.json') as cfg:
+		with json_ro('user', u.id, 'config.json') as cfg:
 			config_get(cfg, args.get)
 
 	if args.set:
-		with config.json_rw('user', u.id, 'config.json') as cfg:
+		with json_rw('user', u.id, 'config.json') as cfg:
 			config_set(u.id, cfg, args.set)
 
 @add_argument("--username", help="The user to change password for")
@@ -110,15 +113,15 @@ def command_passwd(args):
 	"""
 	import getpass
 	import os
-
-	import config
-	from user import UserModel
+	# Module imports
+	from amanuensis.config import logger
+	from amanuensis.user import UserModel
 
 	if not args.username:
 		args.username = input("Username: ")
 	u = UserModel.by(name=args.username)
 	if u is None:
-		config.logger.error("No user with username '{}'".format(args.username))
+		logger.error("No user with username '{}'".format(args.username))
 		return -1
 	pw = getpass.getpass("Password: ")
 	u.set_password(pw)

@@ -4,8 +4,8 @@ import os
 import traceback
 
 # Module imports
-import cli
-import config
+import amanuensis.cli as cli
+import amanuensis.config as config
 
 
 def repl(args):

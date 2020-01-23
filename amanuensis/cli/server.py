@@ -1,6 +1,6 @@
 import os
 
-from cli.helpers import (
+from amanuensis.cli.helpers import (
 	add_argument, no_argument,
 	config_get, config_set, CONFIG_GET_ROOT_VALUE)
 
@@ -20,7 +20,7 @@ def command_init(args):
 	from the indexes will be deleted, and stale index entries will be removed.
 	"""
 	# Module imports
-	from config.init import create_config_dir
+	from amanuensis.config.init import create_config_dir
 
 	# Verify arguments
 	if args.refresh and not os.path.isdir(args.config_dir):
@@ -39,13 +39,13 @@ def command_generate_secret(args):
 	been generated.
 	"""
 	import os
-
-	import config
+	# Module imports
+	from amanuensis.config import json_rw, logger
 
 	secret_key = os.urandom(32)
-	with config.json_rw("config.json") as cfg:
+	with json_rw("config.json") as cfg:
 		cfg['secret_key'] = secret_key.hex()
-	config.logger.info("Regenerated Flask secret key")
+	logger.info("Regenerated Flask secret key")
 
 
 @add_argument("-a", "--address", default="127.0.0.1")
@@ -57,13 +57,13 @@ def command_run(args):
 	The default Flask server is not secure, and should
 	only be used for development.
 	"""
-	import server
-	import config
+	from amanuensis.server import app
+	from amanuensis.config import get, logger
 
-	if config.get("secret_key") is None:
-		config.logger.error("Can't run server without a secret_key. Run generate-secret first")
+	if get("secret_key") is None:
+		logger.error("Can't run server without a secret_key. Run generate-secret first")
 		return -1
-	server.app.run(host=args.address, port=args.port)
+	app.run(host=args.address, port=args.port)
 
 
 @add_argument("--get", metavar="PATHSPEC", dest="get",
@@ -78,16 +78,17 @@ def command_config(args):
 	a dot-separated sequence of keys.
 	"""
 	import json
-	import config
+	# Module imports
+	from amanuensis.config import json_ro, json_rw, logger
 
 	if args.get and args.set:
-		config.logger.error("Specify one of --get and --set")
+		logger.error("Specify one of --get and --set")
 		return -1
 
 	if args.get:
-		with config.json_ro('config.json') as cfg:
+		with json_ro('config.json') as cfg:
 			config_get(cfg, args.get)
 
 	if args.set:
-		with config.json_rw('config.json') as cfg:
+		with json_rw('config.json') as cfg:
 			config_set("config", cfg, args.set)

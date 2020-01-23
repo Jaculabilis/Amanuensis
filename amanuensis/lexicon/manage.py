@@ -9,10 +9,10 @@ import shutil
 import time
 import uuid
 
-import config
-from config.loader import AttrOrderedDict
-import lexicon
-import resources
+from amanuensis.config import prepend, json_rw, json_ro, logger
+from amanuensis.config.loader import AttrOrderedDict
+from amanuensis.lexicon import LexiconModel
+from amanuensis.resources import get_stream
 
 def valid_name(name):
 	"""
@@ -34,28 +34,28 @@ def create_lexicon(name, editor):
 
 	# Create the lexicon directory and initialize it with a blank lexicon
 	lid = uuid.uuid4().hex
-	lex_dir = config.prepend("lexicon", lid)
+	lex_dir = prepend("lexicon", lid)
 	os.mkdir(lex_dir)
-	with resources.get_stream("lexicon.json") as s:
-		with open(config.prepend(lex_dir, 'config.json'), 'wb') as f:
+	with get_stream("lexicon.json") as s:
+		with open(prepend(lex_dir, 'config.json'), 'wb') as f:
 			f.write(s.read())
 
 	# Fill out the new lexicon
-	with config.json_rw(lex_dir, 'config.json') as cfg:
+	with json_rw(lex_dir, 'config.json') as cfg:
 		cfg['lid'] = lid
 		cfg['name'] = name
 		cfg['editor'] = editor.uid
 		cfg['time']['created'] = int(time.time())
 
 	# Update the index with the new lexicon
-	with config.json_rw('lexicon', 'index.json') as index:
+	with json_rw('lexicon', 'index.json') as index:
 		index[name] = lid
 
 	# Load the Lexicon and log creation
-	l = lexicon.LexiconModel(lid)
+	l = LexiconModel(lid)
 	l.log("Lexicon created")
 
-	config.logger.info("Created Lexicon {0.name}, ed. {1.displayname} ({0.id})".format(
+	logger.info("Created Lexicon {0.name}, ed. {1.displayname} ({0.id})".format(
 		l, editor))
 
 	# Add the editor
@@ -82,7 +82,7 @@ def delete_lexicon(lex, purge=False):
 		raise ValueError("Invalid lexicon: '{}'".format(lex))
 	
 	# Delete the lexicon from the index
-	with config.json_rw('lexicon', 'index.json') as j:
+	with json_rw('lexicon', 'index.json') as j:
 		if lex.id in j:
 			del j[lex.id]
 
@@ -91,7 +91,7 @@ def delete_lexicon(lex, purge=False):
 		raise NotImplementedError()
 
 	# Delete the lexicon config
-	lex_path = config.prepend('lexicon', lex.id)
+	lex_path = prepend('lexicon', lex.id)
 	shutil.rmtree(lex_path)
 
 
@@ -100,11 +100,11 @@ def get_all_lexicons():
 	Loads each lexicon in the lexicon index
 	"""
 	# Get all the lexicon ids in the index
-	with config.json_ro('lexicon', 'index.json') as index:
+	with json_ro('lexicon', 'index.json') as index:
 		lids = list(index.values())
 
 	# Load all of the lexicons
-	lexes = list(map(lambda id: lexicon.LexiconModel.by(lid=id), lids))
+	lexes = list(map(lambda id: LexiconModel.by(lid=id), lids))
 
 	return lexes
 
@@ -145,7 +145,7 @@ def add_player(lex, player):
 		raise ValueError("Invalid player: '{}'".format(player))
 
 	# Idempotently add player
-	with config.json_rw(lex.config_path) as cfg:
+	with json_rw(lex.config_path) as cfg:
 		if player.id not in cfg.join.joined:
 			cfg.join.joined.append(player.id)
 			# Log to the lexicon's log
@@ -165,7 +165,7 @@ def remove_player(lex, player):
 		raise ValueError("Can't remove the editor '{}' from lexicon '{}'".format(player.username, lex.name))
 
 	# Idempotently remove player
-	with config.json_rw(lex.config_path) as cfg:
+	with json_rw(lex.config_path) as cfg:
 		if player.id in cfg.join.joined:
 			cfg.join.joined.remove(player.id)
 
@@ -190,7 +190,7 @@ def add_character(lex, player, charinfo={}):
 		raise ValueError("Duplicate character name: '{}'".format(charinfo))
 
 	# Load the character template
-	with resources.get_stream('character.json') as template:
+	with get_stream('character.json') as template:
 		character = json.load(template, object_pairs_hook=AttrOrderedDict)
 
 	# Fill out the character's information
@@ -200,7 +200,7 @@ def add_character(lex, player, charinfo={}):
 	character.signature = charinfo.get("signature") or ("~" + character.name)
 
 	# Add the character to the lexicon
-	with config.json_rw(lex.config_path) as cfg:
+	with json_rw(lex.config_path) as cfg:
 		cfg.character.new(character.cid, character)
 
 
@@ -221,5 +221,5 @@ def delete_character(lex, charname):
 	char = matches[0]
 
 	# Remove character from character list
-	with config.json_rw(lex.config_path) as cfg:
+	with json_rw(lex.config_path) as cfg:
 		del cfg.character[char.cid]

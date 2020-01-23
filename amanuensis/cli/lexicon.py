@@ -1,4 +1,4 @@
-from cli.helpers import (
+from amanuensis.cli.helpers import (
 	add_argument, no_argument, requires_lexicon, requires_username,
 	config_get, config_set, CONFIG_GET_ROOT_VALUE)
 
@@ -17,9 +17,9 @@ def command_create(args):
 	settings are as desired before opening the lexicon for player joins.
 	"""
 	# Module imports
-	from config import logger
-	from lexicon.manage import valid_name, create_lexicon
-	from user import UserModel
+	from amanuensis.config import logger
+	from amanuensis.lexicon.manage import valid_name, create_lexicon
+	from amanuensis.user import UserModel
 
 	# Verify arguments
 	if not valid_name(args.lexicon):
@@ -42,9 +42,9 @@ def command_delete(args):
 	Delete a lexicon and optionally its data
 	"""
 	# Module imports
-	from config import logger
-	from lexicon import LexiconModel
-	from lexicon.manage import delete_lexicon
+	from amanuensis.config import logger
+	from amanuensis.lexicon import LexiconModel
+	from amanuensis.lexicon.manage import delete_lexicon
 
 	# Verify arguments
 	lex = LexiconModel.by(name=args.lexicon)
@@ -63,7 +63,7 @@ def command_list(args):
 	List all lexicons and their statuses
 	"""
 	# Module imports
-	from lexicon.manage import get_all_lexicons
+	from amanuensis.lexicon.manage import get_all_lexicons
 
 	# Internal call
 	lexicons = get_all_lexicons()
@@ -91,8 +91,8 @@ def command_config(args):
 	Interact with a lexicon's config
 	"""
 	# Module imports
-	from config import logger, json_ro, json_rw
-	from lexicon import LexiconModel
+	from amanuensis.config import logger, json_ro, json_rw
+	from amanuensis.lexicon import LexiconModel
 
 	# Verify arguments
 	if args.get and args.set:
@@ -123,10 +123,10 @@ def command_player_add(args):
 	Add a player to a lexicon
 	"""
 	# Module imports
-	from config import logger
-	from lexicon import LexiconModel
-	from lexicon.manage import add_player
-	from user import UserModel
+	from amanuensis.config import logger
+	from amanuensis.lexicon import LexiconModel
+	from amanuensis.lexicon.manage import add_player
+	from amanuensis.user import UserModel
 
 	# Verify arguments
 	u = UserModel.by(name=args.username)
@@ -152,10 +152,10 @@ def command_player_remove(args):
 	they control but does not delete any character data.
 	"""
 	# Module imports
-	from config import logger
-	from lexicon import LexiconModel
-	from lexicon.manage import remove_player
-	from user import UserModel
+	from amanuensis.config import logger
+	from amanuensis.lexicon import LexiconModel
+	from amanuensis.lexicon.manage import remove_player
+	from amanuensis.user import UserModel
 
 	# Verify arguments
 	u = UserModel.by(name=args.username)
@@ -181,8 +181,8 @@ def command_player_list(args):
 	"""
 	import json
 	# Module imports
-	from lexicon import LexiconModel
-	from user import UserModel
+	from amanuensis.lexicon import LexiconModel
+	from amanuensis.user import UserModel
 
 	# Verify arguments
 	lex = LexiconModel.by(name=args.lexicon)
@@ -209,10 +209,10 @@ def command_char_create(args):
 	The specified player will be set as the character's player.
 	"""
 	# Module imports
-	from config import logger
-	from lexicon import LexiconModel
-	from lexicon.manage import add_character
-	from user import UserModel
+	from amanuensis.config import logger
+	from amanuensis.lexicon import LexiconModel
+	from amanuensis.lexicon.manage import add_character
+	from amanuensis.user import UserModel
 
 	# Verify arguments
 	u = UserModel.by(name=args.username)
@@ -223,7 +223,7 @@ def command_char_create(args):
 	if lex is None:
 		logger.error("Could not find lexicon '{}'".format(args.lexicon))
 		return -1
-	# u in lx
+	# u in lx TODO
 
 	# Internal call
 	add_character(lex, u, {"name": args.charname})
@@ -239,9 +239,9 @@ def command_char_delete(args):
 	they have contributed rather than deleting it.
 	"""
 	# Module imports
-	from config import logger
-	from lexicon import LexiconModel
-	from lexicon.manage import delete_character
+	from amanuensis.config import logger
+	from amanuensis.lexicon import LexiconModel
+	from amanuensis.lexicon.manage import delete_character
 
 	# Verify arguments
 	lex = LexiconModel.by(name=args.lexicon)
@@ -259,7 +259,7 @@ def command_char_list(args):
 	"""
 	import json
 	# Module imports
-	from lexicon import LexiconModel
+	from amanuensis.lexicon import LexiconModel
 
 	# Verify arguments
 	lex = LexiconModel.by(name=args.lexicon)
@@ -291,4 +291,7 @@ def command_publish_turn(args):
 	The --force flag bypasses the publish.quorum and publish.block_on_ready
 	settings.
 	"""
+	# Module imports
+	from amanuensis.config import logger
+
 	raise NotImplementedError() # TODO

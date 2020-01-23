@@ -4,8 +4,8 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired
 from flask_login import current_user, login_user, logout_user, login_required
 
-import config
-from user import UserModel
+from amanuensis.config import logger
+from amanuensis.user import UserModel
 
 class LoginForm(FlaskForm):
 	username = StringField('Username', validators=[DataRequired()])
@@ -30,7 +30,7 @@ def get_bp(login_manager):
 			if u is not None and u.check_password(form.password.data):
 				remember_me = form.remember.data
 				login_user(u, remember=remember_me)
-				config.logger.info("Logged in user '{}' ({})".format(
+				logger.info("Logged in user '{}' ({})".format(
 					u.username, u.uid))
 				return redirect(url_for('home.home'))
 			flash("Login not recognized")

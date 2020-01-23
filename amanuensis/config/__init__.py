@@ -4,9 +4,9 @@ import logging
 import os
 
 # Module imports
-from errors import MissingConfigError, MalformedConfigError
-import config.init
-import config.loader
+from amanuensis.errors import MissingConfigError, MalformedConfigError
+import amanuensis.config.init
+import amanuensis.config.loader
 
 
 # Environment variable name constants
@@ -31,10 +31,10 @@ def init_config(args):
 	"""
 	global CONFIG_DIR, GLOBAL_CONFIG, logger
 	CONFIG_DIR = args.config_dir
-	config.init.verify_config_dir(CONFIG_DIR)
-	with config.loader.json_ro(os.path.join(CONFIG_DIR, "config.json")) as cfg:
+	amanuensis.config.init.verify_config_dir(CONFIG_DIR)
+	with amanuensis.config.loader.json_ro(os.path.join(CONFIG_DIR, "config.json")) as cfg:
 		GLOBAL_CONFIG = cfg
-	config.init.init_logging(args, GLOBAL_CONFIG['logging'])
+	amanuensis.config.init.init_logging(args, GLOBAL_CONFIG['logging'])
 	logger = logging.getLogger("amanuensis")
 
 def get(key):
@@ -47,13 +47,13 @@ def prepend(*path):
 	return joined
 
 def open_sh(*path, mode):
-	return config.loader.open_sh(prepend(*path), mode)
+	return amanuensis.config.loader.open_sh(prepend(*path), mode)
 
 def open_ex(*path, mode):
-	return config.loader.open_ex(prepend(*path), mode)
+	return amanuensis.config.loader.open_ex(prepend(*path), mode)
 
 def json_ro(*path):
-	return config.loader.json_ro(prepend(*path))
+	return amanuensis.config.loader.json_ro(prepend(*path))
 
 def json_rw(*path):
-	return config.loader.json_rw(prepend(*path))
+	return amanuensis.config.loader.json_rw(prepend(*path))

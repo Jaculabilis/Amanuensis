@@ -6,10 +6,10 @@ import os
 import shutil
 
 # Module imports
-from errors import MissingConfigError, MalformedConfigError
-import config
-from config.loader import json_ro
-import resources
+from amanuensis.errors import MissingConfigError, MalformedConfigError
+from amanuensis.config.loader import json_ro, json_rw
+from amanuensis.resources import get_stream
+
 
 def create_config_dir(config_dir, refresh=False):
 	"""
@@ -18,14 +18,15 @@ def create_config_dir(config_dir, refresh=False):
 	from collections import OrderedDict
 	import fcntl
 
-	path = config.prepend
+	def prepend(*path):
+		joined = os.path.join(*path)
+		if not joined.startswith(config_dir):
+			joined = os.path.join(config_dir, joined)
+		return joined
 
 	# Create the directory if it doesn't exist.
 	if not os.path.isdir(config_dir):
 		os.mkdir(config_dir)
-
-	# Initialize the config dir without verification
-	config.CONFIG_DIR = config_dir
 
 	# The directory should be empty if we're not updating an existing one.
 	if len(os.listdir(config_dir)) > 0 and not refresh:
@@ -33,8 +34,8 @@ def create_config_dir(config_dir, refresh=False):
 		return -1
 
 	# Update or create global config.
-	def_cfg = resources.get_stream("global.json")
-	global_config_path = path("config.json")
+	def_cfg = get_stream("global.json")
+	global_config_path = prepend("config.json")
 	if refresh and os.path.isfile(global_config_path):
 		# We need to write an entirely different ordereddict to the config
 		# file, so we mimic the config.loader functionality manually.
@@ -56,34 +57,34 @@ def create_config_dir(config_dir, refresh=False):
 			cfg_file.truncate()
 			fcntl.lockf(cfg_file, fcntl.LOCK_UN)
 	else:
-		with open(path("config.json"), 'wb') as f:
+		with open(prepend("config.json"), 'wb') as f:
 			f.write(def_cfg.read())
 
 	# Ensure pidfile exists.
-	if not os.path.isfile(path("pid")):
-		with open(path("pid"), 'w') as f:
+	if not os.path.isfile(prepend("pid")):
+		with open(prepend("pid"), 'w') as f:
 			f.write(str(os.getpid()))
 
 	# Ensure lexicon subdir exists.
-	if not os.path.isdir(path("lexicon")):
-		os.mkdir(path("lexicon"))
-	if not os.path.isfile(path("lexicon", "index.json")):
-		with open(path("lexicon", "index.json"), 'w') as f:
+	if not os.path.isdir(prepend("lexicon")):
+		os.mkdir(prepend("lexicon"))
+	if not os.path.isfile(prepend("lexicon", "index.json")):
+		with open(prepend("lexicon", "index.json"), 'w') as f:
 			json.dump({}, f)
 
 	# Ensure user subdir exists.
-	if not os.path.isdir(path("user")):
-		os.mkdir(path("user"))
-	if not os.path.isfile(path('user', 'index.json')):
-		with open(path('user', 'index.json'), 'w') as f:
+	if not os.path.isdir(prepend("user")):
+		os.mkdir(prepend("user"))
+	if not os.path.isfile(prepend('user', 'index.json')):
+		with open(prepend('user', 'index.json'), 'w') as f:
 			json.dump({}, f)
 
 	if refresh:
 		for dir_name in ('lexicon', 'user'):
 			# Clean up unindexed folders
-			with config.json_ro(dir_name, 'index.json') as index:
+			with json_ro(prepend(dir_name, 'index.json')) as index:
 				known = list(index.values())
-			entries = os.listdir(path(dir_name))
+			entries = os.listdir(prepend(dir_name))
 			for dir_entry in entries:
 				if dir_entry == "index.json":
 					continue
@@ -91,12 +92,12 @@ def create_config_dir(config_dir, refresh=False):
 					continue
 				print("Removing unindexed folder: '{}/{}'"
 					.format(dir_name, dir_entry))
-				shutil.rmtree(path(dir_name, dir_entry))
+				shutil.rmtree(prepend(dir_name, dir_entry))
 
 			# Remove orphaned index listings
-			with config.json_rw(dir_name, 'index.json') as index:
+			with json_rw(prepend(dir_name, 'index.json')) as index:
 				for name, entry in index.items():
-					if not os.path.isdir(path(dir_name, entry)):
+					if not os.path.isdir(prepend(dir_name, entry)):
 						print("Removing stale {} index entry '{}: {}'"
 							.format(dir_name, name, entry))
 						del index[name]
@@ -115,7 +116,7 @@ def verify_config_dir(config_dir):
 	if not os.path.isfile(global_config_path):
 		raise MissingConfigError("Config directory missing global config file: {}".format(config_dir))
 	# Check that global config file has all the default settings
-	def_cfg_s = resources.get_stream("global.json")
+	def_cfg_s = get_stream("global.json")
 	def_cfg = json.load(def_cfg_s)
 	with json_ro(global_config_path) as global_config_file:
 		for key in def_cfg.keys():

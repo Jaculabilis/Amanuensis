@@ -6,10 +6,10 @@ import uuid
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from errors import InternalMisuseError, MissingConfigError, IndexMismatchError
-import config
-import resources
-import lexicon.manage
+from amanuensis.errors import InternalMisuseError, MissingConfigError, IndexMismatchError
+from amanuensis.config import prepend, json_ro, json_rw
+from amanuensis.resources import get_stream
+from amanuensis.lexicon.manage import get_all_lexicons
 
 class UserModel(UserMixin):
 	@staticmethod
@@ -26,21 +26,21 @@ class UserModel(UserMixin):
 		if not uid and not name:
 			raise ValueError("One of uid or name must be not None")
 		if not uid:
-			with config.json_ro('user', 'index.json') as index:
+			with json_ro('user', 'index.json') as index:
 				uid = index.get(name)
 		if not uid:
 			return None
-		if not os.path.isdir(config.prepend('user', uid)):
+		if not os.path.isdir(prepend('user', uid)):
 			raise IndexMismatchError("username={} uid={}".format(name, uid))
-		if not os.path.isfile(config.prepend('user', uid, 'config.json')):
+		if not os.path.isfile(prepend('user', uid, 'config.json')):
 			raise MissingConfigError("uid={}".format(uid))
 		return UserModel(uid)
 
 	def __init__(self, uid):
 		"""User model initializer, assume all checks were done by by()"""
 		self.id = str(uid) # Flask-Login checks for this
-		self.config_path = config.prepend('user', uid, 'config.json')
-		with config.json_ro(self.config_path) as j:
+		self.config_path = prepend('user', uid, 'config.json')
+		with json_ro(self.config_path) as j:
 			self.config = j
 
 	def __getattr__(self, key):
@@ -50,17 +50,17 @@ class UserModel(UserMixin):
 
 	def set_password(self, pw):
 		h = generate_password_hash(pw)
-		with config.json_rw(self.config_path) as j:
+		with json_rw(self.config_path) as j:
 			j['password'] = h
 
 	def check_password(self, pw):
-		with config.json_ro(self.config_path) as j:
+		with json_ro(self.config_path) as j:
 			return check_password_hash(j['password'], pw)
 
 	def lexicons_in(self):
 		return [
 			lex
-			for lex in lexicon.manage.get_all_lexicons()
+			for lex in get_all_lexicons()
 			if self.id in lex.join.joined
 		]
 
@@ -87,14 +87,14 @@ def create_user(username, displayname, email):
 
 	# Create the user directory and initialize it with a blank user
 	uid = uuid.uuid4().hex
-	user_dir = config.prepend("user", uid)
+	user_dir = prepend("user", uid)
 	os.mkdir(user_dir)
-	with resources.get_stream("user.json") as s:
-		with open(config.prepend(user_dir, 'config.json'), 'wb') as f:
+	with get_stream("user.json") as s:
+		with open(prepend(user_dir, 'config.json'), 'wb') as f:
 			f.write(s.read())
 
 	# Fill out the new user
-	with config.json_rw(user_dir, 'config.json') as cfg:
+	with json_rw(user_dir, 'config.json') as cfg:
 		cfg.uid = uid
 		cfg.username = username
 		cfg.displayname = displayname
@@ -102,7 +102,7 @@ def create_user(username, displayname, email):
 		cfg.created = int(time.time())
 
 	# Update the index with the new user
-	with config.json_rw('user', 'index.json') as index:
+	with json_rw('user', 'index.json') as index:
 		index[username] = uid
 
 	# Set a temporary password

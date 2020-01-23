@@ -43,10 +43,10 @@ def requires_lexicon(command):
 			subp_val = hasattr(cmd_args, "lexicon") and getattr(cmd_args, "lexicon")
 			val = subp_val or base_val or None
 			if not val:
-				import config
-				config.logger.error("This command requires specifying a lexicon")
+				from amanuensis.config import logger
+				logger.error("This command requires specifying a lexicon")
 				return -1
-			from lexicon import LexiconModel
+			from amanuensis.lexicon import LexiconModel
 			cmd_args.lexicon = val#LexiconModel.by(name=val).name
 			command(cmd_args)
 	augmented_command.__dict__['wrapper'] = True
@@ -64,10 +64,10 @@ def requires_username(command):
 			subp_val = hasattr(cmd_args, "username") and getattr(cmd_args, "username")
 			val = subp_val or base_val or None
 			if not val:
-				import config
-				config.logger.error("This command requires specifying a user")
+				from amanuensis.config import logger
+				logger.error("This command requires specifying a user")
 				return -1
-			from user import UserModel
+			from amanuensis.user import UserModel
 			cmd_args.username = val#UserModel.by(name=val).name
 			command(cmd_args)
 	augmented_command.__dict__['wrapper'] = True
@@ -84,7 +84,7 @@ def config_get(cfg, pathspec):
 	path is the full pathspec, unsplit
 	"""
 	import json
-	from config import logger
+	from amanuensis.config import logger
 
 	if pathspec is CONFIG_GET_ROOT_VALUE:
 		path = []
@@ -105,7 +105,7 @@ def config_set(obj_id, cfg, set_tuple):
 	set_tuple is a tuple of the pathspec and the value
 	"""
 	import json
-	from config import logger
+	from amanuensis.config import logger
 	pathspec, value = set_tuple
 	if not pathspec:
 		logger.error("Path must be non-empty")

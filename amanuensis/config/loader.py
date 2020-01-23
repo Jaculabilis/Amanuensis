@@ -5,7 +5,7 @@ import json
 import os
 
 # Module imports
-from errors import ReadOnlyError
+from amanuensis.errors import ReadOnlyError
 
 
 class AttrOrderedDict(OrderedDict):

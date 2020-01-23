@@ -6,9 +6,7 @@ from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from wtforms import TextAreaField, SubmitField, StringField
 
-import config
-import user
-import lexicon
+from amanuensis.config import json_ro
 
 class AdminDashboardForm(FlaskForm):
 	lexiconName = StringField("Lexicon name")
@@ -42,10 +40,10 @@ def get_bp():
 
 		if form.lexiconName.data:
 			lid = None
-			with config.json_ro('lexicon', 'index.json') as index:
+			with json_ro('lexicon', 'index.json') as index:
 				lid = index.get(form.lexiconName.data)
 			if lid is not None:
-				with config.json_ro('lexicon', lid, 'config.json') as cfg:
+				with json_ro('lexicon', lid, 'config.json') as cfg:
 					form.configText.data = json.dumps(cfg, indent=2)
 					form.lexiconName.data = ""
 		elif form.configText.data:
