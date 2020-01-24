@@ -8,18 +8,8 @@ from wtforms import TextAreaField, SubmitField, StringField
 
 from amanuensis.config import json_ro
 from amanuensis.lexicon import LexiconModel
+from amanuensis.server.helpers import admin_required
 from amanuensis.user import UserModel
-
-
-def admin_required(route):
-	"""Requires the user to be an admin"""
-	@wraps(route)
-	def admin_route(*args, **kwargs):
-		if not current_user.is_admin:
-			flash("Access is forbidden")
-			return redirect(url_for('home.home'))
-		return route(*args, **kwargs)
-	return admin_route
 
 
 def get_bp():

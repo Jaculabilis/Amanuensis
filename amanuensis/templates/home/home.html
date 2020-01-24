@@ -4,9 +4,11 @@
 
 {% block main %}
 <h1>Welcome to Amanuensis!</h1>
-<p>
-	Amanuensis is a hub for playing Lexicon, the encyclopedia RPG. Log in to access your Lexicon games. If you do not have an account, contact the administrator.
-</p>
+<p>Amanuensis is a hub for playing Lexicon, the encyclopedia RPG. Log in to access your Lexicon games. If you do not have an account, contact the administrator.</p>
+
+{% for message in get_flashed_messages() %}
+<span style="color:#ff0000">{{ message }}</span><br>
+{% endfor %}
 
 {% if current_user.is_authenticated %}
 {% set lexicons = current_user.lexicons_in() %}

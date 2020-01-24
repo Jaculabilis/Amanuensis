@@ -9,18 +9,8 @@ from wtforms import TextAreaField, SubmitField
 from amanuensis.config import json_ro, open_ex
 from amanuensis.config.loader import ReadOnlyOrderedDict
 from amanuensis.lexicon import LexiconModel
+from amanuensis.server.helpers import lexicon_param, player_required
 from amanuensis.user import UserModel
-
-
-def lexicon_param(route):
-	@wraps(route)
-	def with_lexicon(name):
-		g.lexicon = LexiconModel.by(name=name)
-		if g.lexicon is None:
-			flash("Couldn't find a lexicon with the name '{}'".format(name))
-			return redirect(url_for("home.home"))
-		return route(name)
-	return with_lexicon
 
 
 class LexiconConfigForm(FlaskForm):
