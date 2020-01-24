@@ -107,6 +107,7 @@ def command_config(args):
 			config_set(u.id, cfg, args.set)
 
 @add_argument("--username", help="The user to change password for")
+@add_argument("--password", help="The password to set. Not recommended")
 def command_passwd(args):
 	"""
 	Set a user's password
@@ -123,5 +124,5 @@ def command_passwd(args):
 	if u is None:
 		logger.error("No user with username '{}'".format(args.username))
 		return -1
-	pw = getpass.getpass("Password: ")
+	pw = args.password or getpass.getpass("Password: ")
 	u.set_password(pw)
