@@ -50,10 +50,10 @@ def get_bp():
 	def session(name):
 		return render_template('lexicon/session.html')
 
-	@bp.route('/session/edit/', methods=['GET', 'POST'])
+	@bp.route('/session/settings/', methods=['GET', 'POST'])
 	@login_required
 	@lexicon_param
-	def session_edit(name):
+	def settings(name):
 		# Restrict to editor
 		if not current_user.id == g.lexicon.editor:
 			flash("Access is forbidden")
@@ -65,7 +65,7 @@ def get_bp():
 		if not form.is_submitted():
 			with json_ro(g.lexicon.config_path) as cfg:
 				form.configText.data = json.dumps(cfg, indent=2)
-			return render_template("lexicon/session_edit.html", form=form)
+			return render_template("lexicon/settings.html", form=form)
 
 		if form.validate():
 			# Check input is valid json
@@ -73,7 +73,7 @@ def get_bp():
 				cfg = json.loads(form.configText.data, object_pairs_hook=ReadOnlyOrderedDict)
 			except:
 				flash("Invalid JSON")
-				return render_template("lexicon/session_edit.html", form=form)
+				return render_template("lexicon/settings.html", form=form)
 			# Check input has all the required fields
 			# TODO
 			# Write the new config
@@ -81,9 +81,9 @@ def get_bp():
 			with open_ex(g.lexicon.config_path, mode='w') as f:
 				json.dump(cfg, f, indent='\t')
 				flash("Config updated")
-			return redirect(url_for('lexicon.session_edit', name=name))
+			return redirect(url_for('lexicon.settings', name=name))
 
-		return render_template("lexicon/session_edit.html", form=form)
+		return render_template("lexicon/settings.html", form=form)
 
 	@bp.route('/statistics/', methods=['GET'])
 	@login_required

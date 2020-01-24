@@ -2,14 +2,19 @@
 {% set current_page = "session" %}
 {% block title %}Session | {{ lexicon_title }}{% endblock %}
 
-{% block main %}
-<h1>Session</h1>
-{% endblock %}
-{% set template_content_blocks = [self.main()] %}
+{% set template_content_blocks = [] %}
 
 {% if current_user.id == g.lexicon.editor %}
-{% block editor_edit %}
-<a href="{{ url_for('lexicon.session_edit', name=g.lexicon.name) }}" style="display:block; text-align:center;">Edit lexicon settings</a>
+{% block bl_editor %}
+<p>Editor actions</p>
+<ul>
+	<li><a href="{{ url_for('lexicon.settings', name=g.lexicon.name) }}">Edit lexicon settings</a></li>
+</ul>
 {% endblock %}
-{% set template_content_blocks = [self.editor_edit()] + template_content_blocks %}
+{% set template_content_blocks = template_content_blocks + [self.bl_editor()] %}
 {% endif %}
+
+{% block main %}
+<p>Placeholder text for session page</p>
+{% endblock %}
+{% set template_content_blocks = template_content_blocks + [self.main()] %}
