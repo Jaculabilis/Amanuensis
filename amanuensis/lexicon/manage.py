@@ -145,11 +145,15 @@ def add_player(lex, player):
 		raise ValueError("Invalid player: '{}'".format(player))
 
 	# Idempotently add player
+	added = False
 	with json_rw(lex.config_path) as cfg:
 		if player.id not in cfg.join.joined:
 			cfg.join.joined.append(player.id)
-			# Log to the lexicon's log
-			lex.log("Player '{0.username}' joined ({0.id})".format(player))
+			added = True
+	
+	# Log to the lexicon's log
+	if added:
+		lex.log("Player '{0.username}' joined ({0.id})".format(player))
 
 
 def remove_player(lex, player):
@@ -200,9 +204,14 @@ def add_character(lex, player, charinfo={}):
 	character.signature = charinfo.get("signature") or ("~" + character.name)
 
 	# Add the character to the lexicon
+	added = False
 	with json_rw(lex.config_path) as cfg:
 		cfg.character.new(character.cid, character)
+		added = True
 
+	# Log addition
+	if added:
+			lex.log("Character '{0.name}' created ({0.cid})".format(character))
 
 def delete_character(lex, charname):
 	"""
