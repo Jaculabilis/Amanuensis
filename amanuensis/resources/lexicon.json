@@ -13,10 +13,11 @@
 		"current": null,
 		"start": 1,
 		"max": 8,
-		"assigned_index": {
+		"assignment": {
 		}
 	},
 	"join": {
+		"public": true,
 		"open": false,
 		"password": null,
 		"max_players": 4,
