@@ -7,11 +7,9 @@ from flask_wtf import FlaskForm
 from wtforms import TextAreaField, SubmitField, StringField
 
 from amanuensis.config import json_ro
+from amanuensis.lexicon import LexiconModel
+from amanuensis.user import UserModel
 
-class AdminDashboardForm(FlaskForm):
-	lexiconName = StringField("Lexicon name")
-	configText = TextAreaField("Config file")
-	submit = SubmitField("Submit")
 
 def admin_required(route):
 	"""Requires the user to be an admin"""
@@ -22,6 +20,7 @@ def admin_required(route):
 			return redirect(url_for('home.home'))
 		return route(*args, **kwargs)
 	return admin_route
+
 
 def get_bp():
 	"""Create a blueprint for pages outside of a specific lexicon"""
@@ -34,22 +33,16 @@ def get_bp():
 	@bp.route('/admin/', methods=['GET', 'POST'])
 	@admin_required
 	def admin():
-		form = AdminDashboardForm()
-		if not form.is_submitted():
-			return render_template('home/admin.html', form=form)
+		users = []
+		with json_ro('user', 'index.json') as index:
+			for name, uid in index.items():
+				users.append(UserModel.by(uid=uid))
 
-		if form.lexiconName.data:
-			lid = None
-			with json_ro('lexicon', 'index.json') as index:
-				lid = index.get(form.lexiconName.data)
-			if lid is not None:
-				with json_ro('lexicon', lid, 'config.json') as cfg:
-					form.configText.data = json.dumps(cfg, indent=2)
-					form.lexiconName.data = ""
-		elif form.configText.data:
-			return "Update config"
-		else:
-			pass
-		return render_template('home/admin.html', form=form)
+		lexicons = []
+		with json_ro('lexicon', 'index.json') as index:
+			for name, lid in index.items():
+				lexicons.append(LexiconModel.by(lid=lid))
+
+		return render_template('home/admin.html', users=users, lexicons=lexicons)
 
 	return bp

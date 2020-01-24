@@ -1,0 +1,18 @@
+{% macro dashboard_lexicon_item(lexicon) %}
+<div class="dashboard-lexicon-item dashboard-lexicon-{{ lexicon.status() }}">
+	<p>
+		<span class="dashboard-lexicon-item-title">
+			<a href="{{ url_for('lexicon.session', name=lexicon.name) }}">Lexicon {{ lexicon.name }}</a>
+		</span>
+		[{{ lexicon.status().capitalize() }}]
+	</p>
+	<p><i>{{ lexicon.prompt }}</i></p>
+</div>
+{% endmacro %}
+
+{% macro dashboard_user_item(user) %}
+<div class="dashboard-lexicon-item">
+	<p><b>{{ user.username }}</b> {% if user.username != user.displayname %} / {{ user.displayname }}{% endif %} ({{user.uid}})</p>
+	<p>Last activity: {{ user.last_activity }} &mdash; Last login: {{ user.last_login }}</p>
+</div>
+{% endmacro %}

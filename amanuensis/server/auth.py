@@ -1,10 +1,12 @@
+import time
+
 from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired
 from flask_login import current_user, login_user, logout_user, login_required
 
-from amanuensis.config import logger
+from amanuensis.config import logger, json_rw
 from amanuensis.user import UserModel
 
 class LoginForm(FlaskForm):
@@ -30,6 +32,8 @@ def get_bp(login_manager):
 			if u is not None and u.check_password(form.password.data):
 				remember_me = form.remember.data
 				login_user(u, remember=remember_me)
+				with json_rw(u.config_path) as cfg:
+					cfg.last_login = int(time.time())
 				logger.info("Logged in user '{}' ({})".format(
 					u.username, u.uid))
 				return redirect(url_for('home.home'))

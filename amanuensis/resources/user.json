@@ -6,6 +6,8 @@
 	"email": null,
 	"password": null,
 	"created": null,
+	"last_login": null,
+	"last_activity": null,
 	"new_password_required": true,
 	"is_admin": false
 }
