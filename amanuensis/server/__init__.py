@@ -11,7 +11,10 @@ from amanuensis.server.lexicon import get_bp as get_lex_bp
 
 # Flask app init
 static_root = os.path.abspath(get("static_root"))
-app = Flask(__name__, template_folder="../templates", static_folder=static_root)
+app = Flask(
+	__name__,
+	template_folder="../templates",
+	static_folder=static_root)
 app.secret_key = bytes.fromhex(get('secret_key'))
 app.jinja_options['trim_blocks'] = True
 app.jinja_options['lstrip_blocks'] = True

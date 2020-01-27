@@ -14,11 +14,13 @@ def command_create(args):
 	import json
 	# Module imports
 	from amanuensis.config import logger, json_ro
-	from amanuensis.user import UserModel, valid_username, valid_email, create_user
+	from amanuensis.user import (
+		UserModel, valid_username, valid_email, create_user)
 
 	# Verify or query parameters
 	if not valid_username(args.username):
-		logger.error("Invalid username: usernames may only contain alphanumeric characters, dashes, and underscores")
+		logger.error("Invalid username: usernames may only contain alphanumer"
+			"ic characters, dashes, and underscores")
 		return -1
 	if UserModel.by(name=args.username) is not None:
 		logger.error("Invalid username: username is already taken")
@@ -33,7 +35,10 @@ def command_create(args):
 	new_user, tmp_pw = create_user(args.username, args.displayname, args.email)
 	with json_ro(new_user.config_path) as js:
 		print(json.dumps(js, indent=2))
-	print("Username: {}\nUser ID:  {}\nPassword: {}".format(args.username, new_user.uid, tmp_pw))
+	print("Username: {}\nUser ID:  {}\nPassword: {}".format(
+		args.username, new_user.uid, tmp_pw))
+
+	return 0
 
 @add_argument("--id", required=True, help="id of user to delete")
 def command_delete(args):
@@ -42,19 +47,20 @@ def command_delete(args):
 	"""
 	import os
 	# Module imports
-	from amanuensis.config import logger, prepend
+	from amanuensis.config import logger, prepend, json_rw
 
 	user_path = prepend('user', args.id)
 	if not os.path.isdir(user_path):
 		logger.error("No user with that id")
 		return -1
-	else:
-		shutil.rmtree(user_path)
+	shutil.rmtree(user_path)
 	with json_rw('user', 'index.json') as j:
-		if args.id in j:
-			del j[uid]
+		if args.id in j: # TODO this is wrong
+			del j[args.id]
 
 	# TODO
+
+	return 0
 
 @no_argument
 def command_list(args):
@@ -66,12 +72,16 @@ def command_list(args):
 	user_dirs = os.listdir(prepend('user'))
 	users = []
 	for uid in user_dirs:
-		if uid == "index.json": continue
+		if uid == "index.json":
+			continue
 		with json_ro('user', uid, 'config.json') as user:
 			users.append(user)
 	users.sort(key=lambda u: u['username'])
 	for user in users:
-		print("{0}  {1} ({2})".format(user['uid'], user['displayname'], user['username']))
+		print("{0}  {1} ({2})".format(
+			user['uid'], user['displayname'], user['username']))
+
+	return 0
 
 @requires_username
 @add_argument(
@@ -84,7 +94,6 @@ def command_config(args):
 	"""
 	Interact with a user's config
 	"""
-	import json
 	# Module imports
 	from amanuensis.config import logger, json_ro, json_rw
 	from amanuensis.user import UserModel
@@ -106,6 +115,8 @@ def command_config(args):
 		with json_rw('user', u.id, 'config.json') as cfg:
 			config_set(u.id, cfg, args.set)
 
+	return 0
+
 @add_argument("--username", help="The user to change password for")
 @add_argument("--password", help="The password to set. Not recommended")
 def command_passwd(args):
@@ -113,7 +124,6 @@ def command_passwd(args):
 	Set a user's password
 	"""
 	import getpass
-	import os
 	# Module imports
 	from amanuensis.config import logger
 	from amanuensis.user import UserModel
@@ -126,3 +136,5 @@ def command_passwd(args):
 		return -1
 	pw = args.password or getpass.getpass("Password: ")
 	u.set_password(pw)
+
+	return 0

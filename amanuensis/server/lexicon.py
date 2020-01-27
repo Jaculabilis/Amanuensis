@@ -1,4 +1,3 @@
-from functools import wraps
 import json
 
 from flask import Blueprint, render_template, url_for, redirect, g, flash
@@ -6,10 +5,8 @@ from flask_login import login_required, current_user
 
 from amanuensis.config import json_ro, open_ex
 from amanuensis.config.loader import ReadOnlyOrderedDict
-from amanuensis.lexicon import LexiconModel
 from amanuensis.server.forms import LexiconConfigForm
-from amanuensis.server.helpers import lexicon_param, player_required
-from amanuensis.user import UserModel
+from amanuensis.server.helpers import lexicon_param
 
 
 def get_bp():
@@ -54,8 +51,9 @@ def get_bp():
 		if form.validate():
 			# Check input is valid json
 			try:
-				cfg = json.loads(form.configText.data, object_pairs_hook=ReadOnlyOrderedDict)
-			except:
+				cfg = json.loads(form.configText.data,
+					object_pairs_hook=ReadOnlyOrderedDict)
+			except json.decoder.JsonDecodeError:
 				flash("Invalid JSON")
 				return render_template("lexicon/settings.html", form=form)
 			# Check input has all the required fields

@@ -1,6 +1,8 @@
 # Standard library imports
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser
 from functools import wraps
+from json.decoder import JSONDecodeError
+
 
 # These function wrappers allow us to use the same function for executing a
 # command and for configuring it. This keeps command arg configuration close to
@@ -9,69 +11,107 @@ from functools import wraps
 
 def add_argument(*args, **kwargs):
 	"""Passes the given args and kwargs to subparser.add_argument"""
+
 	def argument_adder(command):
-		second_layer = command.__dict__.get('wrapper', False)
 		@wraps(command)
 		def augmented_command(cmd_args):
-			if type(cmd_args) is ArgumentParser:
+			# Add this wrapper's command in the parser pass
+			if isinstance(cmd_args, ArgumentParser):
 				cmd_args.add_argument(*args, **kwargs)
-			if type(cmd_args) is not ArgumentParser or second_layer:
-				command(cmd_args)
+				# If there are more command wrappers, pass through to them
+				if command.__dict__.get('wrapper', False):
+					command(cmd_args)
+				# Parser pass doesn't return a value
+				return None
+
+			# Pass through transparently in the execute pass
+			return command(cmd_args)
+
+		# Mark the command as wrapped so control passes through
 		augmented_command.__dict__['wrapper'] = True
 		return augmented_command
+
 	return argument_adder
+
 
 def no_argument(command):
 	"""Noops for subparsers"""
 	@wraps(command)
 	def augmented_command(cmd_args):
-		if type(cmd_args) is not ArgumentParser:
-			command(cmd_args)
+		# Noop in the parser pass
+		if isinstance(cmd_args, ArgumentParser):
+			return None
+		# Pass through in the execute pass
+		return command(cmd_args)
+
 	return augmented_command
+
 
 # Wrappers for commands requiring lexicon or username options
 
 def requires_lexicon(command):
 	@wraps(command)
 	def augmented_command(cmd_args):
-		if type(cmd_args) is ArgumentParser:
-			cmd_args.add_argument("-n", metavar="LEXICON", dest="lexicon", help="Specify a lexicon to operate on")
+		# Add lexicon argument in parser pass
+		if isinstance(cmd_args, ArgumentParser):
+			cmd_args.add_argument(
+				"-n", metavar="LEXICON", dest="lexicon",
+				help="Specify a lexicon to operate on")
+			# If there are more command wrappers, pass through to them
 			if command.__dict__.get('wrapper', False):
 				command(cmd_args)
-		if type(cmd_args) is Namespace:
-			base_val = hasattr(cmd_args, "tl_lexicon") and getattr(cmd_args, "tl_lexicon")
-			subp_val = hasattr(cmd_args, "lexicon") and getattr(cmd_args, "lexicon")
-			val = subp_val or base_val or None
-			if not val:
-				from amanuensis.config import logger
-				logger.error("This command requires specifying a lexicon")
-				return -1
-			from amanuensis.lexicon import LexiconModel
-			cmd_args.lexicon = val#LexiconModel.by(name=val).name
-			command(cmd_args)
+			# Parser pass doesn't return a value
+			return None
+
+		# Verify lexicon argument in execute pass
+		base_val = (hasattr(cmd_args, "tl_lexicon")
+			and getattr(cmd_args, "tl_lexicon"))
+		subp_val = (hasattr(cmd_args, "lexicon")
+			and getattr(cmd_args, "lexicon"))
+		val = subp_val or base_val or None
+		if not val:
+			from amanuensis.config import logger
+			logger.error("This command requires specifying a lexicon")
+			return -1
+		# from amanuensis.lexicon import LexiconModel
+		cmd_args.lexicon = val#LexiconModel.by(name=val).name TODO
+		return command(cmd_args)
+
 	augmented_command.__dict__['wrapper'] = True
 	return augmented_command
+
 
 def requires_username(command):
 	@wraps(command)
 	def augmented_command(cmd_args):
-		if type(cmd_args) is ArgumentParser:
-			cmd_args.add_argument("-u", metavar="USERNAME", dest="username", help="Specify a user to operate on")
+		# Add user argument in parser pass
+		if isinstance(cmd_args, ArgumentParser):
+			cmd_args.add_argument(
+				"-u", metavar="USERNAME", dest="username",
+				help="Specify a user to operate on")
+			# If there are more command wrappers, pass through to them
 			if command.__dict__.get('wrapper', False):
 				command(cmd_args)
-		if type(cmd_args) is Namespace:
-			base_val = hasattr(cmd_args, "tl_username") and getattr(cmd_args, "tl_lexicon")
-			subp_val = hasattr(cmd_args, "username") and getattr(cmd_args, "username")
-			val = subp_val or base_val or None
-			if not val:
-				from amanuensis.config import logger
-				logger.error("This command requires specifying a user")
-				return -1
-			from amanuensis.user import UserModel
-			cmd_args.username = val#UserModel.by(name=val).name
-			command(cmd_args)
+			# Parser pass doesn't return a value
+			return None
+
+		# Verify user argument in execute pass
+		base_val = (hasattr(cmd_args, "tl_username")
+			and getattr(cmd_args, "tl_lexicon"))
+		subp_val = (hasattr(cmd_args, "username")
+			and getattr(cmd_args, "username"))
+		val = subp_val or base_val or None
+		if not val:
+			from amanuensis.config import logger
+			logger.error("This command requires specifying a user")
+			return -1
+		# from amanuensis.user import UserModel
+		cmd_args.username = val#UserModel.by(name=val).name TODO
+		return command(cmd_args)
+
 	augmented_command.__dict__['wrapper'] = True
 	return augmented_command
+
 
 # Helpers for common command tasks
 
@@ -96,6 +136,7 @@ def config_get(cfg, pathspec):
 			return -1
 		cfg = cfg.get(spec)
 	print(json.dumps(cfg, indent=2))
+	return 0
 
 def config_set(obj_id, cfg, set_tuple):
 	"""
@@ -112,7 +153,7 @@ def config_set(obj_id, cfg, set_tuple):
 	path = pathspec.split('.')
 	try:
 		value = json.loads(value)
-	except:
+	except JSONDecodeError:
 		pass # Leave value as string
 	for spec in path[:-1]:
 		if spec not in cfg:
@@ -126,3 +167,4 @@ def config_set(obj_id, cfg, set_tuple):
 	old_value = cfg[key]
 	cfg[key] = value
 	logger.info("{}.{}: {} -> {}".format(obj_id, pathspec, old_value, value))
+	return 0

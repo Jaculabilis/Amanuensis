@@ -1,10 +1,5 @@
-from functools import wraps
-import json
-
-from flask import Blueprint, render_template, url_for, redirect, flash
-from flask_login import login_required, current_user
-from flask_wtf import FlaskForm
-from wtforms import TextAreaField, SubmitField, StringField
+from flask import Blueprint, render_template
+from flask_login import login_required
 
 from amanuensis.config import json_ro
 from amanuensis.lexicon import LexiconModel
@@ -22,6 +17,7 @@ def get_bp():
 		return render_template('home/home.html')
 
 	@bp.route('/admin/', methods=['GET'])
+	@login_required
 	@admin_required
 	def admin():
 		users = []
@@ -37,6 +33,7 @@ def get_bp():
 		return render_template('home/admin.html', users=users, lexicons=lexicons)
 
 	@bp.route("/admin/create/", methods=['GET', 'POST'])
+	@login_required
 	@admin_required
 	def admin_create():
 		form = LexiconCreateForm()

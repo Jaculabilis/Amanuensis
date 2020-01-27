@@ -7,7 +7,9 @@ from amanuensis.cli.helpers import (
 #
 
 @requires_lexicon
-@add_argument("--editor", "-e", required=True, help="Name of the user who will be editor")
+@add_argument(
+	"--editor", "-e", required=True,
+	help="Name of the user who will be editor")
 def command_create(args):
 	"""
 	Create a lexicon
@@ -33,6 +35,7 @@ def command_create(args):
 
 	# Internal call
 	create_lexicon(args.lexicon, editor)
+	return 0
 
 
 @requires_lexicon
@@ -55,6 +58,7 @@ def command_delete(args):
 	# Internal call
 	delete_lexicon(lex, args.purge)
 	logger.info("Deleted lexicon '{}'".format(args.lexicon))
+	return 0
 
 
 @no_argument
@@ -74,9 +78,11 @@ def command_list(args):
 		elif lex.turn['current'] > lex.turn['max']:
 			statuses.append("{0.lid}  {0.name} ({1})".format(lex, "Completed"))
 		else:
-			statuses.append("{0.lid}  {0.name} (Turn {1}/{2})".format(lex, lex.turn['current'], lex.turn['max']))
+			statuses.append("{0.lid}  {0.name} (Turn {1}/{2})".format(
+				lex, lex.turn['current'], lex.turn['max']))
 	for s in statuses:
 		print(s)
+	return 0
 
 
 @requires_lexicon
@@ -112,6 +118,8 @@ def command_config(args):
 		with json_rw(lex.config_path) as cfg:
 			config_set(lex.id, cfg, args.set)
 
+	return 0
+
 #
 # Player/character commands
 #
@@ -140,6 +148,7 @@ def command_player_add(args):
 
 	# Internal call
 	add_player(lex, u)
+	return 0
 
 
 @requires_lexicon
@@ -172,6 +181,7 @@ def command_player_remove(args):
 
 	# Internal call
 	remove_player(lex, u)
+	return 0
 
 
 @requires_lexicon
@@ -181,6 +191,7 @@ def command_player_list(args):
 	"""
 	import json
 	# Module imports
+	from amanuensis.config import logger
 	from amanuensis.lexicon import LexiconModel
 	from amanuensis.user import UserModel
 
@@ -197,6 +208,7 @@ def command_player_list(args):
 		players.append(u.username)
 
 	print(json.dumps(players, indent=2))
+	return 0
 
 
 @requires_lexicon
@@ -227,6 +239,7 @@ def command_char_create(args):
 
 	# Internal call
 	add_character(lex, u, {"name": args.charname})
+	return 0
 
 
 @requires_lexicon
@@ -251,6 +264,7 @@ def command_char_delete(args):
 
 	# Internal call
 	delete_character(lex, args.charname)
+	return 0
 
 @requires_lexicon
 def command_char_list(args):
@@ -259,6 +273,7 @@ def command_char_list(args):
 	"""
 	import json
 	# Module imports
+	from amanuensis.config import logger
 	from amanuensis.lexicon import LexiconModel
 
 	# Verify arguments
@@ -269,6 +284,7 @@ def command_char_list(args):
 
 	# Internal call
 	print(json.dumps(lex.character, indent=2))
+	return 0
 
 #
 # Procedural commands
@@ -292,6 +308,5 @@ def command_publish_turn(args):
 	settings.
 	"""
 	# Module imports
-	from amanuensis.config import logger
 
 	raise NotImplementedError() # TODO

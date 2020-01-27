@@ -1,10 +1,12 @@
 import os
 import time
 
-from amanuensis.errors import InternalMisuseError, IndexMismatchError, MissingConfigError
+from amanuensis.errors import (
+	InternalMisuseError, IndexMismatchError, MissingConfigError)
 from amanuensis.config import prepend, json_ro, json_rw
 
 class LexiconModel():
+	@staticmethod
 	def by(lid=None, name=None):
 		"""
 		Gets the LexiconModel with the given lid or username
@@ -14,7 +16,8 @@ class LexiconModel():
 		the lexicon's config, raises an error.
 		"""
 		if lid and name:
-			raise InternalMisuseError("lid and name both specified to LexiconModel.by()")
+			raise InternalMisuseError("lid and name both specified to Lexicon"
+				"Model.by()")
 		if not lid and not name:
 			raise ValueError("One of lid or name must be not None")
 		if not lid:
@@ -51,7 +54,6 @@ class LexiconModel():
 	def status(self):
 		if self.turn.current is None:
 			return "unstarted"
-		elif self.turn.current > self.turn.max:
+		if self.turn.current > self.turn.max:
 			return "completed"
-		else:
-			return "ongoing"
+		return "ongoing"

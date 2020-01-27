@@ -9,7 +9,8 @@
 #
 
 def server_commands(commands={}):
-	if commands: return commands
+	if commands:
+		return commands
 	import amanuensis.cli.server
 	for name, func in vars(amanuensis.cli.server).items():
 		if name.startswith("command_"):
@@ -18,7 +19,8 @@ def server_commands(commands={}):
 	return commands
 
 def lexicon_commands(commands={}):
-	if commands: return commands
+	if commands:
+		return commands
 	import amanuensis.cli.lexicon
 	for name, func in vars(amanuensis.cli.lexicon).items():
 		if name.startswith("command_"):
@@ -27,7 +29,8 @@ def lexicon_commands(commands={}):
 	return commands
 
 def user_commands(commands={}):
-	if commands: return commands
+	if commands:
+		return commands
 	import amanuensis.cli.user
 	for name, func in vars(amanuensis.cli.user).items():
 		if name.startswith("command_"):

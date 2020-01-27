@@ -80,7 +80,7 @@ def delete_lexicon(lex, purge=False):
 	# Verify arguments
 	if lex is None:
 		raise ValueError("Invalid lexicon: '{}'".format(lex))
-	
+
 	# Delete the lexicon from the index
 	with json_rw('lexicon', 'index.json') as j:
 		if lex.id in j:
@@ -150,7 +150,7 @@ def add_player(lex, player):
 		if player.id not in cfg.join.joined:
 			cfg.join.joined.append(player.id)
 			added = True
-	
+
 	# Log to the lexicon's log
 	if added:
 		lex.log("Player '{0.username}' joined ({0.id})".format(player))
@@ -166,7 +166,9 @@ def remove_player(lex, player):
 	if player is None:
 		raise ValueError("Invalid player: '{}'".format(player))
 	if lex.editor == player.id:
-		raise ValueError("Can't remove the editor '{}' from lexicon '{}'".format(player.username, lex.name))
+		raise ValueError(
+			"Can't remove the editor '{}' from lexicon '{}'".format(
+				player.username, lex.name))
 
 	# Idempotently remove player
 	with json_rw(lex.config_path) as cfg:
@@ -190,7 +192,9 @@ def add_character(lex, player, charinfo={}):
 	if not charinfo or not charinfo.get("name"):
 		raise ValueError("Invalid character info: '{}'".format(charinfo))
 	charname = charinfo.get("name")
-	if any([char.name for char in lex.character.values() if char.name == charname]):
+	if any([
+			char.name for char in lex.character.values()
+			if char.name == charname]):
 		raise ValueError("Duplicate character name: '{}'".format(charinfo))
 
 	# Load the character template
@@ -221,10 +225,12 @@ def delete_character(lex, charname):
 	if lex is None:
 		raise ValueError("Invalid lexicon: '{}'".format(lex))
 	if charname is None:
-		raise ValueError("Invalid character name: '{}'".format(charinfo))
+		raise ValueError("Invalid character name: '{}'".format(charname))
 
 	# Find character in this lexicon
-	matches = [char for cid, char in lex.character.items() if char.name == charname]
+	matches = [
+		char for cid, char in lex.character.items()
+		if char.name == charname]
 	if len(matches) != 1:
 		raise ValueError(matches)
 	char = matches[0]

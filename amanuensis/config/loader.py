@@ -2,7 +2,6 @@
 from collections import OrderedDict
 import fcntl
 import json
-import os
 
 # Module imports
 from amanuensis.errors import ReadOnlyError
@@ -90,4 +89,3 @@ class json_rw(open_ex):
 		json.dump(self.config, self.fd, allow_nan=False, indent='\t')
 		self.fd.truncate()
 		super().__exit__(exc_type, exc_value, traceback)
-

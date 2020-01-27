@@ -28,6 +28,7 @@ def command_init(args):
 
 	# Internal call
 	create_config_dir(args.config_dir, args.refresh)
+	return 0
 
 
 @no_argument
@@ -38,7 +39,6 @@ def command_generate_secret(args):
 	The Flask server will not run unless a secret key has
 	been generated.
 	"""
-	import os
 	# Module imports
 	from amanuensis.config import json_rw, logger
 
@@ -46,6 +46,7 @@ def command_generate_secret(args):
 	with json_rw("config.json") as cfg:
 		cfg['secret_key'] = secret_key.hex()
 	logger.info("Regenerated Flask secret key")
+	return 0
 
 
 @add_argument("-a", "--address", default="127.0.0.1")
@@ -54,7 +55,7 @@ def command_generate_secret(args):
 def command_run(args):
 	"""
 	Run the default Flask server
-	
+
 	The default Flask server is not secure, and should
 	only be used for development.
 	"""
@@ -62,9 +63,11 @@ def command_run(args):
 	from amanuensis.config import get, logger
 
 	if get("secret_key") is None:
-		logger.error("Can't run server without a secret_key. Run generate-secret first")
+		logger.error("Can't run server without a secret_key. Run generate-sec"
+			"ret first")
 		return -1
 	app.run(host=args.address, port=args.port, debug=args.debug)
+	return 0
 
 
 @add_argument("--get", metavar="PATHSPEC", dest="get",
@@ -78,7 +81,6 @@ def command_config(args):
 	PATHSPEC is a path into the config object formatted as
 	a dot-separated sequence of keys.
 	"""
-	import json
 	# Module imports
 	from amanuensis.config import json_ro, json_rw, logger
 
@@ -93,3 +95,5 @@ def command_config(args):
 	if args.set:
 		with json_rw('config.json') as cfg:
 			config_set("config", cfg, args.set)
+
+	return 0

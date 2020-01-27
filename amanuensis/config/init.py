@@ -114,14 +114,17 @@ def verify_config_dir(config_dir):
 	# Check that global config file exists
 	global_config_path = os.path.join(config_dir, "config.json")
 	if not os.path.isfile(global_config_path):
-		raise MissingConfigError("Config directory missing global config file: {}".format(config_dir))
+		raise MissingConfigError("Config directory missing global config file"
+			": {}".format(config_dir))
 	# Check that global config file has all the default settings
 	def_cfg_s = get_stream("global.json")
 	def_cfg = json.load(def_cfg_s)
 	with json_ro(global_config_path) as global_config_file:
 		for key in def_cfg.keys():
 			if key not in global_config_file.keys():
-				raise MalformedConfigError("Missing '{}' in global config. If you updated Amanuensis, run init --refresh to pick up new config keys".format(key))
+				raise MalformedConfigError("Missing '{}' in global config. If"
+					" you updated Amanuensis, run init --refresh to pick up n"
+					"ew config keys".format(key))
 	# Configs verified
 	return True
 
@@ -147,4 +150,3 @@ def init_logging(args, logging_config):
 		logging.config.dictConfig(cfg)
 	except:
 		raise MalformedConfigError("Failed to load logging config")
-

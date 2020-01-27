@@ -10,11 +10,11 @@ import amanuensis.config.loader
 
 
 # Environment variable name constants
-ENV_SECRET_KEY =    "AMANUENSIS_SECRET_KEY"
-ENV_CONFIG_DIR =    "AMANUENSIS_CONFIG_DIR"
-ENV_LOG_FILE =      "AMANUENSIS_LOG_FILE"
+ENV_SECRET_KEY = "AMANUENSIS_SECRET_KEY"
+ENV_CONFIG_DIR = "AMANUENSIS_CONFIG_DIR"
+ENV_LOG_FILE = "AMANUENSIS_LOG_FILE"
 ENV_LOG_FILE_SIZE = "AMANUENSIS_LOG_FILE_SIZE"
-ENV_LOG_FILE_NUM =  "AMANUENSIS_LOG_FILE_NUM"
+ENV_LOG_FILE_NUM = "AMANUENSIS_LOG_FILE_NUM"
 
 #
 # The config directory can be set by cli input, so the config infrastructure
@@ -32,7 +32,8 @@ def init_config(args):
 	global CONFIG_DIR, GLOBAL_CONFIG, logger
 	CONFIG_DIR = args.config_dir
 	amanuensis.config.init.verify_config_dir(CONFIG_DIR)
-	with amanuensis.config.loader.json_ro(os.path.join(CONFIG_DIR, "config.json")) as cfg:
+	with amanuensis.config.loader.json_ro(
+			os.path.join(CONFIG_DIR, "config.json")) as cfg:
 		GLOBAL_CONFIG = cfg
 	amanuensis.config.init.init_logging(args, GLOBAL_CONFIG['logging'])
 	logger = logging.getLogger("amanuensis")

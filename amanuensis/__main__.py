@@ -46,7 +46,10 @@ def repl(args):
 				traceback.print_exc()
 
 def process_doc(docstring):
-	return '\n'.join([line.strip() for line in (docstring or "").strip().splitlines()])
+	return '\n'.join([
+		line.strip()
+		for line in (docstring or "").strip().splitlines()
+	])
 
 def get_parser(valid_commands):
 	# Set up the top-level parser.
@@ -84,7 +87,10 @@ def get_parser(valid_commands):
 		metavar="USERNAME",
 		dest="tl_username",
 		help="Specify a user to operate on")
-	parser.set_defaults(func=lambda args: repl(args) if args.tl_lexicon else parser.print_help())
+	parser.set_defaults(
+		func=lambda args: repl(args)
+		if args.tl_lexicon
+		else parser.print_help())
 	subp = parser.add_subparsers(
 		metavar="COMMAND",
 		dest="command",
