@@ -3,19 +3,13 @@ import json
 
 from flask import Blueprint, render_template, url_for, redirect, g, flash
 from flask_login import login_required, current_user
-from flask_wtf import FlaskForm
-from wtforms import TextAreaField, SubmitField
 
 from amanuensis.config import json_ro, open_ex
 from amanuensis.config.loader import ReadOnlyOrderedDict
 from amanuensis.lexicon import LexiconModel
+from amanuensis.server.forms import LexiconConfigForm
 from amanuensis.server.helpers import lexicon_param, player_required
 from amanuensis.user import UserModel
-
-
-class LexiconConfigForm(FlaskForm):
-	configText = TextAreaField("Config file")
-	submit = SubmitField("Submit")
 
 
 def get_bp():

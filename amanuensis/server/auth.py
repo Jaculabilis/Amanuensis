@@ -1,19 +1,11 @@
 import time
 
 from flask import Blueprint, render_template, redirect, url_for, flash
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
-from wtforms.validators import DataRequired
 from flask_login import login_user, logout_user, login_required
 
 from amanuensis.config import logger, json_rw
+from amanuensis.server.forms import LoginForm
 from amanuensis.user import UserModel
-
-class LoginForm(FlaskForm):
-	username = StringField('Username', validators=[DataRequired()])
-	password = PasswordField('Password', validators=[DataRequired()])
-	remember = BooleanField('Stay logged in')
-	submit = SubmitField('Log in')
 
 def get_bp(login_manager):
 	"""Create a blueprint for the auth functions"""
