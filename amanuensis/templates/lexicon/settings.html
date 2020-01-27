@@ -4,7 +4,7 @@
 {% block main %}
 <form action="" method="post" novalidate>
 	{{ form.hidden_tag() }}
-	<p>{{ form.configText.label }}<br>{{ form.configText(rows=20) }}</p>
+	<p>{{ form.configText.label }}<br>{{ form.configText(rows=20, class_="fullwidth") }}</p>
 	<p>{{ form.submit() }}</p>
 </form>
 {% for message in get_flashed_messages() %}
