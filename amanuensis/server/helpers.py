@@ -7,6 +7,16 @@ from flask_login import current_user
 
 # Module imports
 from amanuensis.lexicon import LexiconModel
+from amanuensis.user import UserModel
+
+
+def register_custom_filters(app):
+	"""Adds custom filters to the Flask app"""
+	@app.template_filter("user_attr")
+	def user_attr(uid, attr):
+		user = UserModel.by(uid=uid)
+		val = getattr(user, attr)
+		return val
 
 def lexicon_param(route):
 	"""Wrapper for loading a route's lexicon"""
@@ -19,6 +29,7 @@ def lexicon_param(route):
 		return route(name)
 	return with_lexicon
 
+
 def admin_required(route):
 	"""Requires the user to be an admin to load this page"""
 	@wraps(route)
@@ -28,6 +39,7 @@ def admin_required(route):
 			return redirect(url_for('home.home'))
 		return route(*args, **kwargs)
 	return admin_route
+
 
 def player_required(route):
 	"""Requires the user to be a player in the lexicon to load this page"""

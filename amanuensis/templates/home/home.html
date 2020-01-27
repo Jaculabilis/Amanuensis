@@ -1,4 +1,5 @@
 {% extends "page_1col.html" %}
+{% import 'macros.html' as macros %}
 {% block title %}Home | Amanuensis{% endblock %}
 {% block header %}<h2>Amanuensis - Home</h2>{% endblock %}
 
@@ -15,17 +16,7 @@
 <h2>Your games</h2>
 {% if lexicons %}
 {% for lexicon in lexicons %}
-
-<div class="dashboard-lexicon-item dashboard-lexicon-{{ lexicon.status() }}">
-<p>
-	<span class="dashboard-lexicon-item-title">
-		<a href="{{ url_for('lexicon.session', name=lexicon.name) }}">Lexicon {{ lexicon.name }}</a>
-	</span>
-	[{{ lexicon.status().capitalize() }}]
-</p>
-<p><i>{{ lexicon.prompt }}</i></p>
-</div>
-
+{{ macros.dashboard_lexicon_item(lexicon) }}
 {% endfor %}
 {% else %}
 <p>You haven't joined a game yet.</p>
