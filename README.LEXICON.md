@@ -1,0 +1,1 @@
+For now, please see Lexipython's [README](https://github.com/Jaculabilis/Lexipython/blob/master/README.md) for the rules of Lexicon.
