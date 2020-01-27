@@ -1,0 +1,31 @@
+{% extends "page_2col.html" %}
+{% import 'macros.html' as macros %}
+{% block title %}Admin | Amanuensis{% endblock %}
+{% block header %}<h2>Amanuensis - Create a Lexicon</h2>{% endblock %}
+
+{% block sb_home %}<a href="{{ url_for('home.home') }}">Home</a>{% endblock %}
+{% block sb_admin %}<a href="{{ url_for('home.admin') }}">Admin</a>{% endblock %}
+{% set template_sidebar_rows = [self.sb_home(), self.sb_admin()] %}
+
+{% block main %}
+<form action="" method="post" novalidate>
+	{{ form.hidden_tag() }}
+	<p>{{ form.lexiconName.label }}<br>{{ form.lexiconName(size=32) }}
+	{% for error in form.lexiconName.errors %}
+	<br><span style="color: #ff0000">{{ error }}</span>
+	{% endfor %}</p>
+
+	<p>{{ form.editorName.label }}<br>{{ form.editorName(size=32) }}
+	{% for error in form.editorName.errors %}
+	<br><span style="color: #ff0000">{{ error }}</span>
+	{% endfor %}</p>
+
+	<p>{{ form.promptText.label }}<br>{{ form.promptText(class_="fullwidth") }}</p>
+
+	<p>{{ form.submit() }}</p>
+</form>
+{% for message in get_flashed_messages() %}
+<span style="color: #ff0000">{{ message }}</span><br>
+{% endfor %}
+{% endblock %}
+{% set template_content_blocks = [self.main()] %}
