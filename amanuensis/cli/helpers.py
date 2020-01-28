@@ -81,7 +81,9 @@ def requires_lexicon(command):
 	return augmented_command
 
 USER_ARGS = ['--user']
-USER_KWARGS = {'metavar': 'USER', 'dest': 'user',
+USER_KWARGS = {
+	'metavar': 'USER',
+	'dest': 'user',
 	'help': 'Specify a user to operate on'}
 def requires_user(command):
 	"""
@@ -100,18 +102,19 @@ def requires_user(command):
 			return None
 
 		# Verify user argument in execute pass
-		base_val = (hasattr(cmd_args, "tl_user")
-			and getattr(cmd_args, "tl_user"))
-		subp_val = (hasattr(cmd_args, "user")
+		val = ((hasattr(cmd_args, "user")
 			and getattr(cmd_args, "user"))
-		val = subp_val or base_val or None
+			or None)
 		if not val:
 			from amanuensis.config import logger
 			logger.error("This command requires specifying a user")
 			return -1
 		from amanuensis.user import UserModel
-		cmd_args.user = UserModel.by(name=val)
-		# TODO more thorough verification of argument val
+		cmd_args.user = UserModel.by(name=val) #TODO catch specific exceptions
+		if cmd_args.user is None:
+			from amanuensis.config import logger
+			logger.error('Could not find user "{}"'.format(val))
+			return -1
 		return command(cmd_args)
 
 	augmented_command.__dict__['wrapper'] = True
