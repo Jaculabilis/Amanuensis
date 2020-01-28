@@ -1,9 +1,10 @@
 import os
 
 from amanuensis.cli.helpers import (
-	add_argument, no_argument,
+	add_argument, no_argument, alias,
 	config_get, config_set, CONFIG_GET_ROOT_VALUE)
 
+@alias('i')
 @add_argument(
 	"--refresh", action="store_true",
 	help="Refresh an existing config directory")
@@ -31,6 +32,7 @@ def command_init(args):
 	return 0
 
 
+@alias('gs')
 @no_argument
 def command_generate_secret(args):
 	"""
@@ -49,6 +51,7 @@ def command_generate_secret(args):
 	return 0
 
 
+@alias('r')
 @add_argument("-a", "--address", default="127.0.0.1")
 @add_argument("-p", "--port", default="5000")
 @add_argument("--debug", action="store_true")
@@ -70,6 +73,7 @@ def command_run(args):
 	return 0
 
 
+@alias('n')
 @add_argument("--get", metavar="PATHSPEC", dest="get",
 	nargs="?", const=CONFIG_GET_ROOT_VALUE, help="Get the value of a config key")
 @add_argument("--set", metavar=("PATHSPEC", "VALUE"), dest="set",

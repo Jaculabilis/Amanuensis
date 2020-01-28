@@ -118,6 +118,17 @@ def requires_user(command):
 	return augmented_command
 
 
+# Wrapper for aliasing commands
+def alias(cmd_alias):
+	"""Adds an alias to the function dictionary"""
+	def aliaser(command):
+		aliases = command.__dict__.get('aliases', [])
+		aliases.append(cmd_alias)
+		command.__dict__['aliases'] = aliases
+		return command
+	return aliaser
+
+
 # Helpers for common command tasks
 
 CONFIG_GET_ROOT_VALUE = object()

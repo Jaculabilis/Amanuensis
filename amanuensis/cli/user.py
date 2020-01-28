@@ -6,10 +6,11 @@ import shutil
 
 # Module imports
 from amanuensis.cli.helpers import (
-	add_argument, no_argument, requires_user,
+	add_argument, no_argument, requires_user, alias,
 	config_get, config_set, CONFIG_GET_ROOT_VALUE)
 
 
+@alias('uc')
 @add_argument("--username", required=True, help="Name of user to create")
 @add_argument("--email", help="User's email")
 @add_argument("--displayname", help="User's publicly displayed name")
@@ -44,6 +45,7 @@ def command_create(args):
 	return 0
 
 
+@alias('ud')
 @requires_user
 def command_delete(args):
 	"""
@@ -65,6 +67,7 @@ def command_delete(args):
 	return 0
 
 
+@alias('ul')
 @no_argument
 def command_list(args):
 	"""List all users"""
@@ -88,6 +91,7 @@ def command_list(args):
 	return 0
 
 
+@alias('un')
 @requires_user
 @add_argument(
 	"--get", metavar="PATHSPEC", dest="get",
@@ -120,6 +124,7 @@ def command_config(args):
 	return 0
 
 
+@alias('up')
 @requires_user
 @add_argument("--password", help="The password to set. Used for scripting; "
 	"not recommended for general use")

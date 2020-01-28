@@ -101,7 +101,8 @@ def get_parser(valid_commands):
 		# Create the subparser, set the docstring as the description.
 		cmd = subp.add_parser(name,
 			description=process_doc(func.__doc__),
-			formatter_class=argparse.RawDescriptionHelpFormatter)
+			formatter_class=argparse.RawDescriptionHelpFormatter,
+			aliases=func.__dict__.get("aliases", []))
 		# Delegate subparser setup to the command.
 		func(cmd)
 		# Store function for later execution.
