@@ -49,14 +49,17 @@ def no_argument(command):
 
 # Wrappers for commands requiring lexicon or username options
 
+LEXICON_ARGS = ['--lexicon']
+LEXICON_KWARGS = {
+	'metavar': 'LEXICON',
+	'dest': 'lexicon',
+	'help': 'Specify a user to operate on'}
 def requires_lexicon(command):
 	@wraps(command)
 	def augmented_command(cmd_args):
 		# Add lexicon argument in parser pass
 		if isinstance(cmd_args, ArgumentParser):
-			cmd_args.add_argument(
-				"-n", metavar="LEXICON", dest="lexicon",
-				help="Specify a lexicon to operate on")
+			cmd_args.add_argument(*LEXICON_ARGS, **LEXICON_KWARGS)
 			# If there are more command wrappers, pass through to them
 			if command.__dict__.get('wrapper', False):
 				command(cmd_args)
@@ -64,17 +67,19 @@ def requires_lexicon(command):
 			return None
 
 		# Verify lexicon argument in execute pass
-		base_val = (hasattr(cmd_args, "tl_lexicon")
-			and getattr(cmd_args, "tl_lexicon"))
-		subp_val = (hasattr(cmd_args, "lexicon")
-			and getattr(cmd_args, "lexicon"))
-		val = subp_val or base_val or None
+		val = ((hasattr(cmd_args, 'lexicon')
+			and getattr(cmd_args, 'lexicon'))
+			or None)
 		if not val:
 			from amanuensis.config import logger
 			logger.error("This command requires specifying a lexicon")
 			return -1
-		# from amanuensis.lexicon import LexiconModel
-		cmd_args.lexicon = val#LexiconModel.by(name=val).name TODO
+		from amanuensis.lexicon import LexiconModel
+		cmd_args.lexicon = LexiconModel.by(name=val) #TODO catch specific exceptions
+		if cmd_args.lexicon is None:
+			from amanuensis.config import logger
+			logger.error('Could not find lexicon "{}"'.format(val))
+			return -1
 		return command(cmd_args)
 
 	augmented_command.__dict__['wrapper'] = True

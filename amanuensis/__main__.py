@@ -5,7 +5,8 @@ import traceback
 
 # Module imports
 import amanuensis.cli as cli
-from amanuensis.cli.helpers import USER_ARGS, USER_KWARGS
+from amanuensis.cli.helpers import (
+	USER_ARGS, USER_KWARGS, LEXICON_ARGS, LEXICON_KWARGS)
 import amanuensis.config as config
 
 
@@ -80,10 +81,7 @@ def get_parser(valid_commands):
 		default=os.environ.get(config.ENV_LOG_FILE_NUM),
 		help="Maximum rolling file count")
 	# Lexicon settings.
-	parser.add_argument("-n",
-		metavar="LEXICON",
-		dest="tl_lexicon",
-		help="Specify a lexicon to operate on")
+	parser.add_argument(*LEXICON_ARGS, **LEXICON_KWARGS)
 	parser.add_argument(*USER_ARGS, **USER_KWARGS)
 	parser.set_defaults(
 		func=lambda args: repl(args)
