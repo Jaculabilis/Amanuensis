@@ -67,9 +67,9 @@ def requires_lexicon(command):
 			return None
 
 		# Verify lexicon argument in execute pass
-		val = ((hasattr(cmd_args, 'lexicon')
-			and getattr(cmd_args, 'lexicon'))
-			or None)
+		val = (getattr(cmd_args, 'lexicon')
+			if hasattr(cmd_args, 'lexicon')
+			else None)
 		if not val:
 			from amanuensis.config import logger
 			logger.error("This command requires specifying a lexicon")
@@ -107,9 +107,9 @@ def requires_user(command):
 			return None
 
 		# Verify user argument in execute pass
-		val = ((hasattr(cmd_args, "user")
-			and getattr(cmd_args, "user"))
-			or None)
+		val = (getattr(cmd_args, "user")
+			if hasattr(cmd_args, "user")
+			else None)
 		if not val:
 			from amanuensis.config import logger
 			logger.error("This command requires specifying a user")
