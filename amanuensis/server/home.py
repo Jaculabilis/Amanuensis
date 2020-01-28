@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, redirect, url_for
 from flask_login import login_required
 
-from amanuensis.config import json_ro
+from amanuensis.config import json_ro, json_rw
 from amanuensis.lexicon import LexiconModel
+from amanuensis.lexicon.manage import create_lexicon
 from amanuensis.server.forms import LexiconCreateForm
 from amanuensis.server.helpers import admin_required
 from amanuensis.user import UserModel
@@ -42,7 +43,11 @@ def get_bp():
 			lexicon_name = form.lexiconName.data
 			editor_name = form.editorName.data
 			prompt = form.promptText.data
-			return "<br>".join([lexicon_name, editor_name, prompt])
+			editor = UserModel.by(name=editor_name)
+			lexicon = create_lexicon(lexicon_name, editor)
+			with json_rw(lexicon.config_path) as cfg:
+				cfg.prompt = prompt
+			return redirect(url_for('lexicon.session', name=lexicon_name))
 
 		return render_template('home/create.html', form=form)
 
