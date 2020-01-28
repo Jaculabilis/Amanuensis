@@ -80,15 +80,19 @@ def requires_lexicon(command):
 	augmented_command.__dict__['wrapper'] = True
 	return augmented_command
 
-
-def requires_username(command):
+USER_ARGS = ['--user']
+USER_KWARGS = {'metavar': 'USER', 'dest': 'user',
+	'help': 'Specify a user to operate on'}
+def requires_user(command):
+	"""
+	Performs all necessary setup and verification for passing a user to a CLI
+	command.
+	"""
 	@wraps(command)
 	def augmented_command(cmd_args):
 		# Add user argument in parser pass
 		if isinstance(cmd_args, ArgumentParser):
-			cmd_args.add_argument(
-				"-u", metavar="USERNAME", dest="username",
-				help="Specify a user to operate on")
+			cmd_args.add_argument(*USER_ARGS, **USER_KWARGS)
 			# If there are more command wrappers, pass through to them
 			if command.__dict__.get('wrapper', False):
 				command(cmd_args)
@@ -96,17 +100,18 @@ def requires_username(command):
 			return None
 
 		# Verify user argument in execute pass
-		base_val = (hasattr(cmd_args, "tl_username")
-			and getattr(cmd_args, "tl_lexicon"))
-		subp_val = (hasattr(cmd_args, "username")
-			and getattr(cmd_args, "username"))
+		base_val = (hasattr(cmd_args, "tl_user")
+			and getattr(cmd_args, "tl_user"))
+		subp_val = (hasattr(cmd_args, "user")
+			and getattr(cmd_args, "user"))
 		val = subp_val or base_val or None
 		if not val:
 			from amanuensis.config import logger
 			logger.error("This command requires specifying a user")
 			return -1
-		# from amanuensis.user import UserModel
-		cmd_args.username = val#UserModel.by(name=val).name TODO
+		from amanuensis.user import UserModel
+		cmd_args.user = UserModel.by(name=val)
+		# TODO more thorough verification of argument val
 		return command(cmd_args)
 
 	augmented_command.__dict__['wrapper'] = True

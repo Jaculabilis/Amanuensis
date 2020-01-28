@@ -5,6 +5,7 @@ import traceback
 
 # Module imports
 import amanuensis.cli as cli
+from amanuensis.cli.helpers import USER_ARGS, USER_KWARGS
 import amanuensis.config as config
 
 
@@ -83,10 +84,7 @@ def get_parser(valid_commands):
 		metavar="LEXICON",
 		dest="tl_lexicon",
 		help="Specify a lexicon to operate on")
-	parser.add_argument("-u",
-		metavar="USERNAME",
-		dest="tl_username",
-		help="Specify a user to operate on")
+	parser.add_argument(*USER_ARGS, **USER_KWARGS)
 	parser.set_defaults(
 		func=lambda args: repl(args)
 		if args.tl_lexicon
