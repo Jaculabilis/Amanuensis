@@ -1,6 +1,5 @@
 # Standard imports
 import getpass
-import json
 import os
 import shutil
 
@@ -19,7 +18,7 @@ def command_create(args):
 	Create a user
 	"""
 	# Module imports
-	from amanuensis.config import logger, json_ro
+	from amanuensis.config import logger
 	from amanuensis.user import (
 		UserModel, valid_username, valid_email, create_user)
 
@@ -104,8 +103,7 @@ def command_config(args):
 	Interact with a user's config
 	"""
 	# Module imports
-	from amanuensis.config import logger, json_ro, json_rw
-	from amanuensis.user import UserModel
+	from amanuensis.config import logger, json_rw
 
 	# Verify arguments
 	if args.get and args.set:
@@ -134,7 +132,6 @@ def command_passwd(args):
 	"""
 	# Module imports
 	from amanuensis.config import logger
-	from amanuensis.user import UserModel
 
 	# Verify arguments
 	pw = args.password or getpass.getpass("Password: ")
@@ -143,4 +140,5 @@ def command_passwd(args):
 	args.user.set_password(pw)
 
 	# Output
+	logger.info('Updated password for "{}"'.format(args.user.username))
 	return 0
