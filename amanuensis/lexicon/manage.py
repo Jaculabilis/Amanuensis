@@ -89,9 +89,9 @@ def delete_lexicon(lex, purge=False):
 		raise ArgumentError("Invalid lexicon: '{}'".format(lex))
 
 	# Delete the lexicon from the index
-	with json_rw('lexicon', 'index.json') as j:
-		if lex.id in j:
-			del j[lex.id]
+	with json_rw('lexicon', 'index.json') as index:
+		if lex.name in index:
+			del index[lex.name]
 
 	# Delete the lexicon data folder if purging
 	if purge:
