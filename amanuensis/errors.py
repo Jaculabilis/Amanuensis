@@ -10,8 +10,8 @@ class MalformedConfigError(AmanuensisError):
 class ReadOnlyError(AmanuensisError):
 	"""A config was edited in readonly mode"""
 
-class InternalMisuseError(AmanuensisError):
-	"""An internal helper method was called wrongly"""
+class ArgumentError(AmanuensisError):
+	"""An internal call was made with invalid arguments"""
 
 class IndexMismatchError(AmanuensisError):
 	"""An id was obtained from an index, but the object doesn't exist"""

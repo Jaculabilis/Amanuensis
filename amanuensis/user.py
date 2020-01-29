@@ -7,7 +7,7 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from amanuensis.errors import (
-	InternalMisuseError, MissingConfigError, IndexMismatchError)
+	ArgumentError, MissingConfigError, IndexMismatchError)
 from amanuensis.config import prepend, json_ro, json_rw
 from amanuensis.resources import get_stream
 from amanuensis.lexicon.manage import get_all_lexicons
@@ -23,9 +23,9 @@ class UserModel(UserMixin):
 		the user's config, raises an error.
 		"""
 		if uid and name:
-			raise InternalMisuseError("uid and name both specified to UserModel.by()")
+			raise ArgumentError("uid and name both specified to UserModel.by()")
 		if not uid and not name:
-			raise ValueError("One of uid or name must be not None")
+			raise ArgumentError("One of uid or name must be not None")
 		if not uid:
 			with json_ro('user', 'index.json') as index:
 				uid = index.get(name)

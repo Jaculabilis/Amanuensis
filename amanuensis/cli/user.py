@@ -81,7 +81,7 @@ def command_list(args):
 			continue
 		with json_ro('user', uid, 'config.json') as user:
 			users.append(user)
-
+	
 	# Output
 	users.sort(key=lambda u: u['username'])
 	for user in users:
@@ -140,5 +140,5 @@ def command_passwd(args):
 	args.user.set_password(pw)
 
 	# Output
-	logger.info('Updated password for "{}"'.format(args.user.username))
+	logger.info('Updated password for {}'.format(args.user.username))
 	return 0

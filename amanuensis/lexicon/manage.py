@@ -11,6 +11,7 @@ import uuid
 
 from amanuensis.config import prepend, json_rw, json_ro, logger
 from amanuensis.config.loader import AttrOrderedDict
+from amanuensis.errors import ArgumentError
 from amanuensis.lexicon import LexiconModel
 from amanuensis.resources import get_stream
 
@@ -19,7 +20,7 @@ def valid_name(name):
 	Validates that a lexicon name consists only of alpahnumerics, dashes,
 	underscores, and spaces
 	"""
-	return name is not None and re.match(r"^[A-Za-z0-9-_ ]+$", name) is not None
+	return re.match(r"^[A-Za-z0-9-_ ]+$", name) is not None
 
 
 def create_lexicon(name, editor):
@@ -27,10 +28,16 @@ def create_lexicon(name, editor):
 	Creates a lexicon with the given name and sets the given user as its editor
 	"""
 	# Verify arguments
+	if not name:
+		raise ArgumentError('Empty lexicon name: "{}"'.format(name))
 	if not valid_name(name):
-		raise ValueError("Invalid lexicon name: '{}'".format(name))
+		raise ArgumentError('Invalid lexicon name: "{}"'.format(name))
+	with json_ro('lexicon', 'index.json') as index:
+		if name in index.keys():
+			raise ArgumentError('Lexicon name already taken: "{}"'.format(
+				name))
 	if editor is None:
-		raise ValueError("Invalid editor: '{}'".format(editor))
+		raise ArgumentError("Invalid editor: '{}'".format(editor))
 
 	# Create the lexicon directory and initialize it with a blank lexicon
 	lid = uuid.uuid4().hex
@@ -79,7 +86,7 @@ def delete_lexicon(lex, purge=False):
 	"""
 	# Verify arguments
 	if lex is None:
-		raise ValueError("Invalid lexicon: '{}'".format(lex))
+		raise ArgumentError("Invalid lexicon: '{}'".format(lex))
 
 	# Delete the lexicon from the index
 	with json_rw('lexicon', 'index.json') as j:
@@ -140,9 +147,9 @@ def add_player(lex, player):
 	"""
 	# Verify arguments
 	if lex is None:
-		raise ValueError("Invalid lexicon: '{}'".format(lex))
+		raise ArgumentError("Invalid lexicon: '{}'".format(lex))
 	if player is None:
-		raise ValueError("Invalid player: '{}'".format(player))
+		raise ArgumentError("Invalid player: '{}'".format(player))
 
 	# Idempotently add player
 	added = False
@@ -162,11 +169,11 @@ def remove_player(lex, player):
 	"""
 	# Verify arguments
 	if lex is None:
-		raise ValueError("Invalid lexicon: '{}'".format(lex))
+		raise ArgumentError("Invalid lexicon: '{}'".format(lex))
 	if player is None:
-		raise ValueError("Invalid player: '{}'".format(player))
+		raise ArgumentError("Invalid player: '{}'".format(player))
 	if lex.editor == player.id:
-		raise ValueError(
+		raise ArgumentError(
 			"Can't remove the editor '{}' from lexicon '{}'".format(
 				player.username, lex.name))
 
@@ -186,16 +193,16 @@ def add_character(lex, player, charinfo={}):
 	"""
 	# Verify arguments
 	if lex is None:
-		raise ValueError("Invalid lexicon: '{}'".format(lex))
+		raise ArgumentError("Invalid lexicon: '{}'".format(lex))
 	if player is None:
-		raise ValueError("Invalid player: '{}'".format(player))
+		raise ArgumentError("Invalid player: '{}'".format(player))
 	if not charinfo or not charinfo.get("name"):
-		raise ValueError("Invalid character info: '{}'".format(charinfo))
+		raise ArgumentError("Invalid character info: '{}'".format(charinfo))
 	charname = charinfo.get("name")
 	if any([
 			char.name for char in lex.character.values()
 			if char.name == charname]):
-		raise ValueError("Duplicate character name: '{}'".format(charinfo))
+		raise ArgumentError("Duplicate character name: '{}'".format(charinfo))
 
 	# Load the character template
 	with get_stream('character.json') as template:
@@ -223,16 +230,16 @@ def delete_character(lex, charname):
 	"""
 	# Verify arguments
 	if lex is None:
-		raise ValueError("Invalid lexicon: '{}'".format(lex))
+		raise ArgumentError("Invalid lexicon: '{}'".format(lex))
 	if charname is None:
-		raise ValueError("Invalid character name: '{}'".format(charname))
+		raise ArgumentError("Invalid character name: '{}'".format(charname))
 
 	# Find character in this lexicon
 	matches = [
 		char for cid, char in lex.character.items()
 		if char.name == charname]
 	if len(matches) != 1:
-		raise ValueError(matches)
+		raise ArgumentError(matches)
 	char = matches[0]
 
 	# Remove character from character list

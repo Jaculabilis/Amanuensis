@@ -8,6 +8,7 @@ import amanuensis.cli as cli
 from amanuensis.cli.helpers import (
 	USER_ARGS, USER_KWARGS, LEXICON_ARGS, LEXICON_KWARGS)
 import amanuensis.config as config
+from amanuensis.errors import AmanuensisError
 
 
 def repl(args):
@@ -127,7 +128,11 @@ def main(argv):
 			config.logger.debug("  {}: {}".format(key, val))
 
 	# Execute command.
-	args.func(args)
+	try:
+		args.func(args)
+	except AmanuensisError as e:
+		config.logger.error('Unexpected internal {}: {}'.format(
+			type(e).__name__, str(e)))
 
 if __name__ == "__main__":
 	import sys

@@ -2,7 +2,7 @@ import os
 import time
 
 from amanuensis.errors import (
-	InternalMisuseError, IndexMismatchError, MissingConfigError)
+	ArgumentError, IndexMismatchError, MissingConfigError)
 from amanuensis.config import prepend, json_ro, json_rw
 
 class LexiconModel():
@@ -16,10 +16,10 @@ class LexiconModel():
 		the lexicon's config, raises an error.
 		"""
 		if lid and name:
-			raise InternalMisuseError("lid and name both specified to Lexicon"
+			raise ArgumentError("lid and name both specified to Lexicon"
 				"Model.by()")
 		if not lid and not name:
-			raise ValueError("One of lid or name must be not None")
+			raise ArgumentError("One of lid or name must be not None")
 		if not lid:
 			with json_ro('lexicon', 'index.json') as index:
 				lid = index.get(name)
