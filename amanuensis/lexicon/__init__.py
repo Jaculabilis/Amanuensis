@@ -46,6 +46,12 @@ class LexiconModel():
 			raise AttributeError(key)
 		return self.config.get(key)
 
+	def __str__(self):
+		return '<Lexicon {0.name}>'.format(self)
+
+	def __repr__(self):
+		return '<LexiconModel lid={0.id} name={0.name}>'.format(self)
+
 	def log(self, message):
 		now = int(time.time())
 		with json_rw(self.config_path) as j:

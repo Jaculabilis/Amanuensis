@@ -50,7 +50,7 @@ class UserModel(UserMixin):
 		return self.config.get(key)
 
 	def __str__(self):
-		return '<UserModel {}>'.format(self.username)
+		return '<{0.username}>'.format(self)
 
 	def __repr__(self):
 		return '<UserModel uid={0.id} username={0.username}>'.format(self)
