@@ -73,7 +73,14 @@ class UserModel(UserMixin):
 
 
 def valid_username(username):
-	return re.match(r"^[A-Za-z0-9-_]{3,}$", username) is not None
+	"""
+	A valid username is at least three characters long and composed solely of
+	alpahnumerics, dashes, and underscores. Additionally, usernames may not
+	be 32 hex digits, since that may be confused for an internal id.
+	"""
+	length_and_characters = re.match(r"^[A-Za-z0-9-_]{3,}$", username)
+	is_a_guid = re.match(r"^[A-Za-z0-9]{32}$", username)
+	return length_and_characters and not is_a_guid
 
 def valid_email(email):
 	"""Vaguely RFC2822 email verifier"""
