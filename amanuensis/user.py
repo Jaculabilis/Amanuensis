@@ -49,6 +49,12 @@ class UserModel(UserMixin):
 			raise AttributeError(key)
 		return self.config.get(key)
 
+	def __str__(self):
+		return '<UserModel {}>'.format(self.username)
+
+	def __repr__(self):
+		return '<UserModel uid={0.id} username={0.username}>'.format(self)
+
 	def set_password(self, pw):
 		h = generate_password_hash(pw)
 		with json_rw(self.config_path) as j:
