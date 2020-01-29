@@ -96,7 +96,7 @@ def create_user(username, displayname, email):
 	# Validate arguments
 	if not valid_username(username):
 		raise ValueError("Invalid username: '{}'".format(username))
-	if not valid_email(email):
+	if email and not valid_email(email):
 		raise ValueError("Invalid email: '{}'".format(email))
 
 	# Create the user directory and initialize it with a blank user
