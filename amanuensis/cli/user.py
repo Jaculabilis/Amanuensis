@@ -72,21 +72,18 @@ def command_list(args):
 	"""List all users"""
 	# Module imports
 	from amanuensis.config import prepend, json_ro
+	from amanuensis.user import UserModel
 
 	# Perform command
-	user_dirs = os.listdir(prepend('user'))
 	users = []
-	for uid in user_dirs:
-		if uid == "index.json":
-			continue
-		with json_ro('user', uid, 'config.json') as user:
-			users.append(user)
-	
+	with json_ro('user', 'index.json') as index:
+		for username, uid in index.items():
+			users.append(UserModel.by(uid=uid))
+
 	# Output
-	users.sort(key=lambda u: u['username'])
+	users.sort(key=lambda u: u.username)
 	for user in users:
-		print("{0}  {1} ({2})".format(
-			user['uid'], user['displayname'], user['username']))
+		print("{0.id}  {0.displayname} ({0.username})".format(user))
 	return 0
 
 
@@ -136,7 +133,7 @@ def command_passwd(args):
 	# Verify arguments
 	pw = args.password or getpass.getpass("Password: ")
 
-	# Perform commands
+	# Perform command
 	args.user.set_password(pw)
 
 	# Output
