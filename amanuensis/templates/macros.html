@@ -1,13 +1,25 @@
-{% macro dashboard_lexicon_item(lexicon) %}
+{% macro dashboard_lexicon_item(lexicon, anonymize) %}
 <div class="dashboard-lexicon-item dashboard-lexicon-{{ lexicon.status() }}">
 	<p>
 		<span class="dashboard-lexicon-item-title">
-			<a href="{{ url_for('lexicon.session', name=lexicon.name) }}">Lexicon {{ lexicon.name }}</a>
+			<a href="{{ url_for('lexicon.contents', name=lexicon.name) }}">
+				Lexicon {{ lexicon.name }}</a>
 		</span>
 		[{{ lexicon.status().capitalize() }}]
 	</p>
 	<p><i>{{ lexicon.prompt }}</i></p>
-	<p>Editor: {{ lexicon.editor|user_attr('username') }} / Players: {% for uid in lexicon.join.joined[:-1] %}{{ uid|user_attr('username') }}, {% endfor %}{{ lexicon.join.joined[-1]|user_attr('username') }}</p>
+	<p>
+		{% if anonymize %}
+		Players: {{ lexicon.join.joined|count }}/{{ lexicon.join.max_players }}
+		{% else %}
+		Editor:
+		{{ lexicon.editor|user_attr('username') }} / Players:
+		{% for uid in lexicon.join.joined[:-1] %}
+		{{ uid|user_attr('username') }}, 
+		{% endfor %}
+		{{ lexicon.join.joined[-1]|user_attr('username') }}
+		{% endif %}
+	</p>
 </div>
 {% endmacro %}
 
