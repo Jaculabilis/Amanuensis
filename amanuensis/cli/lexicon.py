@@ -1,40 +1,42 @@
 from amanuensis.cli.helpers import (
-	add_argument, no_argument, requires_lexicon, requires_username,
+	add_argument, no_argument, requires_lexicon, requires_user,
 	config_get, config_set, CONFIG_GET_ROOT_VALUE)
 
 #
 # CRUD commands
 #
 
-@requires_lexicon
-@add_argument(
-	"--editor", "-e", required=True,
-	help="Name of the user who will be editor")
+@add_argument("--name", required=True, help="The name of the new lexicon")
+@requires_user
+@add_argument("--prompt", help="The lexicon's prompt")
 def command_create(args):
 	"""
 	Create a lexicon
 
-	A newly created lexicon is not open for joining and requires additional
-	configuration before it is playable. The editor should ensure that all
-	settings are as desired before opening the lexicon for player joins.
+	The specified user will be the editor. A newly created created lexicon is
+	not open for joining and requires additional configuration before it is
+	playable. The editor should ensure that all settings are as desired before
+	opening the lexicon for player joins.
 	"""
 	# Module imports
-	from amanuensis.config import logger
+	from amanuensis.config import logger, json_ro
 	from amanuensis.lexicon.manage import valid_name, create_lexicon
-	from amanuensis.user import UserModel
 
 	# Verify arguments
-	if not valid_name(args.lexicon):
+	if not valid_name(args.name):
 		logger.error("Lexicon name contains illegal characters: '{}'".format(
-			args.lexicon))
+			args.name))
 		return -1
-	editor = UserModel.by(name=args.editor)
-	if editor is None:
-		logger.error("Could not find user '{}'".format(args.editor))
-		return -1
+	with json_ro('lexicon', 'index.json') as index:
+		if args.name in index.keys():
+			logger.error('A lexicon with name "{}" already exists'.format(
+				args.name))
+			return -1
 
-	# Internal call
-	create_lexicon(args.lexicon, editor)
+	# Perform command
+	lexicon = create_lexicon(args.name, args.user)
+
+	# Output already logged by create_lexicon
 	return 0
 
 
@@ -49,15 +51,11 @@ def command_delete(args):
 	from amanuensis.lexicon import LexiconModel
 	from amanuensis.lexicon.manage import delete_lexicon
 
-	# Verify arguments
-	lex = LexiconModel.by(name=args.lexicon)
-	if lex is None:
-		logger.error("Could not find lexicon '{}'".format(args.lexicon))
-		return -1
+	# Perform command
+	delete_lexicon(args.lexicon, args.purge)
 
-	# Internal call
-	delete_lexicon(lex, args.purge)
-	logger.info("Deleted lexicon '{}'".format(args.lexicon))
+	# Output
+	logger.info('Deleted lexicon "{}"'.format(args.lexicon.name))
 	return 0
 
 
@@ -69,17 +67,13 @@ def command_list(args):
 	# Module imports
 	from amanuensis.lexicon.manage import get_all_lexicons
 
-	# Internal call
+	# Execute command
 	lexicons = get_all_lexicons()
+
+	# Output
 	statuses = []
 	for lex in lexicons:
-		if lex.turn['current'] is None:
-			statuses.append("{0.lid}  {0.name} ({1})".format(lex, "Unstarted"))
-		elif lex.turn['current'] > lex.turn['max']:
-			statuses.append("{0.lid}  {0.name} ({1})".format(lex, "Completed"))
-		else:
-			statuses.append("{0.lid}  {0.name} (Turn {1}/{2})".format(
-				lex, lex.turn['current'], lex.turn['max']))
+		statuses.append("{0.lid}  {0.name} ({1})".format(lex, lex.status()))
 	for s in statuses:
 		print(s)
 	return 0
@@ -88,7 +82,8 @@ def command_list(args):
 @requires_lexicon
 @add_argument(
 	"--get", metavar="PATHSPEC", dest="get",
-	nargs="?", const=CONFIG_GET_ROOT_VALUE, help="Get the value of a config key")
+	nargs="?", const=CONFIG_GET_ROOT_VALUE,
+	help="Get the value of a config key")
 @add_argument(
 	"--set", metavar=("PATHSPEC", "VALUE"), dest="set",
 	nargs=2, help="Set the value of a config key")
@@ -104,20 +99,16 @@ def command_config(args):
 	if args.get and args.set:
 		logger.error("Specify one of --get and --set")
 		return -1
-	lex = LexiconModel.by(name=args.lexicon)
-	if lex is None:
-		logger.error("Could not find lexicon '{}'".format(args.lexicon))
-		return -1
 
-	# Internal call
+	# Execute command
 	if args.get:
-		with json_ro(lex.config_path) as cfg:
-			config_get(cfg, args.get)
+		config_get(args.lexicon.config, args.get)
 
 	if args.set:
-		with json_rw(lex.config_path) as cfg:
-			config_set(lex.id, cfg, args.set)
+		with json_rw(args.lexicon.config_path) as cfg:
+			config_set(args.lexicon.id, cfg, args.set)
 
+	# config_* functions handle output
 	return 0
 
 #
@@ -125,7 +116,7 @@ def command_config(args):
 #
 
 @requires_lexicon
-@requires_username
+# @requires_username
 def command_player_add(args):
 	"""
 	Add a player to a lexicon
@@ -152,7 +143,7 @@ def command_player_add(args):
 
 
 @requires_lexicon
-@requires_username
+# @requires_username
 def command_player_remove(args):
 	"""
 	Remove a player from a lexicon
@@ -212,7 +203,7 @@ def command_player_list(args):
 
 
 @requires_lexicon
-@requires_username
+# @requires_username
 @add_argument("--charname", required=True, help="The character's name")
 def command_char_create(args):
 	"""
