@@ -60,7 +60,7 @@ def create_lexicon(name, editor):
 
 	# Load the Lexicon and log creation
 	l = LexiconModel(lid)
-	l.log("Lexicon created")
+	l.add_log("Lexicon created")
 
 	logger.info("Created Lexicon {0.name}, ed. {1.displayname} ({0.id})".format(
 		l, editor))
@@ -170,7 +170,7 @@ def add_player(lex, player):
 
 	# Log to the lexicon's log
 	if added:
-		lex.log("Player '{0.username}' joined ({0.id})".format(player))
+		lex.add_log("Player '{0.username}' joined ({0.id})".format(player))
 
 
 def remove_player(lex, player):
@@ -232,7 +232,7 @@ def add_character(lex, player, charinfo={}):
 
 	# Log addition
 	if added:
-			lex.log("Character '{0.name}' created ({0.cid})".format(character))
+			lex.add_log("Character '{0.name}' created ({0.cid})".format(character))
 
 def delete_character(lex, charname):
 	"""
