@@ -18,6 +18,7 @@
 		{{ uid|user_attr('username') }}, 
 		{% endfor %}
 		{{ lexicon.join.joined[-1]|user_attr('username') }}
+		({{ lexicon.join.joined|count }}/{{ lexicon.join.max_players }})
 		{% endif %}
 	</p>
 </div>
