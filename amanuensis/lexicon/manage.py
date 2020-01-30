@@ -116,6 +116,16 @@ def get_all_lexicons():
 	return lexes
 
 
+def get_user_lexicons(user):
+	"""
+	Loads each lexicon that the given user is a player in
+	"""
+	return [
+		lexicon
+		for lexicon in get_all_lexicons()
+		if user.id in lexicon.join.joined]
+
+
 def valid_add(lex, player, password=None):
 	"""
 	Checks whether the given player can join a lexicon

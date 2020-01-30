@@ -12,7 +12,6 @@
 {% endfor %}
 
 {% if current_user.is_authenticated %}
-{% set lexicons = current_user.lexicons_in() %}
 <h2>Your games</h2>
 {% if lexicons %}
 {% for lexicon in lexicons %}

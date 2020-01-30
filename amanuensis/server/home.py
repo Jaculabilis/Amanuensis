@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, redirect, url_for
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from amanuensis.config import json_ro, json_rw
 from amanuensis.lexicon import LexiconModel
-from amanuensis.lexicon.manage import create_lexicon
+from amanuensis.lexicon.manage import create_lexicon, get_user_lexicons
 from amanuensis.server.forms import LexiconCreateForm
 from amanuensis.server.helpers import admin_required
 from amanuensis.user import UserModel
@@ -15,7 +15,10 @@ def get_bp():
 
 	@bp.route('/', methods=['GET'])
 	def home():
-		return render_template('home/home.html')
+		lexicons = []
+		if current_user.is_authenticated:
+			lexicons = get_user_lexicons(current_user)
+		return render_template('home/home.html', lexicons=lexicons)
 
 	@bp.route('/admin/', methods=['GET'])
 	@login_required

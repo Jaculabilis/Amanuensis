@@ -10,7 +10,7 @@ from amanuensis.errors import (
 	ArgumentError, MissingConfigError, IndexMismatchError)
 from amanuensis.config import prepend, json_ro, json_rw
 from amanuensis.resources import get_stream
-from amanuensis.lexicon.manage import get_all_lexicons
+
 
 class UserModel(UserMixin):
 	@staticmethod
@@ -64,13 +64,6 @@ class UserModel(UserMixin):
 		with json_ro(self.config_path) as j:
 			return check_password_hash(j['password'], pw)
 
-	def lexicons_in(self):
-		return [
-			lex
-			for lex in get_all_lexicons()
-			if self.id in lex.join.joined
-		]
-
 
 def valid_username(username):
 	"""
@@ -82,12 +75,14 @@ def valid_username(username):
 	is_a_guid = re.match(r"^[A-Za-z0-9]{32}$", username)
 	return length_and_characters and not is_a_guid
 
+
 def valid_email(email):
 	"""Vaguely RFC2822 email verifier"""
 	atom = r"[0-9A-Za-z!#$%&'*+-/=?^_`{|}~]{1,}"
 	dotatom = atom + r"(\." + atom + r")*"
 	addrspec = "^" + dotatom + "@" + dotatom + "$"
 	return re.match(addrspec, email)
+
 
 def create_user(username, displayname, email):
 	"""
