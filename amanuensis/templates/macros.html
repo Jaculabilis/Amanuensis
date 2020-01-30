@@ -13,7 +13,11 @@
 
 {% macro dashboard_user_item(user) %}
 <div class="dashboard-lexicon-item">
-	<p><b>{{ user.username }}</b> {% if user.username != user.displayname %} / {{ user.displayname }}{% endif %} ({{user.uid}})</p>
-	<p>Last activity: {{ user.last_activity }} &mdash; Last login: {{ user.last_login }}</p>
+	<p>
+		<b>{{ user.username }}</b>
+		{% if user.username != user.displayname %} / {{ user.displayname }}{% endif %}
+		({{user.uid}})
+	</p>
+	<p>Last activity: {{ user.last_activity|asdate }} &mdash; Last login: {{ user.last_login|asdate }}</p>
 </div>
 {% endmacro %}

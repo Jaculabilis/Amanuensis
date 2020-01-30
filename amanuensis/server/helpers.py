@@ -1,4 +1,5 @@
 # Standard library imports
+from datetime import datetime
 from functools import wraps
 
 # Third party imports
@@ -12,11 +13,20 @@ from amanuensis.user import UserModel
 
 def register_custom_filters(app):
 	"""Adds custom filters to the Flask app"""
+
 	@app.template_filter("user_attr")
-	def user_attr(uid, attr):
+	def get_user_attr(uid, attr):
 		user = UserModel.by(uid=uid)
 		val = getattr(user, attr)
 		return val
+
+	@app.template_filter("asdate")
+	def timestamp_to_readable(ts, formatstr="%Y-%m-%d %H:%M:%S"):
+		if ts is None:
+			return "null"
+		dt = datetime.fromtimestamp(ts)
+		return dt.strftime(formatstr)
+
 
 def lexicon_param(route):
 	"""Wrapper for loading a route's lexicon"""
