@@ -17,7 +17,7 @@
 		}
 	},
 	"join": {
-		"public": true,
+		"public": false,
 		"open": false,
 		"password": null,
 		"max_players": 4,
