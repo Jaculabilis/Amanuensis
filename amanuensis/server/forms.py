@@ -54,3 +54,9 @@ class LexiconConfigForm(FlaskForm):
 	"""/lexicon/<name>/session/settings/"""
 	configText = TextAreaField("Config file")
 	submit = SubmitField("Submit")
+
+
+class LexiconJoinForm(FlaskForm):
+	"""/lexicon/<name>/join/"""
+	password = StringField('Password')
+	submit = SubmitField("Submit")

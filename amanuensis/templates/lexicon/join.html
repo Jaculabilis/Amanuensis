@@ -1,0 +1,19 @@
+{% extends "lexicon/lexicon.html" %}
+{% block title %}Join | {{ lexicon_title }}{% endblock %}
+
+{% block main %}
+
+<form action="" method="post" novalidate>
+	{{ form.hidden_tag() }}
+	{% if g.lexicon.join.password %}
+	<p>{{ form.password.label }}<br>{{ form.password(size=32) }}</p>
+	{% endif %}
+	<p>{{ form.submit() }}</p>
+</form>
+
+{% for message in get_flashed_messages() %}
+<span style="color:#ff0000">{{ message }}</span><br>
+{% endfor %}
+
+{% endblock %}
+{% set template_content_blocks = [self.main()] %}

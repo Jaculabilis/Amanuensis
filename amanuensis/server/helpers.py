@@ -41,7 +41,9 @@ def lexicon_param(route):
 
 
 def admin_required(route):
-	"""Requires the user to be an admin to load this page"""
+	"""
+	Requires the user to be an admin to load this page
+	"""
 	@wraps(route)
 	def admin_route(*args, **kwargs):
 		if not current_user.is_admin:
@@ -52,11 +54,44 @@ def admin_required(route):
 
 
 def player_required(route):
-	"""Requires the user to be a player in the lexicon to load this page"""
+	"""
+	Requires the user to be a player in the lexicon to load this page
+	"""
 	@wraps(route)
 	def player_route(*args, **kwargs):
 		if current_user.id not in g.lexicon.join.joined:
 			flash("You must be a player to view this page")
+			return (redirect(url_for('lexicon.contents', name=g.lexicon.name))
+				if g.lexicon.join.public
+				else redirect(url_for('home.home')))
+		return route(*args, **kwargs)
+	return player_route
+
+
+def player_required_if_not_public(route):
+	"""
+	Requires the user to be a player in the lexicon to load this page if the
+	lexicon has join.public = false
+	"""
+	@wraps(route)
+	def player_route(*args, **kwargs):
+		if ((not g.lexicon.join.public)
+				and current_user.id not in g.lexicon.join.joined):
+			flash("You must be a player to view this page")
 			return redirect(url_for('home.home'))
 		return route(*args, **kwargs)
 	return player_route
+
+
+def editor_required(route):
+	"""
+	Requires the user to be the editor of the current lexicon to load this
+	page
+	"""
+	@wraps(route)
+	def editor_route(*args, **kwargs):
+		if current_user.id != g.lexicon.editor:
+			flash("You must be the editor to view this page")
+			return redirect(url_for('lexicon.contents', name=g.lexicon.name))
+		return route(*args, **kwargs)
+	return editor_route
