@@ -1,11 +1,12 @@
 from amanuensis.cli.helpers import (
-	add_argument, no_argument, requires_lexicon, requires_user,
+	add_argument, no_argument, requires_lexicon, requires_user, alias,
 	config_get, config_set, CONFIG_GET_ROOT_VALUE)
 
 #
 # CRUD commands
 #
 
+@alias('lc')
 @add_argument("--name", required=True, help="The name of the new lexicon")
 @requires_user
 @add_argument("--prompt", help="The lexicon's prompt")
@@ -40,6 +41,7 @@ def command_create(args):
 	return 0
 
 
+@alias('ld')
 @requires_lexicon
 @add_argument("--purge", action="store_true", help="Delete the lexicon's data")
 def command_delete(args):
@@ -58,6 +60,7 @@ def command_delete(args):
 	return 0
 
 
+@alias('ll')
 @no_argument
 def command_list(args):
 	"""
@@ -78,6 +81,7 @@ def command_list(args):
 	return 0
 
 
+@alias('ln')
 @requires_lexicon
 @add_argument(
 	"--get", metavar="PATHSPEC", dest="get",
@@ -114,6 +118,7 @@ def command_config(args):
 # Player/character commands
 #
 
+@alias('lpa')
 @requires_lexicon
 @requires_user
 def command_player_add(args):
@@ -139,6 +144,7 @@ def command_player_add(args):
 	return 0
 
 
+@alias('lpr')
 @requires_lexicon
 @requires_user
 def command_player_remove(args):
@@ -170,6 +176,7 @@ def command_player_remove(args):
 	return 0
 
 
+@alias('lpl')
 @requires_lexicon
 def command_player_list(args):
 	"""
@@ -190,6 +197,7 @@ def command_player_list(args):
 	return 0
 
 
+@alias('lcc')
 @requires_lexicon
 # @requires_username
 @add_argument("--charname", required=True, help="The character's name")
@@ -221,6 +229,7 @@ def command_char_create(args):
 	return 0
 
 
+@alias('lcd')
 @requires_lexicon
 @add_argument("--charname", required=True, help="The character's name")
 def command_char_delete(args):
@@ -246,6 +255,7 @@ def command_char_delete(args):
 	return 0
 
 
+@alias('lcl')
 @requires_lexicon
 def command_char_list(args):
 	"""
@@ -270,6 +280,7 @@ def command_char_list(args):
 # Procedural commands
 #
 
+@alias('lpt')
 @requires_lexicon
 @add_argument(
 	"--as-deadline", action="store_true",
