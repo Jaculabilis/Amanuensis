@@ -1,4 +1,4 @@
-# Standard imports
+# Standard library imports
 import getpass
 import os
 import shutil

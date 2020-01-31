@@ -1,3 +1,7 @@
+# Standard library imports
+import json
+
+# Module imports
 from amanuensis.cli.helpers import (
 	add_argument, no_argument, requires_lexicon, requires_user, alias,
 	config_get, config_set, CONFIG_GET_ROOT_VALUE)
@@ -199,7 +203,7 @@ def command_player_list(args):
 
 @alias('lcc')
 @requires_lexicon
-# @requires_username
+@requires_user
 @add_argument("--charname", required=True, help="The character's name")
 def command_char_create(args):
 	"""
@@ -214,18 +218,17 @@ def command_char_create(args):
 	from amanuensis.user import UserModel
 
 	# Verify arguments
-	u = UserModel.by(name=args.username)
-	if u is None:
-		logger.error("Could not find user '{}'".format(args.username))
+	if args.user.id not in args.lexicon.join.joined:
+		logger.error('"{0.username}" is not a player in lexicon "{1.name}"'
+			''.format(args.user, args.lexicon))
 		return -1
-	lex = LexiconModel.by(name=args.lexicon)
-	if lex is None:
-		logger.error("Could not find lexicon '{}'".format(args.lexicon))
-		return -1
-	# u in lx TODO
 
-	# Internal call
-	add_character(lex, u, {"name": args.charname})
+	# Perform command
+	add_character(args.lexicon, args.user, {"name": args.charname})
+
+	# Output
+	logger.info('Created character "{0.charname}" for "{0.user.username}" in '
+		'"{0.lexicon.name}"'.format(args))
 	return 0
 
 

@@ -8,18 +8,20 @@
 	Created: {{ g.lexicon.time.created|asdate }}<br>
 	Completed: {{ g.lexicon.time.completed|asdate }}<br>
 	Players:
-	{% for uid in g.lexicon.join.joined[:-1] %}
-	{{ uid|user_attr('username') }},
-	{% endfor %}
-	{{ g.lexicon.join.joined[-1]|user_attr('username') }}<br>
-	Log:
-	<div style="width: 100%; height: 10em; overflow-y:auto; resize: vertical;
-	 border: 1px solid #bbbbbb; font-size: 0.9em; padding:3px; box-sizing: border-box;">
-		{% for log_entry in g.lexicon.log %}
-		[{{ log_entry[0]|asdate }}] {{ log_entry[1] }}<br>
-		{% endfor %}
-	</div>
+	{% for uid in g.lexicon.join.joined %}
+	{{ uid|user_attr('username') }}{% if not loop.last %},{% endif %}
+	{% endfor %}<br>
+	Characters:
+	{% for char in g.lexicon.character.values() %}
+	{{ char.name }} ({{ char.player|user_attr('username') }}){% if not loop.last %},{% endif %}
+	{% endfor %}<br>
 </p>
+<div style="width: 100%; height: 10em; overflow-y:auto; resize: vertical;
+ border: 1px solid #bbbbbb; font-size: 0.9em; padding:3px; box-sizing: border-box;">
+	{% for log_entry in g.lexicon.log %}
+	[{{ log_entry[0]|asdate }}] {{ log_entry[1] }}<br>
+	{% endfor %}
+</div>
 {% endblock %}
 
 {% macro number_setting(field) %}
