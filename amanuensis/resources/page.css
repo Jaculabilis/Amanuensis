@@ -114,6 +114,12 @@ textarea.fullwidth {
 input.smallnumber {
 	width: 4em;
 }
+form#session-settings p {
+	line-height: 1.8em;
+}
+form#lexicon-join {
+	text-align: center;
+}
 div.dashboard-lexicon-item {
 	margin: 0 10px;
 	padding: 0 10px;
