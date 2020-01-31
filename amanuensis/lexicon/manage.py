@@ -125,7 +125,7 @@ def get_user_lexicons(user):
 	return [
 		lexicon
 		for lexicon in get_all_lexicons()
-		if user.id in lexicon.join.joined]
+		if user.in_lexicon(lexicon)]
 
 
 def valid_add(lex, player, password=None):

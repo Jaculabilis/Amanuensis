@@ -3,7 +3,7 @@ import re
 import time
 import uuid
 
-from flask_login import UserMixin
+from flask_login import UserMixin, AnonymousUserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from amanuensis.errors import (
@@ -63,6 +63,16 @@ class UserModel(UserMixin):
 	def check_password(self, pw):
 		with json_ro(self.config_path) as j:
 			return check_password_hash(j['password'], pw)
+
+	def in_lexicon(self, lexicon):
+		return self.id in lexicon.join.joined
+
+
+class AnonymousUserModel(AnonymousUserMixin):
+	is_admin = False
+
+	def in_lexicon(self, lexicon):
+		return False
 
 
 def valid_username(username):

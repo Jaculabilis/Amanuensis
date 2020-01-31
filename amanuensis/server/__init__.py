@@ -8,6 +8,7 @@ from amanuensis.server.auth import get_bp as get_auth_bp
 from amanuensis.server.home import get_bp as get_home_bp
 from amanuensis.server.helpers import register_custom_filters
 from amanuensis.server.lexicon import get_bp as get_lex_bp
+from amanuensis.user import AnonymousUserModel
 
 # Flask app init
 static_root = os.path.abspath(get("static_root"))
@@ -23,6 +24,7 @@ register_custom_filters(app)
 # Flask-Login init
 login = LoginManager(app)
 login.login_view = 'auth.login'
+login.anonymous_user = AnonymousUserModel
 
 # Blueprint inits
 auth_bp = get_auth_bp(login)

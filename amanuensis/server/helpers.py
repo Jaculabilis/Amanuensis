@@ -59,7 +59,7 @@ def player_required(route):
 	"""
 	@wraps(route)
 	def player_route(*args, **kwargs):
-		if current_user.id not in g.lexicon.join.joined:
+		if not current_user.in_lexicon(g.lexicon):
 			flash("You must be a player to view this page")
 			return (redirect(url_for('lexicon.contents', name=g.lexicon.name))
 				if g.lexicon.join.public
@@ -76,7 +76,7 @@ def player_required_if_not_public(route):
 	@wraps(route)
 	def player_route(*args, **kwargs):
 		if ((not g.lexicon.join.public)
-				and current_user.id not in g.lexicon.join.joined):
+				and not current_user.in_lexicon(g.lexicon)):
 			flash("You must be a player to view this page")
 			return redirect(url_for('home.home'))
 		return route(*args, **kwargs)

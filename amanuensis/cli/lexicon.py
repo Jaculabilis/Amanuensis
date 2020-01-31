@@ -134,7 +134,7 @@ def command_player_add(args):
 	from amanuensis.lexicon.manage import add_player
 
 	# Verify arguments
-	if args.user.id in args.lexicon.join.joined:
+	if args.user.in_lexicon(args.lexicon):
 		logger.error('"{0.username}" is already a player in "{1.name}"'.format(
 			args.user, args.lexicon))
 		return -1
@@ -163,7 +163,7 @@ def command_player_remove(args):
 	from amanuensis.lexicon.manage import remove_player
 
 	# Verify arguments
-	if args.user.id not in args.lexicon.join.joined:
+	if not args.user.in_lexicon(args.lexicon):
 		logger.error('"{0.username}" is not a player in lexicon "{1.name}"'
 			''.format(args.user, args.lexicon))
 		return -1
@@ -218,7 +218,7 @@ def command_char_create(args):
 	from amanuensis.user import UserModel
 
 	# Verify arguments
-	if args.user.id not in args.lexicon.join.joined:
+	if not args.user.in_lexicon(args.lexicon):
 		logger.error('"{0.username}" is not a player in lexicon "{1.name}"'
 			''.format(args.user, args.lexicon))
 		return -1
