@@ -70,6 +70,10 @@ class LexiconConfigForm(FlaskForm):
 		"Maximum number of players",
 		widget=NumberInput(),
 		validators=[DataRequired()])
+	joinCharsPerPlayer = IntegerField(
+		"Characters per player",
+		widget=NumberInput(),
+		validators=[DataRequired()])
 	# Publish
 	publishNotifyEditorOnReady = BooleanField(
 		"Notify the editor when a player marks an article as ready")
@@ -137,6 +141,7 @@ class LexiconConfigForm(FlaskForm):
 		self.joinOpen.data = lexicon.join.open
 		self.joinPassword.data = lexicon.join.password
 		self.joinMaxPlayers.data = lexicon.join.max_players
+		self.joinCharsPerPlayer.data = lexicon.join.chars_per_player
 		self.publishNotifyEditorOnReady.data = lexicon.publish.notify.editor_on_ready
 		self.publishNotifyPlayerOnReject.data = lexicon.publish.notify.player_on_reject
 		self.publishNotifyPlayerOnAccept.data = lexicon.publish.notify.player_on_accept
@@ -171,6 +176,7 @@ class LexiconConfigForm(FlaskForm):
 			l.join.open = self.joinOpen.data
 			l.join.password = self.joinPassword.data
 			l.join.max_players = self.joinMaxPlayers.data
+			l.join.chars_per_player = self.joinCharsPerPlayer.data
 			l.publish.notify.editor_on_ready = self.publishNotifyEditorOnReady.data
 			l.publish.notify.player_on_reject = self.publishNotifyPlayerOnReject.data
 			l.publish.notify.player_on_accept = self.publishNotifyPlayerOnAccept.data
