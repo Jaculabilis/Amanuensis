@@ -8,7 +8,16 @@
 {% block bl_editor %}
 <p>Editor actions</p>
 <ul>
-	<li><a href="{{ url_for('lexicon.settings', name=g.lexicon.name) }}">Edit lexicon settings</a></li>
+	<li>
+		<a href="{{ url_for('lexicon.settings', name=g.lexicon.name) }}">
+			Edit lexicon settings
+		</a>
+	</li>
+	<li>
+		<a href="{{ url_for('lexicon.character', name=g.lexicon.name, cid='default') }}">
+			Edit default character
+		</a>
+	</li>
 </ul>
 {% endblock %}
 {% set template_content_blocks = template_content_blocks + [self.bl_editor()] %}
@@ -19,7 +28,6 @@
 <span style="color: #ff0000">{{ message }}</span><br>
 {% endfor %}
 <p>Player actions</p>
-
 <ul>
 	{% set characters = g.lexicon.get_characters_for_player(current_user.id) %}
 	{% for char in characters %}
@@ -29,7 +37,7 @@
 		</a>
 	</li>
 	{% endfor %}
-	{% 
+	{%
 		if characters|count is lt(g.lexicon.join.chars_per_player)
 		and not g.lexicon.turn.current
 	%}

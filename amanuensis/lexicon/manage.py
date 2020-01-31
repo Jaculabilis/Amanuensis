@@ -74,6 +74,8 @@ def create_lexicon(name, editor):
 		"name": "Ersatz Scrivener",
 		"player": None,
 	})
+	with l.edit() as cfg:
+		cfg.character.default.player = None
 
 	return l
 

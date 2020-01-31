@@ -13,11 +13,13 @@
 	{% endfor %}<br>
 	Characters:
 	{% for char in g.lexicon.character.values() %}
-	{{ char.name }} ({{ char.player|user_attr('username') }}){% if not loop.last %},{% endif %}
+	{{ char.name }}{% if char.player %}
+	({{ char.player|user_attr('username') }}){% endif %}
+	{% if not loop.last %},{% endif %}
 	{% endfor %}<br>
 </p>
 <div style="width: 100%; height: 10em; overflow-y:auto; resize: vertical;
- border: 1px solid #bbbbbb; font-size: 0.9em; padding:3px; box-sizing: border-box;">
+ border: 1px solid #bbbbbb; font-size: 0.7em; padding:3px; box-sizing: border-box;">
 	{% for log_entry in g.lexicon.log %}
 	[{{ log_entry[0]|asdate }}] {{ log_entry[1] }}<br>
 	{% endfor %}
