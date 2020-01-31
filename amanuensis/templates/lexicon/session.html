@@ -15,6 +15,9 @@
 {% endif %}
 
 {% block main %}
+{% for message in get_flashed_messages() %}
+<span style="color: #ff0000">{{ message }}</span><br>
+{% endfor %}
 <p>Placeholder text for session page</p>
 {% endblock %}
 {% set template_content_blocks = template_content_blocks + [self.main()] %}

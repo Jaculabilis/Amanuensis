@@ -52,6 +52,9 @@ class LexiconModel():
 	def __repr__(self):
 		return '<LexiconModel lid={0.id} name={0.name}>'.format(self)
 
+	def edit(self):
+		return json_rw(self.config_path)
+
 	def add_log(self, message):
 		now = int(time.time())
 		with json_rw(self.config_path) as j:

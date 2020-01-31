@@ -65,36 +65,23 @@ def get_bp():
 	@lexicon_param
 	@editor_required
 	def settings(name):
-		# Restrict to editor
-		if not current_user.id == g.lexicon.editor:
-			flash("Access is forbidden")
-			return redirect(url_for('lexicon.session', name=name))
-
 		form = LexiconConfigForm()
+		form.set_options(g.lexicon)
 
 		# Load the config for the lexicon on load
 		if not form.is_submitted():
-			with json_ro(g.lexicon.config_path) as cfg:
-				form.configText.data = json.dumps(cfg, indent=2)
+			form.populate_from_lexicon(g.lexicon)
 			return render_template("lexicon/settings.html", form=form)
 
 		if form.validate():
-			# Check input is valid json
-			try:
-				cfg = json.loads(form.configText.data,
-					object_pairs_hook=ReadOnlyOrderedDict)
-			except json.decoder.JsonDecodeError:
-				flash("Invalid JSON")
+			if not form.update_lexicon(g.lexicon):
+				flash("Error updating settings")
 				return render_template("lexicon/settings.html", form=form)
-			# Check input has all the required fields
-			# TODO
-			# Write the new config
 			form.submit.submitted = False
-			with open_ex(g.lexicon.config_path, mode='w') as f:
-				json.dump(cfg, f, indent='\t')
-				flash("Config updated")
-			return redirect(url_for('lexicon.settings', name=name))
+			flash("Settings updated")
+			return redirect(url_for('lexicon.session', name=name))
 
+		flash("Validation error")
 		return render_template("lexicon/settings.html", form=form)
 
 	@bp.route('/statistics/', methods=['GET'])

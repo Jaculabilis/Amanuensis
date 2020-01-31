@@ -1,14 +1,109 @@
 {% extends "lexicon/lexicon.html" %}
 {% block title %}Edit | {{ lexicon_title }}{% endblock %}
 
-{% block main %}
+{% block info %}
+<p>
+	Id: {{ g.lexicon.id }}<br>
+	Name: {{ g.lexicon.name }}<br>
+	Created: {{ g.lexicon.time.created|asdate }}<br>
+	Completed: {{ g.lexicon.time.completed|asdate }}<br>
+	Players:
+	{% for uid in g.lexicon.join.joined[:-1] %}
+	{{ uid|user_attr('username') }},
+	{% endfor %}
+	{{ g.lexicon.join.joined[-1]|user_attr('username') }}<br>
+	Log:
+	<div style="width: 100%; height: 10em; overflow-y:auto; resize: vertical;
+	 border: 1px solid #bbbbbb; font-size: 0.9em; padding:3px; box-sizing: border-box;">
+		{% for log_entry in g.lexicon.log %}
+		[{{ log_entry[0]|asdate }}] {{ log_entry[1] }}<br>
+		{% endfor %}
+	</div>
+</p>
+{% endblock %}
+
+{% macro number_setting(field) %}
+{{ field(autocomplete="off", class_="smallnumber") }}
+{{ field.label }}<br>
+{% for error in field.errors %}
+<span style="color: #ff0000">{{ error }}</span><br>
+{% endfor %}
+
+{% endmacro %}
+{% macro flag_setting(field) %}
+{{ field() }}
+{{ field.label }}<br>
+{% endmacro %}
+
+{% block settings %}
 <form action="" method="post" novalidate>
 	{{ form.hidden_tag() }}
-	<p>{{ form.configText.label }}<br>{{ form.configText(rows=20, class_="fullwidth") }}</p>
+
+	<h3>General</h3>
+	<p>
+		{{ form.title.label }}:<br>
+		{{ form.title(autocomplete="off", size=32, style="width:100%") }}<br>
+		{{ form.editor.label }}: {{ form.editor(autocomplete="off") }}<br>
+		{% for error in form.editor.errors %}
+		<span style="color: #ff0000">{{ error }}</span><br>
+		{% endfor %}
+		{{ form.prompt.label }}: {{ form.prompt(class_="fullwidth") }}
+		{% for error in form.prompt.errors %}
+		<span style="color: #ff0000">{{ error }}</span><br>
+		{% endfor %}
+	</p>
+
+	<h3>Game Progress</h3>
+	<p>
+		{{ number_setting(form.turnCurrent) }}
+		{{ number_setting(form.turnMax) }}
+		{{ form.articleIndexList.label }}:<br>
+		{{ form.articleIndexList(class_="fullwidth", rows=10) }}
+		{{ number_setting(form.articleIndexCapacity) }}
+	</p>
+
+	<h3>Visibility and Joining</h3>
+	<p>
+		{{ flag_setting(form.joinPublic) }}
+		{{ flag_setting(form.joinOpen) }}
+		{{ form.joinPassword(autocomplete="off") }}
+		{{ form.joinPassword.label }}<br>
+		{{ number_setting(form.joinMaxPlayers) }}
+	</p>
+
+	<h3>Turn Publishing</h3>
+	<p>
+		{{ flag_setting(form.publishNotifyEditorOnReady) }}
+		{{ flag_setting(form.publishNotifyPlayerOnReject) }}
+		{{ flag_setting(form.publishNotifyPlayerOnAccept) }}
+		{{ form.publishDeadlines(autocomplete="off") }}
+		{{ form.publishDeadlines.label }}<br>
+		{{ flag_setting(form.publishAsap) }}
+		{{ flag_setting(form.publishBlockOnReady) }}
+		{{ number_setting(form.publishQuorum) }}
+	</p>
+
+	<h3>Article Requirements</h3>
+	<p>
+		{{ flag_setting(form.articleCitationAllowSelf) }}
+		{{ number_setting(form.articleCitationMinExtant)}}
+		{{ number_setting(form.articleCitationMaxExtant)}}
+		{{ number_setting(form.articleCitationMinPhantom)}}
+		{{ number_setting(form.articleCitationMaxPhantom)}}
+		{{ number_setting(form.articleCitationMinTotal)}}
+		{{ number_setting(form.articleCitationMaxTotal)}}
+		{{ number_setting(form.articleCitationMinChars)}}
+		{{ number_setting(form.articleCitationMaxChars)}}
+		{{ number_setting(form.articleWordLimitSoft)}}
+		{{ number_setting(form.articleWordLimitHard)}}
+		{{ flag_setting(form.articleAddendumAllowed) }}
+		{{ number_setting(form.articleAddendumMax) }}
+	</p>
+	<!--character-->
 	<p>{{ form.submit() }}</p>
 </form>
 {% for message in get_flashed_messages() %}
 <span style="color: #ff0000">{{ message }}</span><br>
 {% endfor %}
 {% endblock %}
-{% set template_content_blocks = [self.main()] %}
+{% set template_content_blocks = [self.info(), self.settings()] %}
