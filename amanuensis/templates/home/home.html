@@ -13,14 +13,24 @@
 
 {% if current_user.is_authenticated %}
 <h2>Your games</h2>
-{% if lexicons %}
-{% for lexicon in lexicons %}
+{% if user_lexicons %}
+{% for lexicon in user_lexicons %}
 {{ macros.dashboard_lexicon_item(lexicon) }}
 {% endfor %}
 {% else %}
 <p>You haven't joined a game yet.</p>
 {% endif %}
 {% endif %}
+
+<h2>Public games</h2>
+{% if public_lexicons %}
+{% for lexicon in public_lexicons %}
+{{ macros.dashboard_lexicon_item(lexicon) }}
+{% endfor %}
+{% else %}
+<p>No public games available.</p>
+{% endif %}
+
 {% endblock %}
 {% set template_content_blocks = [self.main()] %}
 
