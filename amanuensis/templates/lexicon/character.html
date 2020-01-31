@@ -1,0 +1,23 @@
+{% extends "lexicon/lexicon.html" %}
+{% block title %}Character | {{ lexicon_title }}{% endblock %}
+
+{% block main %}
+
+<h1>Character</h1>
+<form action="" method="post" novalidate>
+	{{ form.hidden_tag() }}
+	<p>
+		{{ form.characterName.label }}<br>{{ form.characterName(size=32) }}
+	</p>
+	<p>
+		{{ form.defaultSignature.label }}<br>{{ form.defaultSignature(class_='fullwidth') }}
+	</p>
+	<p>{{ form.submit() }}</p>
+</form>
+
+{% for message in get_flashed_messages() %}
+<span style="color:#ff0000">{{ message }}</span><br>
+{% endfor %}
+
+{% endblock %}
+{% set template_content_blocks = [self.main()] %}

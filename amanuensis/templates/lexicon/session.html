@@ -18,6 +18,25 @@
 {% for message in get_flashed_messages() %}
 <span style="color: #ff0000">{{ message }}</span><br>
 {% endfor %}
-<p>Placeholder text for session page</p>
+<p>Player actions</p>
+
+<ul>
+	{% set characters = g.lexicon.get_characters_for_player(current_user.id) %}
+	{% for char in characters %}
+	<li>
+		<a href="{{ url_for('lexicon.character', name=g.lexicon.name, cid=char.cid) }}">
+			Edit {{ char.name }}
+		</a>
+	</li>
+	{% endfor %}
+	{% 
+		if characters|count is lt(g.lexicon.join.chars_per_player)
+		and not g.lexicon.turn.current
+	%}
+	<li>
+		<a href="{{ url_for('lexicon.character', name=g.lexicon.name) }}">Create a character</a>
+	</li>
+	{% endif %}
+</ul>
 {% endblock %}
 {% set template_content_blocks = template_content_blocks + [self.main()] %}

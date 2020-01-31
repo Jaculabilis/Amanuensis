@@ -6,6 +6,7 @@ from wtforms.validators import DataRequired, ValidationError, Optional
 from wtforms.widgets.html5 import NumberInput
 
 from amanuensis.config import json_ro
+from amanuensis.lexicon.manage import add_character
 from amanuensis.user import UserModel
 
 
@@ -206,3 +207,31 @@ class LexiconJoinForm(FlaskForm):
 	"""/lexicon/<name>/join/"""
 	password = StringField('Password')
 	submit = SubmitField("Submit")
+
+
+class LexiconCharacterForm(FlaskForm):
+	"""/lexicon/<name>/session/character/"""
+	characterName = StringField("Character name", validators=[DataRequired()])
+	defaultSignature = TextAreaField("Default signature")
+	submit = SubmitField("Submit")
+
+	def for_new(self):
+		self.characterName.data = ""
+		self.defaultSignature.data = "~"
+
+	def for_character(self, lexicon, cid):
+		char = lexicon.character.get(cid)
+		self.characterName.data = char.name
+		self.defaultSignature.data = char.signature
+
+	def add_character(self, lexicon, user):
+		add_character(lexicon, user, {
+			'name': self.characterName.data,
+			'signature': self.defaultSignature.data,
+		})
+
+	def update_character(self, lexicon, cid):
+		with lexicon.edit() as l:
+			char = l.character.get(cid)
+			char.name = self.characterName.data
+			char.signature = self.defaultSignature.data

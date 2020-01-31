@@ -66,3 +66,16 @@ class LexiconModel():
 		if self.turn.current > self.turn.max:
 			return "completed"
 		return "ongoing"
+
+	def can_add_character(self, uid):
+		return (
+			# Players can't add more characters than chars_per_player
+			(len(self.get_characters_for_player(uid))
+				< self.join.chars_per_player)
+			# Characters can only be added before the game starts
+			and not self.turn.current)
+
+	def get_characters_for_player(self, uid=None):
+		return [
+			char for char in self.character.values()
+			if uid is None or char.player == uid]
