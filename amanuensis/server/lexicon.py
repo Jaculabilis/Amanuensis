@@ -32,8 +32,6 @@ def get_bp():
 			# Gate on password if one is required
 			if (g.lexicon.join.password
 					and form.password.data != g.lexicon.join.password):
-				flash("Incorrect password")
-				print("redirecting")
 				return redirect(url_for("lexicon.join", name=name))
 			# Gate on join validity
 			if valid_add(g.lexicon, current_user, form.password.data):
@@ -41,7 +39,7 @@ def get_bp():
 				return redirect(url_for("lexicon.session", name=name))
 			else:
 				flash("Could not join game")
-				return redirect(url_for("lexicon.join", name=name))
+				return redirect(url_for("home.home", name=name))
 
 		return render_template('lexicon/join.html', form=form)
 
@@ -101,7 +99,8 @@ def get_bp():
 			if cid not in g.lexicon.character:
 				flash('Character not found')
 				return redirect(url_for('lexicon.session', name=name))
-			if g.lexicon.character.get(cid).player != current_user.id:
+			if (g.lexicon.character.get(cid).player != current_user.id
+					and g.lexicon.editor != current_user.id):
 				flash('Access denied')
 				return redirect(url_for('lexicon.session', name=name))
 			return edit_character(name, form, cid)
