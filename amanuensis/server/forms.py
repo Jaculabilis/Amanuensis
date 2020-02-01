@@ -125,6 +125,10 @@ class LexiconConfigForm(FlaskForm):
 	# And finally, the submit button
 	submit = SubmitField("Submit")
 
+	def validate_publishDeadlines(form, field):
+		if form.publishAsap.data:
+			raise ValidationError('Cannot specify deadline if immediate publishing is enabled')
+
 	# TODO add validators that call into extant valid check methods
 
 	def set_options(self, lexicon):

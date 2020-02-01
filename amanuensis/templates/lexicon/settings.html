@@ -84,6 +84,9 @@
 		{{ form.publishDeadlines(autocomplete="off") }}
 		{{ form.publishDeadlines.label }}<br>
 		{{ flag_setting(form.publishAsap) }}
+		{% for error in form.publishDeadlines.errors %}
+		<span style="color: #ff0000">{{ error }}</span><br>
+		{% endfor %}
 		{{ flag_setting(form.publishBlockOnReady) }}
 		{{ number_setting(form.publishQuorum) }}
 	</p>
