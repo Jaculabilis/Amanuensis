@@ -1,0 +1,64 @@
+
+html, body {
+	height: 100%;
+	margin: 0px;
+}
+div#wrapper {
+	max-width: 1128px;
+	height: 100%;
+	display:flex;
+	flex-direction: row;
+	align-items: stretch;
+}
+div.column {
+	width: 50%;
+}
+div#editor-left {
+	display: flex;
+	align-items: stretch;
+}
+div#editor-left div.contentblock {
+	display: flex;
+	flex-direction: column;
+	margin: 10px 10px 10px 5px;
+	width: 100%;
+	padding: 5px;
+}
+div#editor-left div#editor-header {
+	margin: 5px;
+	display: flex;
+	justify-content: space-between;
+}
+div#editor-left input#editor-title {
+	font-size: 2em;
+	margin: 5px;
+}
+textarea#editor-content {
+	margin: 5px;
+	resize: none;
+	flex-grow: 1;
+	width: initial;
+}
+div#editor-right {
+	overflow-y: scroll;
+}
+div#editor-right div.contentblock {
+	margin: 10px 5px 10px 10px;
+}
+@media only screen and (max-width: 816px) {
+	div#wrapper {
+		max-width: 564px;
+		margin: 0 auto;
+		padding: inherit;
+		flex-direction: column;
+	}
+	div.column {
+		width: 100%;
+	}
+	div#editor-left {
+		height: 100%;
+	}
+	div#editor-right {
+		overflow-y: inherit;
+	}
+}

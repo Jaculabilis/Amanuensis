@@ -1,0 +1,52 @@
+{% set characters = g.lexicon.get_characters_for_player(current_user.id) %}
+{% if not characters %}
+{% set characters = [g.lexicon.character.default ] %}
+{% endif %}
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{% block title %}{% endblock %}</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='editor.css') }}">
+	<script>
+		params = {
+			currentTurn: "{{ g.lexicon.turn.current }}",
+			defaultSignature: "{{ characters[0].signature }}",
+		}
+	</script>
+	<script type="text/javascript" src="{{ url_for('static', filename='editor.js') }}"></script>
+</head>
+<body>
+	<div id="wrapper">
+		<div id="editor-left" class="column">
+			<div class="contentblock">
+				<div id="editor-header">
+					<select id="editor-character">
+						{% for char in g.lexicon.get_characters_for_player(current_user.id) %}
+						<option value="{{ char.cid }}">{{ char.name }}</option>
+						{% endfor %}
+					</select>
+					<span>
+						<b>{{ current_user.username }}</b>
+					</span>
+				</div>
+				<input id="editor-title" placeholder="Title" oninput="onContentChange()">
+				<textarea id="editor-content" class="fullwidth" oninput="onContentChange()"></textarea>
+			</div>
+		</div>
+		<div id="editor-right" class="column">
+			<div id="preview" class="contentblock">
+				<p>This editor requires Javascript to function.</p>
+			</div>
+			<div id="preview-citations" class="contentblock">
+				<p>[1]</p>
+			</div>
+			<div id="preview-control" class="contentblock">
+				<p>Article length:</p>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

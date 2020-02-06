@@ -134,4 +134,10 @@ def get_bp():
 	def stats(name):
 		return render_template('lexicon/statistics.html')
 
+	@bp.route('/session/editor/', methods=['GET'])
+	@lexicon_param
+	@player_required
+	def editor(name):
+		return render_template('lexicon/editor.html')
+
 	return bp
