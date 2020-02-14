@@ -1,7 +1,7 @@
 import json
 
 from flask import (
-	Blueprint, render_template, url_for, redirect, g, flash, request)
+	Blueprint, render_template, url_for, redirect, g, flash, request, Markup)
 from flask_login import login_required, current_user
 
 from amanuensis.config import json_ro, open_ex
@@ -138,6 +138,11 @@ def get_bp():
 	@lexicon_param
 	@player_required
 	def editor(name):
-		return render_template('lexicon/editor.html')
+		return render_template(
+			'lexicon/editor.html',
+			current_turn=Markup(json.dumps(g.lexicon.turn.current)),
+			citation=Markup(json.dumps(dict(g.lexicon.article.citation))),
+			word_limit=Markup(json.dumps(dict(g.lexicon.article.word_limit))),
+			addendum=Markup(json.dumps(dict(g.lexicon.article.citation))))
 
 	return bp

@@ -5,23 +5,9 @@ function onContentChange() {
 	// Pass the draft text to the parser to get the preview html and citations
 	var parseResult = parseLexipythonMarkdown(articleBody);
 	// Build the citation block
-	var citeTexts = []
-	for (var i = 0; i < parseResult.citations.length; i++) {
-		var cite = parseResult.citations[i];
-		citeTexts.push("[" + cite.id.toString() + "] " + cite.citeTitle);
-	}
-	var citeblockContent = citeTexts.join(" / ");
+	var citeblockContent = makeCiteblock(parseResult);
 	// Compute warnings and build the control block
-	var flagMissingSignature = !parseResult.hasSignature;
-	var wordCount = (parseResult.html
-		// Delete all HTML tags
-		.replace(/<[^>]+>/g, "")
-		.trim()
-		.split(/\s+/)
-		.length);
-	var controlContent = "";
-	controlContent += "<p>Signature: " + (!flagMissingSignature).toString() + "</p>";
-	controlContent += "<p>Word count: " + wordCount.toString() + "</p>";
+	var controlContent = checkWarnings(parseResult);
 	// Fill in the content blocks
 	document.getElementById("preview").innerHTML = (
 		"<h1>" + articleTitle + "</h1>\n"
@@ -91,13 +77,71 @@ function parseLexipythonMarkdown(text) {
 			content += "<p>" + citationList[i] + "</p>\n";
 		}
 	}
-	// Calculate approximate word count
-	// var wordCount = text.trim().split(/\s+/).length;
-	// if (text.trim().length < 1)
-		// wordCount = 0;
-	// content += "<p><i>Article length: approx. " + wordCount + " words</p>";
-
 	return result;
+}
+
+function makeCiteblock(parseResult) {
+	var citeTexts = []
+	for (var i = 0; i < parseResult.citations.length; i++) {
+		var cite = parseResult.citations[i];
+		citeTexts.push("[" + cite.id.toString() + "] " + cite.citeTitle);
+	}
+	return citeTexts.join(" / ");
+}
+
+function checkWarnings(parseResult) {
+	var result = {
+		errors: [],
+		warnings: [],
+	};
+	if (!parseResult.hasSignature) {
+		result.warnings.push("Article has no signature.");
+	}
+	// Self-citation
+	// TODO
+	// Citation targets
+	// TODO
+	if (params.citation.min_total != null &&
+			parseResult.citations.length < params.citation.min_total) {
+		result.errors.push("Article must have a minimum of " +
+			params.citation.min_total + " citations.");
+	}
+	if (params.citation.max_total != null &&
+			parseResult.citations.length > params.citation.max_total) {
+		result.errors.push("Article cannot have more than " +
+			params.citation.max_total + " citations.");
+	}
+	// TODO
+	// Word limits
+	var wordCount = (parseResult.html
+		// Delete all HTML tags
+		.replace(/<[^>]+>/g, "")
+		.trim()
+		.split(/\s+/)
+		.length);
+	if (params.wordLimit.hard != null && wordCount > params.wordLimit.hard) {
+		result.errors.push("Article must be shorter than " + params.wordLimit.hard + " words.");
+	} else if (params.wordLimit.soft != null && wordCount > params.wordLimit.soft) {
+		result.warnings.push("Article should be shorter than " + params.wordLimit.soft + " words.");
+	}
+
+	var controlContent = "";
+	controlContent += "<p>Word count: " + wordCount + "</p>";
+	if (result.errors.length > 0) {
+		controlContent += "<p id=\"editor-errors\">";
+		for (var i = 0; i < result.errors.length; i++) {
+			controlContent += result.errors[i] + "<br>";
+		}
+		controlContent += "</p>";
+	}
+	if (result.warnings.length > 0) {
+		controlContent += "<p id=\"editor-warnings\">";
+		for (var i = 0; i < result.warnings.length; i++) {
+			controlContent += result.warnings[i] + "<br>";
+		}
+		controlContent += "</p>";
+	}
+	return controlContent;
 }
 
 // Parse the article content and update the preview pane
@@ -128,13 +172,13 @@ function parseLexipythonMarkdown(text) {
 // }
 
 window.onload = function() {
-	document.getElementById("editor-content").value = "\n\n" + params.defaultSignature;
+	document.getElementById("editor-content").value = "\n\n" + params.default_signature;
 	this.onContentChange();
 };
 
 window.addEventListener("beforeunload", function(e) {
 	var content = document.getElementById("editor-content").value
-	var hasText = content.length > 0 && content != "\n\n" + params.defaultSignature;
+	var hasText = content.length > 0 && content != "\n\n" + params.default_signature;
 	if (hasText) {
 		e.returnValue = "Are you sure?";
 	}

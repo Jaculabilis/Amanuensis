@@ -7,14 +7,17 @@
 <head>
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>{% block title %}{% endblock %}</title>
+	<title>Editor</title>
 	<link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='editor.css') }}">
 	<script>
 		params = {
-			currentTurn: "{{ g.lexicon.turn.current }}",
-			defaultSignature: "{{ characters[0].signature }}",
-		}
+			current_turn: {{ current_turn }},
+			default_signature: "{{ characters[0].signature }}",
+			citation: {{ citation }},
+			wordLimit: {{ word_limit }},
+			addendum: {{ addendum }},
+		};
 	</script>
 	<script type="text/javascript" src="{{ url_for('static', filename='editor.js') }}"></script>
 </head>
