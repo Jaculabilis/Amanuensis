@@ -140,11 +140,11 @@ def command_player_add(args):
 		return -1
 
 	# Perform command
-	add_player(lex, u)
+	add_player(args.lexicon, args.user)
 
 	# Output
 	logger.info('Added user "{0.username}" to lexicon "{1.name}"'.format(
-		args.user, ags.lexicon))
+		args.user, args.lexicon))
 	return 0
 
 
@@ -172,7 +172,7 @@ def command_player_remove(args):
 		return -1
 
 	# Perform command
-	remove_player(lex, u)
+	remove_player(args.lexicon, args.user)
 
 	# Output
 	logger.info('Removed "{0.username}" from lexicon "{1.name}"'.format(
