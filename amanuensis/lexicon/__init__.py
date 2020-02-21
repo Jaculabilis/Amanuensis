@@ -44,6 +44,8 @@ class LexiconModel():
 	def __getattr__(self, key):
 		if key not in self.config:
 			raise AttributeError(key)
+		if key == 'title':
+			return self.config.get('title') or f'Lexicon {self.config.name}'
 		return self.config.get(key)
 
 	def __str__(self):
@@ -57,7 +59,7 @@ class LexiconModel():
 
 	def add_log(self, message):
 		now = int(time.time())
-		with json_rw(self.config_path) as j:
+		with self.edit() as j:
 			j['log'].append([now, message])
 
 	def status(self):
