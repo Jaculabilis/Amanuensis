@@ -54,6 +54,10 @@ def create_lexicon(name, editor):
 		cfg['editor'] = editor.uid
 		cfg['time']['created'] = int(time.time())
 
+	# Create subdirectories
+	os.mkdir(prepend(lex_dir, 'draft'))
+	os.mkdir(prepend(lex_dir, 'src'))
+
 	# Update the index with the new lexicon
 	with json_rw('lexicon', 'index.json') as index:
 		index[name] = lid
