@@ -38,7 +38,7 @@ class ConfigDirectoryContext():
 			filename = f'{filename}.json'
 		fpath = os.path.join(self.path, filename)
 		if not os.path.isfile(fpath):
-			raise MissingConfigError(path)
+			raise MissingConfigError(fpath)
 		return json_ro(fpath)
 
 	def edit(self, filename):
@@ -49,7 +49,7 @@ class ConfigDirectoryContext():
 			filename = f'{filename}.json'
 		fpath = os.path.join(self.path, filename)
 		if not os.path.isfile(fpath):
-			raise MissingConfigError(path)
+			raise MissingConfigError(fpath)
 		return json_rw(fpath, new=False)
 
 	def delete(self, filename):
@@ -58,7 +58,7 @@ class ConfigDirectoryContext():
 			filename = f'{filename}.json'
 		fpath = os.path.join(self.path, filename)
 		if not os.path.isfile(fpath):
-			raise MissingConfigError(path)
+			raise MissingConfigError(fpath)
 		os.delete(fpath)
 
 
