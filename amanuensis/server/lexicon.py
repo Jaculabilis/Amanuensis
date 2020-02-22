@@ -4,8 +4,9 @@ from flask import (
 	Blueprint, render_template, url_for, redirect, g, flash, request, Markup)
 from flask_login import login_required, current_user
 
-from amanuensis.config import json_ro, open_ex, prepend
+from amanuensis.config import root
 from amanuensis.config.loader import ReadOnlyOrderedDict
+from amanuensis.errors import MissingConfigError
 from amanuensis.lexicon.manage import valid_add, add_player, add_character
 from amanuensis.server.forms import (
 	LexiconConfigForm, LexiconJoinForm,LexiconCharacterForm)
@@ -190,14 +191,13 @@ def get_bp():
 				articles=articles,
 				jsonfmt=jsonfmt)
 
-		filename = f'{cid}.{aid}.json'
-		path = prepend('lexicon', g.lexicon.id, 'draft', filename)
-		import os
-		if not os.path.isfile(path):
+		filename = f'{cid}.{aid}'
+		try:
+			with g.lexicon.ctx.draft.read(filename) as a:
+				article = a
+		except MissingConfigError:
 			flash("Draft not found")
 			return redirect(url_for('lexicon.session', name=name))
-		with json_ro(path) as a:
-			article = a
 
 		return render_template(
 			'lexicon/editor.html',
@@ -225,9 +225,9 @@ def get_bp():
 			},
 			"contents": ""
 		}
-		filename = f"{cid}.{new_aid}.json"
-		with open_ex('lexicon', g.lexicon.id, 'draft', filename, mode='w') as f:
-			json.dump(article, f)
+		filename = f"{cid}.{new_aid}"
+		with g.lexicon.ctx.draft.new(filename) as j:
+			j.update(article)
 		return redirect(url_for('lexicon.editor', name=name, cid=cid, aid=new_aid))
 
 	@bp.route('/session/editor/update', methods=['POST'])
