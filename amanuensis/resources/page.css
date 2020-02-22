@@ -93,6 +93,7 @@ div.contentblock {
 	padding: 10px;
 	width: auto;
 	border-radius: 5px;
+	word-break: break-word;
 }
 div.contentblock h3 {
 	margin: 0.3em 0;

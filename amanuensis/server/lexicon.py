@@ -4,7 +4,7 @@ from flask import (
 	Blueprint, render_template, url_for, redirect, g, flash, request, Markup)
 from flask_login import login_required, current_user
 
-from amanuensis.config import json_ro, open_ex
+from amanuensis.config import json_ro, open_ex, prepend
 from amanuensis.config.loader import ReadOnlyOrderedDict
 from amanuensis.lexicon.manage import valid_add, add_player, add_character
 from amanuensis.server.forms import (
@@ -12,6 +12,10 @@ from amanuensis.server.forms import (
 from amanuensis.server.helpers import (
 	lexicon_param, player_required, editor_required,
 	player_required_if_not_public)
+
+
+def jsonfmt(obj):
+	return Markup(json.dumps(obj))
 
 
 def get_bp():
@@ -138,11 +142,98 @@ def get_bp():
 	@lexicon_param
 	@player_required
 	def editor(name):
+		"""
+		cases:
+		- neither cid nor aid: load all chars and articles
+		- cid: list articles just for cid
+		- aid: 
+		"""
+		cid = request.args.get('cid')
+		if not cid:
+			# Character not specified, load all characters and articles
+			# and return render_template
+			characters = [
+				char for char in g.lexicon.character.values()
+				if char.player == current_user.id
+			]
+			articles = [
+				article for article in g.lexicon.get_drafts_for_player(uid=current_user.id)
+				if any([article.character == char.cid for char in characters])
+			]
+			return render_template(
+				'lexicon/editor.html',
+				characters=characters,
+				articles=articles,
+				jsonfmt=jsonfmt)
+
+		character = g.lexicon.character.get(cid)
+		if not character:
+			# Character was specified, but id was invalid
+			flash("Character not found")
+			return redirect(url_for('lexicon.session', name=name))
+		if character.player != current_user.id:
+			# Player doesn't control this character
+			flash("Access forbidden")
+			return redirect(url_for('lexicon.session', name=name))
+
+		aid = request.args.get('aid')
+		if not aid:
+			# Character specified but not article, load character articles
+			# and retuen r_t
+			articles = [
+				article for article in g.lexicon.get_drafts_for_player(uid=current_user.id)
+				if article.character == character.cid
+			]
+			return render_template(
+				'lexicon/editor.html',
+				character=character,
+				articles=articles,
+				jsonfmt=jsonfmt)
+
+		filename = f'{cid}.{aid}.json'
+		path = prepend('lexicon', g.lexicon.id, 'draft', filename)
+		import os
+		if not os.path.isfile(path):
+			flash("Draft not found")
+			return redirect(url_for('lexicon.session', name=name))
+		with json_ro(path) as a:
+			article = a
+
 		return render_template(
 			'lexicon/editor.html',
-			current_turn=Markup(json.dumps(g.lexicon.turn.current)),
-			citation=Markup(json.dumps(dict(g.lexicon.article.citation))),
-			word_limit=Markup(json.dumps(dict(g.lexicon.article.word_limit))),
-			addendum=Markup(json.dumps(dict(g.lexicon.article.citation))))
+			character=character,
+			article=article,
+			jsonfmt=jsonfmt)
+
+	@bp.route('/session/editor/new', methods=['GET'])
+	@lexicon_param
+	@player_required
+	def editor_new(name):
+		import uuid
+		new_aid = uuid.uuid4().hex
+		cid = request.args.get("cid")
+		article = {
+			"version": "0",
+			"aid": new_aid,
+			"lexicon": g.lexicon.id,
+			"character": cid,
+			"title": "",
+			"turn": 1,
+			"status": {
+				"ready": False,
+				"approved": False
+			},
+			"contents": ""
+		}
+		filename = f"{cid}.{new_aid}.json"
+		with open_ex('lexicon', g.lexicon.id, 'draft', filename, mode='w') as f:
+			json.dump(article, f)
+		return redirect(url_for('lexicon.editor', name=name, cid=cid, aid=new_aid))
+
+	@bp.route('/session/editor/update', methods=['POST'])
+	@lexicon_param
+	@player_required
+	def editor_update(name):
+		pass
 
 	return bp

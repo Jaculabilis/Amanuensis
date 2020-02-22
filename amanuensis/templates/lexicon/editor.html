@@ -1,6 +1,5 @@
-{% set characters = g.lexicon.get_characters_for_player(current_user.id) %}
-{% if not characters %}
-{% set characters = [g.lexicon.character.default ] %}
+{% if character and not article %}
+{% set characters = [character] %}
 {% endif %}
 <!DOCTYPE html>
 <html>
@@ -12,11 +11,17 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='editor.css') }}">
 	<script>
 		params = {
-			current_turn: {{ current_turn }},
-			default_signature: "{{ characters[0].signature }}",
-			citation: {{ citation }},
-			wordLimit: {{ word_limit }},
-			addendum: {{ addendum }},
+			updateURL: "{{ url_for('lexicon.editor_update', name=g.lexicon.name) }}",
+			{% if character %}
+			character: {{ jsonfmt(character) }},
+			{% else %}
+			character: null,
+			{% endif %}
+			{% if article %}
+			article: {{ jsonfmt(character) }},
+			{% else %}
+			article: null,
+			{% endif %}
 		};
 	</script>
 	<script type="text/javascript" src="{{ url_for('static', filename='editor.js') }}"></script>
@@ -26,17 +31,51 @@
 		<div id="editor-left" class="column">
 			<div class="contentblock">
 				<div id="editor-header">
-					<select id="editor-character">
+					<a href="{{ url_for('lexicon.session', name=g.lexicon.name) }}">
+						{{ g.lexicon.title }}
+					</a>
+					<!-- <select id="editor-character">
 						{% for char in g.lexicon.get_characters_for_player(current_user.id) %}
 						<option value="{{ char.cid }}">{{ char.name }}</option>
 						{% endfor %}
-					</select>
+					</select> -->
 					<span>
-						<b>{{ current_user.username }}</b>
+						<b>
+							{% if character %}
+							{{ character.name }} / 
+							{% endif %}
+							{{ current_user.username }}
+						</b>
 					</span>
 				</div>
+				{% for char in characters %}
+				<div id="editor-charselect">
+					<a href="{{ url_for('lexicon.editor', name=g.lexicon.name, cid=char.cid) }}">
+						<b>{{ char.name }}</b>
+					</a>
+					<ul>
+						{% for article in articles %}
+						{% if article.character == char.cid %}
+						<li>
+							<a href="{{ url_for('lexicon.editor', name=g.lexicon.name, cid=char.cid, aid=article.aid) }}">
+								{{ article.title if article.title.strip() else "Untitled" }}
+							</a>
+						</li>
+						{% endif %}
+						{% endfor %}
+						<li>
+							<a href="{{ url_for('lexicon.editor_new', name=g.lexicon.name, cid=char.cid) }}">
+								New
+							</a>
+						</li>
+					</ul>
+				</div>
+				{% endfor %}
+				{% if article %}
 				<input id="editor-title" placeholder="Title" oninput="onContentChange()">
-				<textarea id="editor-content" class="fullwidth" oninput="onContentChange()"></textarea>
+				<textarea id="editor-content" class="fullwidth" oninput="onContentChange()">
+				</textarea>
+				{% endif %}
 			</div>
 		</div>
 		<div id="editor-right" class="column">
@@ -44,10 +83,10 @@
 				<p>This editor requires Javascript to function.</p>
 			</div>
 			<div id="preview-citations" class="contentblock">
-				<p>[1]</p>
+				<p>&nbsp;</p>
 			</div>
 			<div id="preview-control" class="contentblock">
-				<p>Article length:</p>
+				<p>&nbsp;</p>
 			</div>
 		</div>
 	</div>

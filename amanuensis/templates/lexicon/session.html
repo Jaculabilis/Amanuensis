@@ -45,6 +45,11 @@
 		<a href="{{ url_for('lexicon.character', name=g.lexicon.name) }}">Create a character</a>
 	</li>
 	{% endif %}
+	<li>
+		<a href="{{ url_for('lexicon.editor', name=g.lexicon.name) }}">
+			Article editor
+		</a>
+	</li>
 </ul>
 {% endblock %}
 {% set template_content_blocks = template_content_blocks + [self.main()] %}

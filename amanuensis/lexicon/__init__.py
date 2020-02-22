@@ -81,3 +81,16 @@ class LexiconModel():
 		return [
 			char for char in self.character.values()
 			if uid is None or char.player == uid]
+
+	def get_drafts_for_player(self, uid):
+		chars = self.get_characters_for_player(uid=uid)
+		drafts_path = prepend('lexicon', self.id, 'draft')
+		drafts = []
+		for filename in os.listdir(drafts_path):
+			for char in chars:
+				if filename.startswith(str(char.cid)):
+					drafts.append(filename)
+		for i in range(len(drafts)):
+			with json_ro(drafts_path, drafts[i]) as a:
+				drafts[i] = a
+		return drafts

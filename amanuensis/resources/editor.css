@@ -20,7 +20,7 @@ div#editor-left {
 div#editor-left div.contentblock {
 	display: flex;
 	flex-direction: column;
-	margin: 10px 10px 10px 5px;
+	margin: 10px 5px 10px 10px;
 	width: 100%;
 	padding: 5px;
 }
@@ -28,6 +28,9 @@ div#editor-left div#editor-header {
 	margin: 5px;
 	display: flex;
 	justify-content: space-between;
+}
+div#editor-left div#editor-charselect {
+	margin: 5px;
 }
 div#editor-left input#editor-title {
 	font-size: 2em;
