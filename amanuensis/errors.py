@@ -3,6 +3,15 @@ class AmanuensisError(Exception):
 
 class MissingConfigError(AmanuensisError):
 	"""A config file is missing that was expected to be present"""
+	def __init__(self, path):
+		super.__init__(self, "A config file or directory was expected to "
+			f"exist, but could not be found: {path}")
+
+class ConfigAlreadyExistsError(AmanuensisError):
+	"""Attempted to create a config, but it already exists"""
+	def __init__(self, path):
+		super.__init__(self, "Attempted to create a config, but it already "
+			f"exists: {path}")
 
 class MalformedConfigError(AmanuensisError):
 	"""A config file could not be read and parsed"""
