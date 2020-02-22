@@ -3,7 +3,7 @@ import time
 
 from amanuensis.errors import (
 	ArgumentError, IndexMismatchError, MissingConfigError)
-from amanuensis.config import prepend, json_ro, json_rw
+from amanuensis.config import prepend, json_ro, json_rw, root
 
 class LexiconModel():
 	@staticmethod
@@ -40,6 +40,7 @@ class LexiconModel():
 		self.config_path = prepend('lexicon', lid, 'config.json')
 		with json_ro(self.config_path) as j:
 			self.config = j
+		self.ctx = root.lexicon[self.id]
 
 	def __getattr__(self, key):
 		if key not in self.config:
