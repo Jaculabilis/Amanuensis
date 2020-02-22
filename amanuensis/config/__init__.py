@@ -5,6 +5,7 @@ import os
 
 # Module imports
 from amanuensis.errors import MissingConfigError, MalformedConfigError
+import amanuensis.config.context
 import amanuensis.config.init
 import amanuensis.config.loader
 
@@ -23,13 +24,14 @@ ENV_LOG_FILE_NUM = "AMANUENSIS_LOG_FILE_NUM"
 CONFIG_DIR = None
 GLOBAL_CONFIG = None
 logger = None
+root = None
 
 def init_config(args):
 	"""
 	Initializes the config infrastructure to read configs from the
 	directory given by args.config_dir. Initializes logging.
 	"""
-	global CONFIG_DIR, GLOBAL_CONFIG, logger
+	global CONFIG_DIR, GLOBAL_CONFIG, logger, root
 	CONFIG_DIR = args.config_dir
 	amanuensis.config.init.verify_config_dir(CONFIG_DIR)
 	with amanuensis.config.loader.json_ro(
@@ -37,6 +39,7 @@ def init_config(args):
 		GLOBAL_CONFIG = cfg
 	amanuensis.config.init.init_logging(args, GLOBAL_CONFIG['logging'])
 	logger = logging.getLogger("amanuensis")
+	root = amanuensis.config.context.RootConfigDirectoryContext(CONFIG_DIR)
 
 def get(key):
 	return GLOBAL_CONFIG[key]
