@@ -116,7 +116,7 @@ class LexiconConfigDirectoryContext(ConfigDirectoryContext):
 		self.draft = ConfigDirectoryContext(os.path.join(self.path, 'draft'))
 		self.src = ConfigDirectoryContext(os.path.join(self.path, 'src'))
 
-	def config(edit=False):
+	def config(self, edit=False):
 		if edit:
 			return self.edit('config')
 		else:
@@ -127,7 +127,7 @@ class UserConfigDirectoryContext(ConfigDirectoryContext):
 	"""
 	A config context for a user's config directory.
 	"""
-	def config(edit=False):
+	def config(self, edit=False):
 		if edit:
 			return self.edit('config')
 		else:

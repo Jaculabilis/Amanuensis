@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from amanuensis.errors import (
 	ArgumentError, MissingConfigError, IndexMismatchError)
-from amanuensis.config import prepend, json_ro, json_rw
+from amanuensis.config import prepend, json_rw, root
 from amanuensis.resources import get_stream
 
 
@@ -27,7 +27,7 @@ class UserModel(UserMixin):
 		if not uid and not name:
 			raise ArgumentError("One of uid or name must be not None")
 		if not uid:
-			with json_ro('user', 'index.json') as index:
+			with root.user.index() as index:
 				uid = index.get(name)
 		if not uid:
 			return None
@@ -41,7 +41,8 @@ class UserModel(UserMixin):
 		"""User model initializer, assume all checks were done by by()"""
 		self.id = str(uid) # Flask-Login checks for this
 		self.config_path = prepend('user', uid, 'config.json')
-		with json_ro(self.config_path) as j:
+		self.ctx = root.user[self.id]
+		with self.ctx.config() as j:
 			self.config = j
 
 	def __getattr__(self, key):
@@ -57,12 +58,12 @@ class UserModel(UserMixin):
 
 	def set_password(self, pw):
 		h = generate_password_hash(pw)
-		with json_rw(self.config_path) as j:
+		with self.ctx.config(edit=True) as j:
 			j['password'] = h
 
 	def check_password(self, pw):
-		with json_ro(self.config_path) as j:
-			return check_password_hash(j['password'], pw)
+		with self.ctx.config() as cfg:
+			return check_password_hash(cfg.password, pw)
 
 	def in_lexicon(self, lexicon):
 		return self.id in lexicon.join.joined
