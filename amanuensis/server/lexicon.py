@@ -234,6 +234,12 @@ def get_bp():
 	@lexicon_param
 	@player_required
 	def editor_update(name):
-		pass
+		article = request.json
+		# TODO verification
+		filename = f'{article["character"]}.{article["aid"]}'
+		with g.lexicon.ctx.draft.edit(filename) as a:
+			a.update(article)
+		# TODO return more info
+		return {'hello': 'world'}
 
 	return bp

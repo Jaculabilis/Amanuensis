@@ -18,7 +18,7 @@
 			character: null,
 			{% endif %}
 			{% if article %}
-			article: {{ jsonfmt(character) }},
+			article: {{ jsonfmt(article) }},
 			{% else %}
 			article: null,
 			{% endif %}
@@ -73,8 +73,7 @@
 				{% endfor %}
 				{% if article %}
 				<input id="editor-title" placeholder="Title" oninput="onContentChange()">
-				<textarea id="editor-content" class="fullwidth" oninput="onContentChange()">
-				</textarea>
+				<textarea id="editor-content" class="fullwidth" oninput="onContentChange()"></textarea>
 				{% endif %}
 			</div>
 		</div>
