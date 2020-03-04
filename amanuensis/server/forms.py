@@ -5,7 +5,7 @@ from wtforms import (
 from wtforms.validators import DataRequired, ValidationError, Optional
 from wtforms.widgets.html5 import NumberInput
 
-from amanuensis.config import json_ro
+from amanuensis.config import root
 from amanuensis.lexicon.manage import add_character
 from amanuensis.user import UserModel
 
@@ -16,7 +16,7 @@ def user(exists=True):
 		"not found" if exists else "already exists")
 	should_exist = bool(exists)
 	def validate_user(form, field):
-		with json_ro('user', 'index.json') as index:
+		with root.user.index() as index:
 			if (field.data in index.keys()) != should_exist:
 				raise ValidationError(template.format(field.data))
 	return validate_user
@@ -27,7 +27,7 @@ def lexicon(exists=True):
 		"not found" if exists else "already exists")
 	should_exist = bool(exists)
 	def validate_lexicon(form, field):
-		with json_ro('lexicon', 'index.json') as index:
+		with root.lexicon.index() as index:
 			if (field.data in index.keys()) != should_exist:
 				raise ValidationError(template.format(field.data))
 	return validate_lexicon
@@ -36,7 +36,7 @@ def lexicon(exists=True):
 # Forms
 class LoginForm(FlaskForm):
 	"""/auth/login/"""
-	username = StringField('Username', validators=[DataRequired()])
+	username = StringField('Username', validators=[DataRequired(), user(exists=True)])
 	password = PasswordField('Password', validators=[DataRequired()])
 	remember = BooleanField('Stay logged in')
 	submit = SubmitField('Log in')
