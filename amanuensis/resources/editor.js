@@ -2,14 +2,14 @@
 // before updating in response to a change.
 var nonce = 0;
 
-function ifNoFurtherChanges(callback) {
+function ifNoFurtherChanges(callback, timeout=2000) {
 	var nonce_local = Math.random();
 	nonce = nonce_local;
 	setTimeout(() => {
 		if (nonce == nonce_local) {
 			callback()
 		}
-	}, 2500);
+	}, timeout);
 }
 
 // Initialize editor
@@ -72,7 +72,10 @@ window.addEventListener("keydown", function(event) {
 		if (String.fromCharCode(event.which).toLowerCase() == 's')
 		{
 			event.preventDefault();
-			onContentChange();
+			ifNoFurtherChanges(() => {
+				var article = getArticleObj();
+				update(article);
+			}, 0);
 		}
 	}
 });
