@@ -42,10 +42,11 @@ function update(article) {
 	var req = new XMLHttpRequest();
 	req.open("POST", params.updateURL, true);
 	req.setRequestHeader("Content-type", "application/json");
+	req.responseType = "json";
 	req.onreadystatechange = function () {
 		if (req.readyState == 4 && req.status == 200) {
-			params.article = article;
-			document.getElementById("preview-control").innerHTML = JSON.stringify(req.response);
+			// params.article = article;
+			document.getElementById("preview-control").innerHTML = req.response.rendered;
 		}
 	};
 	req.send(JSON.stringify(article));

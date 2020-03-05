@@ -8,6 +8,7 @@ from amanuensis.config import root
 from amanuensis.config.loader import ReadOnlyOrderedDict
 from amanuensis.errors import MissingConfigError
 from amanuensis.lexicon.manage import valid_add, add_player, add_character
+from amanuensis.parser import parse_raw_markdown, PreviewHtmlRenderer
 from amanuensis.server.forms import (
 	LexiconConfigForm, LexiconJoinForm,LexiconCharacterForm)
 from amanuensis.server.helpers import (
@@ -236,10 +237,14 @@ def get_bp():
 	def editor_update(name):
 		article = request.json
 		# TODO verification
+		parsed_draft = parse_raw_markdown(article['contents'])
+		rendered_html = parsed_draft.render(PreviewHtmlRenderer())
+
 		filename = f'{article["character"]}.{article["aid"]}'
 		with g.lexicon.ctx.draft.edit(filename) as a:
 			a.update(article)
+
 		# TODO return more info
-		return {'hello': 'world'}
+		return {'rendered': rendered_html}
 
 	return bp
