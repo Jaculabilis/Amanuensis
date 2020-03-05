@@ -10,16 +10,16 @@ class PreviewHtmlRenderer():
 	def LineBreak(self, span):
 		return '<br>'
 	def ParsedArticle(self, span):
-		return '\n'.join([child.render(self) for child in span.spans])
+		return '\n'.join(span.recurse(self))
 	def BodyParagraph(self, span):
-		return f'<p>{"".join([child.render(self) for child in span.spans])}</p>'
+		return f'<p>{"".join(span.recurse(self))}</p>'
 	def SignatureParagraph(self, span):
 		return ('<hr><span class="signature"><p>'
-			f'{"".join([child.render(self) for child in span.spans])}'
+			f'{"".join(span.recurse(self))}'
 			'</p></span>')
 	def BoldSpan(self, span):
-		return f'<b>{"".join([child.render(self) for child in span.spans])}</b>'
+		return f'<b>{"".join(span.recurse(self))}</b>'
 	def ItalicSpan(self, span):
-		return f'<i>{"".join([child.render(self) for child in span.spans])}</i>'
+		return f'<i>{"".join(span.recurse(self))}</i>'
 	def CitationSpan(self, span):
 		return f'<a href="#">{span.cite_text}</a>'

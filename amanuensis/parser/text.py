@@ -29,6 +29,8 @@ class SpanContainer(Renderable):
 		self.spans = spans
 	def __str__(self):
 		return f"[{type(self).__name__} {' '.join([str(span) for span in self.spans])}]"
+	def recurse(self, renderer):
+		return [child.render(renderer) for child in self.spans]
 
 class ParsedArticle(SpanContainer):
 	"""Multiple paragraphs"""
