@@ -46,7 +46,9 @@ function update(article) {
 	req.onreadystatechange = function () {
 		if (req.readyState == 4 && req.status == 200) {
 			// params.article = article;
-			document.getElementById("preview").innerHTML = req.response.rendered;
+			var title = document.getElementById("editor-title").value;
+			var previewHtml = "<h1>" + title + "</h1>\n" + req.response.rendered
+			document.getElementById("preview").innerHTML = previewHtml;
 			document.getElementById("preview-control").innerHTML = req.response.word_count;
 		}
 	};

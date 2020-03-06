@@ -5,20 +5,41 @@ for verification against constraints.
 
 import re
 
-class WordCounter():
+class FeatureCounter():
+	def __init__(self):
+		self.word_count = 0
+		self.citation_count = 0
+		self.has_signature = False
+
 	def TextSpan(self, span):
-		return len(re.split('\s+', span.innertext.strip()))
+		self.word_count += len(re.split('\s+', span.innertext.strip()))
+		return self
+
 	def LineBreak(self, span):
-		return 0
+		return self
+
 	def ParsedArticle(self, span):
-		return sum(span.recurse(self))
+		span.recurse(self)
+		return self
+
 	def BodyParagraph(self, span):
-		return sum(span.recurse(self))
+		span.recurse(self)
+		return self
+
 	def SignatureParagraph(self, span):
-		return sum(span.recurse(self))
+		self.has_signature = True
+		span.recurse(self)
+		return self
+
 	def BoldSpan(self, span):
-		return sum(span.recurse(self))
+		span.recurse(self)
+		return self
+
 	def ItalicSpan(self, span):
-		return sum(span.recurse(self))
+		span.recurse(self)
+		return self
+
 	def CitationSpan(self, span):
-		return sum(span.recurse(self))
+		self.citation_count += 1
+		span.recurse(self)
+		return self

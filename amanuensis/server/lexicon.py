@@ -8,7 +8,7 @@ from amanuensis.config import root
 from amanuensis.config.loader import ReadOnlyOrderedDict
 from amanuensis.errors import MissingConfigError
 from amanuensis.lexicon.manage import valid_add, add_player, add_character
-from amanuensis.parser import parse_raw_markdown, PreviewHtmlRenderer, WordCounter
+from amanuensis.parser import parse_raw_markdown, PreviewHtmlRenderer, FeatureCounter
 from amanuensis.server.forms import (
 	LexiconConfigForm, LexiconJoinForm,LexiconCharacterForm)
 from amanuensis.server.helpers import (
@@ -239,7 +239,7 @@ def get_bp():
 		# TODO verification
 		parsed_draft = parse_raw_markdown(article['contents'])
 		rendered_html = parsed_draft.render(PreviewHtmlRenderer())
-		word_count = parsed_draft.render(WordCounter())
+		features = parsed_draft.render(FeatureCounter())
 
 		filename = f'{article["character"]}.{article["aid"]}'
 		with g.lexicon.ctx.draft.edit(filename) as a:
@@ -248,7 +248,7 @@ def get_bp():
 		# TODO return more info
 		return {
 			'rendered': rendered_html,
-			'word_count': word_count,
+			'word_count': features.word_count,
 		}
 
 	return bp
