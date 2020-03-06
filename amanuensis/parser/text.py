@@ -47,13 +47,13 @@ class BoldSpan(SpanContainer):
 class ItalicSpan(SpanContainer):
 	"""A span of text inside italic marks"""
 
-class CitationSpan(Renderable):
+class CitationSpan(SpanContainer):
 	"""A citation to another article"""
-	def __init__(self, cite_text, cite_target):
-		self.cite_text = cite_text
+	def __init__(self, spans, cite_target):
+		super().__init__(spans)
 		self.cite_target = cite_target
 	def __str__(self):
-		return f"{{{self.cite_text}:{self.cite_target}}}"
+		return f"{{{' '.join([str(span) for span in self.spans])}:{self.cite_target}}}"
 
 
 def parse_raw_markdown(text):
@@ -67,46 +67,83 @@ def parse_paragraph(text):
 	# Parse the paragraph as a span of text
 	text = text.strip()
 	if text and text[0] == '~':
-		return SignatureParagraph(parse_citations(text[1:]))
+		return SignatureParagraph(parse_paired_formatting(text[1:]))
 	else:
-		return BodyParagraph(parse_citations(text))
+		return BodyParagraph(parse_paired_formatting(text))
 
-def parse_citations(text):
+def parse_paired_formatting(text, cite=True, bold=True, italic=True):
+	# Find positions of any paired formatting
+	first_cite = text.find("[[") if cite else -1
+	first_bold = text.find("**") if bold else -1
+	first_italic = text.find("//") if italic else -1
+	# Load the possible parse handlers into the map
+	handlers = {}
+	handlers[first_cite] = lambda: parse_citation(text, bold=bold, italic=italic)
+	handlers[first_bold] = lambda: parse_bold(text, cite=cite, italic=italic)
+	handlers[first_italic] = lambda: parse_italic(text, cite=cite, bold=bold)
+	# If nothing was found, move on to the next parsing step
+	handlers[-1] = lambda: parse_breaks(text)
+	# Choose a handler based on the earliest found result
+	finds = [i for i in (first_cite, first_bold, first_italic) if i > -1]
+	first = min(finds) if finds else -1
+	return handlers[first]()
+
+def parse_citation(text, bold=True, italic=True):
 	cite_open = text.find("[[")
 	if cite_open > -1:
 		cite_close = text.find("]]", cite_open + 2)
-		spans_before = parse_bold(text[:cite_open])
-		spans_after = parse_citations(text[cite_close+2:])
-		text_inner = text[cite_open+2:cite_close]
-		alias_split = text_inner.split("|", 1)
-		citation = CitationSpan(alias_split[0], alias_split[-1])
+		# Since we searched for pairs from the beginning, there should be no
+		# undetected pair formatting before this one, so move to the next
+		# level of parsing
+		spans_before = parse_breaks(text[:cite_open])
+		# Continue parsing pair formatting after this one closes with all
+		# three as valid choices
+		spans_after = parse_paired_formatting(text[cite_close + 2:])
+		# Parse inner text and skip parsing for this format pair
+		text_inner = text[cite_open + 2:cite_close]
+		# For citations specifically, we may need to split off a citation
+		# target from the alias text
+		inner_split = text_inner.split("|", 1)
+		text_inner_actual, cite_target = inner_split[0], inner_split[-1]
+		spans_inner = parse_paired_formatting(text_inner_actual,
+			cite=False, bold=bold, italic=italic)
+		citation = CitationSpan(spans_inner, cite_target)
 		return spans_before + [citation] + spans_after
-	# No citations, just parse the regular formatting
-	return parse_bold(text)
+	# Should never happen
+	return parse_breaks(text)
 
-def parse_bold(text):
+def parse_bold(text, cite=True, italic=True):
 	bold_open = text.find("**")
 	if bold_open > -1:
 		bold_close = text.find("**", bold_open + 2)
-		spans_before = parse_italic(text[:bold_open])
-		spans_after = parse_bold(text[bold_close+2:])
-		spans_inner = parse_italic(text[bold_open+2:bold_close])
+		# Should be no formatting behind us
+		spans_before = parse_breaks(text[:bold_open])
+		# Freely parse formatting after us
+		spans_after = parse_paired_formatting(text[bold_close+2:])
+		# Parse inner text minus bold parsing
+		text_inner = text[bold_open+2:bold_close]
+		spans_inner = parse_paired_formatting(text_inner,
+			cite=cite, bold=False, italic=italic)
 		bold = BoldSpan(spans_inner)
 		return spans_before + [bold] + spans_after
+	# Should never happen
 	return parse_italic(text)
 
-def parse_italic(text):
+def parse_italic(text, cite=True, bold=True):
 	italic_open = text.find("//")
 	if italic_open > -1:
 		italic_close = text.find("//", italic_open + 2)
-		text_before = text[:italic_open]
+		# Should be no formatting behind us
+		spans_before = parse_breaks(text[:italic_open])
+		# Freely parse formatting after us
+		spans_after = parse_paired_formatting(text[italic_close+2:])
+		# Parse inner text minus italic parsing
 		text_inner = text[italic_open+2:italic_close]
-		text_after = text[italic_close+2:]
-		spans_before = parse_breaks(text_before)
-		spans_after = parse_italic(text_after)
-		spans_inner = parse_breaks(text_inner)
+		spans_inner = parse_paired_formatting(text_inner,
+			cite=cite, bold=bold, italic=False)
 		italic = ItalicSpan(spans_inner)
 		return spans_before + [italic] + spans_after
+	# Should never happen
 	return parse_breaks(text)
 
 def parse_breaks(text):
