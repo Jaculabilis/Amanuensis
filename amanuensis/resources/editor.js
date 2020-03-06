@@ -21,7 +21,7 @@ window.onload = function() {
 		document.getElementById("editor-content").value = params.article.contents;
 	}
 
-	onContentChange();
+	onContentChange(0);
 };
 
 function getArticleObj() {
@@ -52,11 +52,11 @@ function update(article) {
 	req.send(JSON.stringify(article));
 }
 
-function onContentChange() {
+function onContentChange(timeout=2000) {
 	ifNoFurtherChanges(() => {
 		var article = getArticleObj();
 		update(article);
-	});
+	}, timeout);
 }
 
 window.addEventListener("beforeunload", function(e) {
@@ -73,10 +73,7 @@ window.addEventListener("keydown", function(event) {
 		if (String.fromCharCode(event.which).toLowerCase() == 's')
 		{
 			event.preventDefault();
-			ifNoFurtherChanges(() => {
-				var article = getArticleObj();
-				update(article);
-			}, 0);
+			onContentChange(0);
 		}
 	}
 });
