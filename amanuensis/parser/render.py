@@ -3,6 +3,8 @@ Internal module encapsulating the render logic for parsed articles. Rendering
 is done via a rough approximation of the visitor pattern.
 """
 
+import re
+
 
 class PreviewHtmlRenderer():
 	def TextSpan(self, span):
@@ -22,4 +24,22 @@ class PreviewHtmlRenderer():
 	def ItalicSpan(self, span):
 		return f'<i>{"".join(span.recurse(self))}</i>'
 	def CitationSpan(self, span):
-		return f'<a href="#">{span.cite_text}</a>'
+		return f'<a href="#">{"".join(span.recurse(self))}</a>'
+
+class WordCounter():
+	def TextSpan(self, span):
+		return len(re.split('\s+', span.innertext.strip()))
+	def LineBreak(self, span):
+		return 0
+	def ParsedArticle(self, span):
+		return sum(span.recurse(self))
+	def BodyParagraph(self, span):
+		return sum(span.recurse(self))
+	def SignatureParagraph(self, span):
+		return sum(span.recurse(self))
+	def BoldSpan(self, span):
+		return sum(span.recurse(self))
+	def ItalicSpan(self, span):
+		return sum(span.recurse(self))
+	def CitationSpan(self, span):
+		return sum(span.recurse(self))
