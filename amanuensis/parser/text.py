@@ -9,7 +9,10 @@ import re
 
 class Renderable():
 	def render(self, renderer):
-		return getattr(renderer, type(self).__name__)(self)
+		hook = getattr(renderer, type(self).__name__, None)
+		if hook:
+			return hook(self)
+		return None
 
 class TextSpan(Renderable):
 	"""An unstyled length of text"""
