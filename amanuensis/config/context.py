@@ -62,6 +62,14 @@ class ConfigDirectoryContext():
 		os.delete(fpath)
 
 
+class ConfigFileMixin():
+	def config(self, edit=False):
+		if edit:
+			return self.edit('config')
+		else:
+			return self.read('config')
+
+
 class IndexDirectoryContext(ConfigDirectoryContext):
 	"""
 	A lookup layer for getting config directory contexts for lexicon
@@ -107,7 +115,7 @@ class RootConfigDirectoryContext(ConfigDirectoryContext):
 			UserConfigDirectoryContext)
 
 
-class LexiconConfigDirectoryContext(ConfigDirectoryContext):
+class LexiconConfigDirectoryContext(ConfigFileMixin, ConfigDirectoryContext):
 	"""
 	A config context for a lexicon's config directory.
 	"""
@@ -116,19 +124,9 @@ class LexiconConfigDirectoryContext(ConfigDirectoryContext):
 		self.draft = ConfigDirectoryContext(os.path.join(self.path, 'draft'))
 		self.src = ConfigDirectoryContext(os.path.join(self.path, 'src'))
 
-	def config(self, edit=False):
-		if edit:
-			return self.edit('config')
-		else:
-			return self.read('config')
 
-
-class UserConfigDirectoryContext(ConfigDirectoryContext):
+class UserConfigDirectoryContext(ConfigFileMixin, ConfigDirectoryContext):
 	"""
 	A config context for a user's config directory.
 	"""
-	def config(self, edit=False):
-		if edit:
-			return self.edit('config')
-		else:
-			return self.read('config')
+	pass
