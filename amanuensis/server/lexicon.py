@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from flask import (
 	Blueprint, render_template, url_for, redirect, g, flash, request, Markup)
@@ -210,9 +211,10 @@ def get_bp():
 	@lexicon_param
 	@player_required
 	def editor_new(name):
-		import uuid
 		new_aid = uuid.uuid4().hex
+		# TODO harden this
 		cid = request.args.get("cid")
+		character = g.lexicon.character.get(cid)
 		article = {
 			"version": "0",
 			"aid": new_aid,
@@ -224,7 +226,7 @@ def get_bp():
 				"ready": False,
 				"approved": False
 			},
-			"contents": ""
+			"contents": f"\n\n{character.signature}",
 		}
 		filename = f"{cid}.{new_aid}"
 		with g.lexicon.ctx.draft.new(filename) as j:
@@ -235,7 +237,7 @@ def get_bp():
 	@lexicon_param
 	@player_required
 	def editor_update(name):
-		article = request.json
+		article = request.json['article']
 		# TODO verification
 		parsed_draft = parse_raw_markdown(article['contents'])
 		rendered_html = parsed_draft.render(PreviewHtmlRenderer())
@@ -247,8 +249,11 @@ def get_bp():
 
 		# TODO return more info
 		return {
-			'rendered': rendered_html,
-			'word_count': features.word_count,
+			'article': article,
+			'info': {
+				'rendered': rendered_html,
+				'word_count': features.word_count,
+			}
 		}
 
 	return bp

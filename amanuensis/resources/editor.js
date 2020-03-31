@@ -12,8 +12,9 @@ function ifNoFurtherChanges(callback, timeout=2000) {
 	}, timeout);
 }
 
-// Initialize editor
+// Read data out of params and initialize editor
 window.onload = function() {
+	// Kill noscript message first
 	document.getElementById("preview").innerHTML = "<p>&nbsp;</p>";
 
 	if (params.article != null) {
@@ -24,7 +25,7 @@ window.onload = function() {
 	onContentChange(0);
 };
 
-function getArticleObj() {
+function buildArticleObject() {
 	var title = document.getElementById("editor-title").value;
 	var contents = document.getElementById("editor-content").value;
 	return {
@@ -45,19 +46,21 @@ function update(article) {
 	req.responseType = "json";
 	req.onreadystatechange = function () {
 		if (req.readyState == 4 && req.status == 200) {
-			// params.article = article;
+			params.article = req.response.article;
+
 			var title = document.getElementById("editor-title").value;
-			var previewHtml = "<h1>" + title + "</h1>\n" + req.response.rendered
+			var previewHtml = "<h1>" + title + "</h1>\n" + req.response.info.rendered;
 			document.getElementById("preview").innerHTML = previewHtml;
-			document.getElementById("preview-control").innerHTML = req.response.word_count;
+			document.getElementById("preview-control").innerHTML = req.response.info.word_count;
 		}
 	};
-	req.send(JSON.stringify(article));
+	var payload = { article: article };
+	req.send(JSON.stringify(payload));
 }
 
 function onContentChange(timeout=2000) {
 	ifNoFurtherChanges(() => {
-		var article = getArticleObj();
+		var article = buildArticleObject();
 		update(article);
 	}, timeout);
 }
