@@ -46,16 +46,31 @@ function update(article) {
 	req.responseType = "json";
 	req.onreadystatechange = function () {
 		if (req.readyState == 4 && req.status == 200) {
+			// Update internal state with the returned article object
 			params.article = req.response.article;
-
-			var title = document.getElementById("editor-title").value;
-			var previewHtml = "<h1>" + title + "</h1>\n" + req.response.info.rendered;
-			document.getElementById("preview").innerHTML = previewHtml;
-			document.getElementById("preview-control").innerHTML = req.response.info.word_count;
+			// Set editor editability based on article status
+			updateEditorStatus();
+			// Update the preview with the parse information
+			updatePreview(req.response.info);
 		}
 	};
 	var payload = { article: article };
 	req.send(JSON.stringify(payload));
+}
+
+function updateEditorStatus() {
+	var ready = !!params.article.status.ready
+	document.getElementById("editor-title").disabled = ready;
+	document.getElementById("editor-content").disabled = ready;
+	var submitButton = document.getElementById("button-submit");
+	submitButton.innerText = ready ? "Edit article" : "Submit article";
+}
+
+function updatePreview(info) {
+	var title = document.getElementById("editor-title").value;
+	var previewHtml = "<h1>" + title + "</h1>\n" + info.rendered;
+	document.getElementById("preview").innerHTML = previewHtml;
+	document.getElementById("preview-control").innerHTML = info.word_count;
 }
 
 function onContentChange(timeout=2000) {
@@ -63,6 +78,14 @@ function onContentChange(timeout=2000) {
 		var article = buildArticleObject();
 		update(article);
 	}, timeout);
+}
+
+function submitArticle() {
+	ifNoFurtherChanges(() => {
+		params.article.status.ready = !params.article.status.ready;
+		var article = buildArticleObject();
+		update(article);
+	}, 0);
 }
 
 window.addEventListener("beforeunload", function(e) {

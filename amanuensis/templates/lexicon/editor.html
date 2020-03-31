@@ -34,11 +34,9 @@
 					<a href="{{ url_for('lexicon.session', name=g.lexicon.name) }}">
 						{{ g.lexicon.title }}
 					</a>
-					<!-- <select id="editor-character">
-						{% for char in g.lexicon.get_characters_for_player(current_user.id) %}
-						<option value="{{ char.cid }}">{{ char.name }}</option>
-						{% endfor %}
-					</select> -->
+					{% if article %}
+					<button id="button-submit" onclick="submitArticle()">Submit article</button>
+					{% endif %}
 					<span>
 						<b>
 							{% if character %}
