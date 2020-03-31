@@ -50,9 +50,7 @@
 				</div>
 				{% for char in characters %}
 				<div id="editor-charselect">
-					<a href="{{ url_for('lexicon.editor', name=g.lexicon.name, cid=char.cid) }}">
-						<b>{{ char.name }}</b>
-					</a>
+					<b>{{ char.name }}</b>
 					<ul>
 						{% for article in articles %}
 						{% if article.character == char.cid %}
