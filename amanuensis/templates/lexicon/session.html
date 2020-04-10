@@ -18,6 +18,13 @@
 			Edit default character
 		</a>
 	</li>
+	{% for article in ready_articles %}
+	<li>
+		<a href="{{ url_for('lexicon.review', name=g.lexicon.name, aid=article.aid) }}">
+			Review article by {{ g.lexicon.character[article.character].name }}
+		</a>
+	</li>
+	{% endfor %}
 </ul>
 {% endblock %}
 {% set template_content_blocks = template_content_blocks + [self.bl_editor()] %}

@@ -11,7 +11,7 @@ from amanuensis.errors import MissingConfigError
 from amanuensis.lexicon.manage import valid_add, add_player, add_character
 from amanuensis.parser import parse_raw_markdown, PreviewHtmlRenderer, FeatureCounter
 from amanuensis.server.forms import (
-	LexiconConfigForm, LexiconJoinForm,LexiconCharacterForm)
+	LexiconConfigForm, LexiconJoinForm,LexiconCharacterForm, LexiconReviewForm)
 from amanuensis.server.helpers import (
 	lexicon_param, player_required, editor_required,
 	player_required_if_not_public)
@@ -66,7 +66,14 @@ def get_bp():
 	@lexicon_param
 	@player_required
 	def session(name):
-		return render_template('lexicon/session.html')
+		drafts = []
+		draft_ctx = g.lexicon.ctx.draft
+		draft_filenames = draft_ctx.ls()
+		for draft_filename in draft_filenames:
+			with draft_ctx.read(draft_filename) as draft:
+				if draft.status.ready and not draft.status.approved:
+					drafts.append(draft)
+		return render_template('lexicon/session.html', ready_articles=drafts)
 
 	def edit_character(name, form, cid):
 		if form.validate_on_submit():
@@ -134,6 +141,41 @@ def get_bp():
 
 		flash("Validation error")
 		return render_template("lexicon/settings.html", form=form)
+
+	@bp.route('/session/review/', methods=['GET', 'POST'])
+	@lexicon_param
+	@editor_required
+	def review(name):
+		aid = request.args.get('aid')
+		if not aid:
+			flash("Unknown article id")
+			return redirect(url_for('lexicon.session', name=name))
+
+		draft_ctx = g.lexicon.ctx.draft
+		# TODO do this not terribly
+		draft_filename = [fn for fn in draft_ctx.ls() if aid in fn][0]
+		with draft_ctx.read(draft_filename) as draft:
+			parsed_draft = parse_raw_markdown(draft.contents)
+			rendered_html = parsed_draft.render(PreviewHtmlRenderer(
+				{'Article':'default','Phantom':None}))
+
+		form = LexiconReviewForm()
+
+		if form.validate_on_submit():
+			with draft_ctx.edit(draft_filename) as draft:
+				if not draft.status.ready:
+					flash("Article was rescinded")
+					return redirect(url_for('lexicon.session', name=name))
+				result = (form.approved.data == "Y")
+				draft.status.ready = result
+				draft.status.approved = result
+			return redirect(url_for('lexicon.session', name=name))
+
+		return render_template(
+			"lexicon/review.html",
+			form=form,
+			article_html=Markup(rendered_html))
+
 
 	@bp.route('/statistics/', methods=['GET'])
 	@lexicon_param
@@ -239,6 +281,8 @@ def get_bp():
 	def editor_update(name):
 		article = request.json['article']
 		# TODO verification
+		# check if article was previously approved
+		# check extrinsic constraints for blocking errors
 		parsed_draft = parse_raw_markdown(article['contents'])
 		rendered_html = parsed_draft.render(PreviewHtmlRenderer(
 			{'Article':'default','Phantom':None}))

@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import (
 	StringField, PasswordField, BooleanField, SubmitField, TextAreaField,
-	IntegerField, SelectField)
+	IntegerField, SelectField, RadioField)
 from wtforms.validators import DataRequired, ValidationError, Optional
 from wtforms.widgets.html5 import NumberInput
 
@@ -239,3 +239,9 @@ class LexiconCharacterForm(FlaskForm):
 			char = l.character.get(cid)
 			char.name = self.characterName.data
 			char.signature = self.defaultSignature.data
+
+
+class LexiconReviewForm(FlaskForm):
+	"""/lexicon/<name>/session/review/"""
+	approved = RadioField("Buttons", choices=(("Y", "Approved"), ("N", "Rejected")))
+	submit = SubmitField("Submit")

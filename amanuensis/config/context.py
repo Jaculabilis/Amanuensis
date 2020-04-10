@@ -61,6 +61,11 @@ class ConfigDirectoryContext():
 			raise MissingConfigError(fpath)
 		os.delete(fpath)
 
+	def ls(self):
+		"""Lists all files in this directory."""
+		filenames = os.listdir(self.path)
+		return filenames
+
 
 class ConfigFileMixin():
 	def config(self, edit=False):

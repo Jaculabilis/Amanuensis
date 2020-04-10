@@ -1,0 +1,20 @@
+{% extends "lexicon/lexicon.html" %}
+{% block title %}Review | {{ lexicon_title }}{% endblock %}
+
+{% block article %}
+{{ article_html }}
+{% endblock %}
+
+{% block evaluation %}
+{% for message in get_flashed_messages() %}
+<span style="color: #ff0000">{{ message }}</span><br>
+{% endfor %}
+<form id="article-review" action="" method="post" novalidate>
+	{{ form.hidden_tag() }}
+
+	{{ form.approved }}
+	<p>{{ form.submit() }}</p>
+</form>
+{% endblock %}
+
+{% set template_content_blocks = [self.article(), self.evaluation()] %}

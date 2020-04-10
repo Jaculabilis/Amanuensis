@@ -59,7 +59,7 @@ function update(article) {
 }
 
 function updateEditorStatus() {
-	var ready = !!params.article.status.ready
+	var ready = !!params.article.status.ready || !!params.article.status.approved;
 	document.getElementById("editor-title").disabled = ready;
 	document.getElementById("editor-content").disabled = ready;
 	var submitButton = document.getElementById("button-submit");
