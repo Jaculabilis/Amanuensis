@@ -240,7 +240,8 @@ def get_bp():
 		article = request.json['article']
 		# TODO verification
 		parsed_draft = parse_raw_markdown(article['contents'])
-		rendered_html = parsed_draft.render(PreviewHtmlRenderer())
+		rendered_html = parsed_draft.render(PreviewHtmlRenderer(
+			{'Article':'default','Phantom':None}))
 		features = parsed_draft.render(FeatureCounter())
 
 		filename = f'{article["character"]}.{article["aid"]}'
