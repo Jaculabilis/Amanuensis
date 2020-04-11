@@ -17,4 +17,8 @@
 </form>
 {% endblock %}
 
+{% if form %}
 {% set template_content_blocks = [self.article(), self.evaluation()] %}
+{% else %}
+{% set template_content_blocks = [self.article()] %}
+{% endif %}

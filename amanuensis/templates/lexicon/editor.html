@@ -34,7 +34,7 @@
 					<a href="{{ url_for('lexicon.session', name=g.lexicon.name) }}">
 						{{ g.lexicon.title }}
 					</a>
-					{% if article %}
+					{% if article and not article.status.approved %}
 					<button id="button-submit" onclick="submitArticle()">Submit article</button>
 					{% endif %}
 					<span>

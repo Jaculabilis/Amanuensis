@@ -21,7 +21,17 @@
 	{% for article in ready_articles %}
 	<li>
 		<a href="{{ url_for('lexicon.review', name=g.lexicon.name, aid=article.aid) }}">
-			Review article by {{ g.lexicon.character[article.character].name }}
+			Review <i>{{ article.title }}</i> by {{ g.lexicon.character[article.character].name }}
+		</a>
+	</li>
+	{% endfor %}
+</ul>
+<p>Approved articles</p>
+<ul>
+	{% for article in approved_articles %}
+	<li>
+		<a href="{{ url_for('lexicon.review', name=g.lexicon.name, aid=article.aid) }}">
+			<i>{{ article.title }}</i> by {{ g.lexicon.character[article.character].name }}
 		</a>
 	</li>
 	{% endfor %}
