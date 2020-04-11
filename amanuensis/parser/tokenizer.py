@@ -54,7 +54,8 @@ class CitationSpan(SpanContainer):
 	"""A citation to another article"""
 	def __init__(self, spans, cite_target):
 		super().__init__(spans)
-		self.cite_target = cite_target
+		# Normalize citation target by eliminating most whitespace
+		self.cite_target = re.sub(r'\s+', " ", cite_target.strip())
 	def __str__(self):
 		return f"{{{' '.join([str(span) for span in self.spans])}:{self.cite_target}}}"
 
