@@ -32,6 +32,9 @@ div#editor-left div#editor-header {
 div#editor-left div#editor-charselect {
 	margin: 5px;
 }
+div#editor-left div#editor-buttons {
+	margin: 5px;
+}
 div#editor-left input#editor-title {
 	font-size: 2em;
 	margin: 5px;
