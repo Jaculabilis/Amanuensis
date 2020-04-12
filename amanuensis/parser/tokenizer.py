@@ -6,6 +6,7 @@ can be rendered by a renderer.
 
 import re
 
+from amanuensis.parser.helpers import normalize_title
 
 class Renderable():
 	def render(self, renderer):
@@ -54,8 +55,8 @@ class CitationSpan(SpanContainer):
 	"""A citation to another article"""
 	def __init__(self, spans, cite_target):
 		super().__init__(spans)
-		# Normalize citation target by eliminating most whitespace
-		self.cite_target = re.sub(r'\s+', " ", cite_target.strip())
+		# Normalize citation target
+		self.cite_target = normalize_title(cite_target)
 	def __str__(self):
 		return f"{{{' '.join([str(span) for span in self.spans])}:{self.cite_target}}}"
 
