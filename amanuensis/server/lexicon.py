@@ -8,8 +8,8 @@ from flask_login import login_required, current_user
 from amanuensis.config import root
 from amanuensis.config.loader import ReadOnlyOrderedDict
 from amanuensis.errors import MissingConfigError
-from amanuensis.lexicon.manage import valid_add, add_player, add_character
-from amanuensis.parser import parse_raw_markdown, PreviewHtmlRenderer, FeatureCounter
+from amanuensis.lexicon.manage import valid_add, add_player, add_character, attempt_publish
+from amanuensis.parser import parse_raw_markdown, PreviewHtmlRenderer, FeatureCounter, filesafe_title
 from amanuensis.server.forms import (
 	LexiconConfigForm, LexiconJoinForm,LexiconCharacterForm, LexiconReviewForm)
 from amanuensis.server.helpers import (
@@ -54,7 +54,24 @@ def get_bp():
 	@lexicon_param
 	@player_required_if_not_public
 	def contents(name):
-		return render_template('lexicon/contents.html')
+		articles = []
+		filenames = g.lexicon.ctx.article.ls()
+		for filename in filenames:
+			with g.lexicon.ctx.article.read(filename) as a:
+				articles.append({
+					'title': a.title,
+					'link': url_for('lexicon.article', name=name, title=filesafe_title(a.title)),
+				})
+		return render_template('lexicon/contents.html', articles=articles)
+
+	@bp.route('/article/<title>')
+	@lexicon_param
+	@player_required_if_not_public
+	def article(name, title):
+		with g.lexicon.ctx.article.read(title) as a:
+			article = dict(a)
+			article['html'] = Markup(a['html'])
+			return render_template('lexicon/article.html', article=article)
 
 	@bp.route('/rules/', methods=['GET'])
 	@lexicon_param
@@ -177,6 +194,8 @@ def get_bp():
 						draft.status.ready = True
 						draft.status.approved = True
 						g.lexicon.add_log(f"Article '{draft.title}' approved ({draft.aid})")
+						if g.lexicon.publish.asap:
+							attempt_publish(g.lexicon)
 					else:
 						draft.status.ready = False
 						draft.status.approved = False

@@ -13,6 +13,7 @@ from amanuensis.config import prepend, json_rw, json_ro, logger
 from amanuensis.config.loader import AttrOrderedDict
 from amanuensis.errors import ArgumentError
 from amanuensis.lexicon import LexiconModel
+from amanuensis.parser import parse_raw_markdown, GetCitations, HtmlRenderer, filesafe_title
 from amanuensis.resources import get_stream
 
 def valid_name(name):
@@ -261,3 +262,62 @@ def delete_character(lex, charname):
 	# Remove character from character list
 	with json_rw(lex.config_path) as cfg:
 		del cfg.character[char.cid]
+
+
+def attempt_publish(lexicon):
+	# Need to do checks
+
+	# Get the articles to publish
+	draft_ctx = lexicon.ctx.draft
+	drafts = draft_ctx.ls()
+	turn = []
+	for draft_fn in drafts:
+		with draft_ctx.read(draft_fn) as draft:
+			if draft.status.approved:
+				draft_fn = f'{draft.character}.{draft.aid}'
+				turn.append(draft_fn)
+
+	return publish_turn(lexicon, turn)
+
+def publish_turn(lexicon, drafts):
+	# Move the drafts to src
+	draft_ctx = lexicon.ctx.draft
+	src_ctx =  lexicon.ctx.src
+	for filename in drafts:
+		with draft_ctx.read(filename) as source:
+			with src_ctx.new(filename) as dest:
+				dest.update(source)
+		draft_ctx.delete(filename)
+
+	# Rebuilding the interlink data begins with loading all articles
+	article_model_by_title = {}
+	article_renderable_by_title = {}
+	for filename in src_ctx.ls():
+		with src_ctx.read(filename) as article:
+			article_model_by_title[article.title] = article
+			article_renderable_by_title[article.title] = parse_raw_markdown(article.contents)
+
+	# Determine the full list of articles by checking for phantom citations
+	written_titles = list(article_model_by_title.keys())
+	phantom_titles = []
+	for article in article_renderable_by_title.values():
+		citations = article.render(GetCitations())
+		for target in citations:
+			if target not in written_titles and target not in phantom_titles:
+				phantom_titles.append(target)
+
+	# Render article HTML and save to cache
+	rendered_html_by_title = {}
+	for title, article in article_renderable_by_title.items():
+		html = article.render(HtmlRenderer(written_titles))
+		filename = filesafe_title(title)
+		with lexicon.ctx.article.new(filename) as f:
+			f['title'] = title
+			f['html'] = html
+
+	for title in phantom_titles:
+		html = ""
+		filename = filesafe_title(title)
+		with lexicon.ctx.article.new(filename) as f:
+			f['title'] = title
+			f['html'] = html

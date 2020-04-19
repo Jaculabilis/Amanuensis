@@ -4,6 +4,47 @@ readable formats.
 """
 
 
+class HtmlRenderer():
+	"""
+	Renders an article token tree into published article HTML.
+	"""
+	def __init__(self, written_articles):
+		self.written_articles = written_articles
+
+	def TextSpan(self, span):
+		return span.innertext
+
+	def LineBreak(self, span):
+		return '<br>'
+
+	def ParsedArticle(self, span):
+		return '\n'.join(span.recurse(self))
+
+	def BodyParagraph(self, span):
+		return f'<p>{"".join(span.recurse(self))}</p>'
+
+	def SignatureParagraph(self, span):
+		return (
+			'<hr><span class="signature"><p>'
+			f'{"".join(span.recurse(self))}'
+			'</p></span>'
+		)
+
+	def BoldSpan(self, span):
+		return f'<b>{"".join(span.recurse(self))}</b>'
+
+	def ItalicSpan(self, span):
+		return f'<i>{"".join(span.recurse(self))}</i>'
+
+	def CitationSpan(self, span):
+		if span.cite_target in self.written_articles:
+			link_class = ''
+		else:
+			link_class = ' class="phantom"'
+		return f'<a href="#"{link_class}>{"".join(span.recurse(self))}</a>'
+
+
+
 class PreviewHtmlRenderer():
 	def __init__(self, article_map):
 		"""

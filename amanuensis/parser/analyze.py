@@ -33,8 +33,11 @@ class RenderableVisitor():
 class GetCitations(RenderableVisitor):
 	def __init__(self):
 		self.citations = []
+	def ParsedArticle(self, span):
+		span.recurse(self)
+		return self.citations
 	def CitationSpan(self, span):
-		self.citations.append(self.cite_target)
+		self.citations.append(span.cite_target)
 		return self
 
 class FeatureCounter(RenderableVisitor):

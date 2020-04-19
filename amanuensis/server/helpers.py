@@ -31,12 +31,13 @@ def register_custom_filters(app):
 def lexicon_param(route):
 	"""Wrapper for loading a route's lexicon"""
 	@wraps(route)
-	def with_lexicon(name):
+	def with_lexicon(**kwargs):
+		name = kwargs.get('name')
 		g.lexicon = LexiconModel.by(name=name)
 		if g.lexicon is None:
 			flash("Couldn't find a lexicon with the name '{}'".format(name))
 			return redirect(url_for("home.home"))
-		return route(name)
+		return route(**kwargs)
 	return with_lexicon
 
 

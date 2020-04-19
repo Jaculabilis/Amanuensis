@@ -59,7 +59,7 @@ class ConfigDirectoryContext():
 		fpath = os.path.join(self.path, filename)
 		if not os.path.isfile(fpath):
 			raise MissingConfigError(fpath)
-		os.delete(fpath)
+		os.remove(fpath)
 
 	def ls(self):
 		"""Lists all files in this directory."""
@@ -128,6 +128,7 @@ class LexiconConfigDirectoryContext(ConfigFileMixin, ConfigDirectoryContext):
 		super().__init__(path)
 		self.draft = ConfigDirectoryContext(os.path.join(self.path, 'draft'))
 		self.src = ConfigDirectoryContext(os.path.join(self.path, 'src'))
+		self.article = ConfigDirectoryContext(os.path.join(self.path, 'article'))
 
 
 class UserConfigDirectoryContext(ConfigFileMixin, ConfigDirectoryContext):

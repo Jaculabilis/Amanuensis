@@ -302,5 +302,7 @@ def command_publish_turn(args):
 	settings.
 	"""
 	# Module imports
+	from amanuensis.lexicon.manage import attempt_publish
 
-	raise NotImplementedError() # TODO
+	# Internal call
+	attempt_publish(args.lexicon)

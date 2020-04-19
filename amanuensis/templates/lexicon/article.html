@@ -1,0 +1,15 @@
+{% extends "lexicon/lexicon.html" %}
+{% block title %}{{ article.title }} | {{ lexicon_title }}{% endblock %}
+
+{% block main %}
+
+{% for message in get_flashed_messages() %}
+<span style="color:#ff0000">{{ message }}</span><br>
+{% endfor %}
+
+<h1>{{ article.title }}</h1>
+
+{{ article.html }}
+
+{% endblock %}
+{% set template_content_blocks = [self.main()] %}

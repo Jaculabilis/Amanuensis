@@ -1,3 +1,6 @@
+import re
+import urllib
+
 def normalize_title(title):
 	"""
 	Normalizes strings as titles:
@@ -6,7 +9,7 @@ def normalize_title(title):
 	- Capitalizes the first word
 	"""
 	cleaned = re.sub(r'\s+', " ", title.strip())
-	return cleaned[0:1].upper() + cleaned[1:]
+	return cleaned[:1].capitalize() + cleaned[1:]
 
 def titlesort(title):
 	"""
@@ -21,3 +24,14 @@ def titlesort(title):
 		return lower[2:]
 	else:
 		return lower
+
+def filesafe_title(title):
+	"""
+	Makes an article title filename-safe.
+	"""
+	s = re.sub(r"\s+", '_', title)  # Replace whitespace with _
+	s = re.sub(r"~", '-', s)        # parse.quote doesn't catch ~
+	s = urllib.parse.quote(s)       # Encode all other characters
+	s = re.sub(r"%", "", s)         # Strip encoding %s
+	s = s[:64]                  	# Limit to 64 characters
+	return s

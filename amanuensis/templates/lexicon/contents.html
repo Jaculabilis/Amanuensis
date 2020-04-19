@@ -8,7 +8,13 @@
 <span style="color:#ff0000">{{ message }}</span><br>
 {% endfor %}
 
-Placeholder text
+{% if articles %}
+<ul>
+{% for article in articles %}
+<li><a href="{{ article.link }}">{{ article.title }}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
 
 {% endblock %}
 {% set template_content_blocks = [self.main()] %}
