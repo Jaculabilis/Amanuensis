@@ -78,9 +78,9 @@ def parse_paragraph(text):
 
 def parse_paired_formatting(text, cite=True, bold=True, italic=True):
 	# Find positions of any paired formatting
-	first_cite = text.find("[[") if cite else -1
-	first_bold = text.find("**") if bold else -1
-	first_italic = text.find("//") if italic else -1
+	first_cite = find_pair(text, "[[", "]]", cite)
+	first_bold = find_pair(text, "**", "**", bold)
+	first_italic = find_pair(text, "//", "//", italic)
 	# Load the possible parse handlers into the map
 	handlers = {}
 	handlers[first_cite] = lambda: parse_citation(text, bold=bold, italic=italic)
@@ -92,6 +92,21 @@ def parse_paired_formatting(text, cite=True, bold=True, italic=True):
 	finds = [i for i in (first_cite, first_bold, first_italic) if i > -1]
 	first = min(finds) if finds else -1
 	return handlers[first]()
+
+def find_pair(text, open_tag, close_tag, valid):
+	# If skipping, return -1
+	if not valid:
+		return -1
+	# If the open tag wasn't found, return -1
+	first = text.find(open_tag)
+	if first < 0:
+		return -1
+	# If the close tag wasn't found after the open tag, return -1
+	second = text.find(close_tag, first + len(open_tag))
+	if second < 0:
+		return -1
+	# Otherwise, the pair exists
+	return first
 
 def parse_citation(text, bold=True, italic=True):
 	cite_open = text.find("[[")
