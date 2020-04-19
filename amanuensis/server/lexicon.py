@@ -71,7 +71,9 @@ def get_bp():
 		with g.lexicon.ctx.article.read(title) as a:
 			article = dict(a)
 			article['html'] = Markup(a['html'] or "")
-			return render_template('lexicon/article.html', article=article)
+			with g.lexicon.ctx.read('info') as info:
+				cites = info[a.title]['citations']
+			return render_template('lexicon/article.html', article=article, cites=cites)
 
 	@bp.route('/rules/', methods=['GET'])
 	@lexicon_param
@@ -183,8 +185,12 @@ def get_bp():
 				return redirect(url_for('lexicon.session', name=name))
 
 			parsed_draft = parse_raw_markdown(draft.contents)
-			rendered_html = parsed_draft.render(PreviewHtmlRenderer(
-				{'Article':'default','Phantom':None}))
+			with g.lexicon.ctx.read('info') as info:
+				authorship = {
+					title: article.character
+					for title, article in info.items()
+				}
+				rendered_html = parsed_draft.render(PreviewHtmlRenderer(authorship))
 
 			# If the article is ready and awaiting review
 			if not draft.status.approved:

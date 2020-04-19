@@ -8,6 +8,7 @@ from flask_login import current_user
 
 # Module imports
 from amanuensis.lexicon import LexiconModel
+from amanuensis.parser import filesafe_title
 from amanuensis.user import UserModel
 
 
@@ -26,6 +27,10 @@ def register_custom_filters(app):
 			return "null"
 		dt = datetime.fromtimestamp(ts)
 		return dt.strftime(formatstr)
+
+	@app.template_filter("articlelink")
+	def article_link(title):
+		return url_for('lexicon.article', name=g.lexicon.name, title=filesafe_title(title))
 
 
 def lexicon_param(route):

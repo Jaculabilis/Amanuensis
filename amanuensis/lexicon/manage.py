@@ -13,7 +13,7 @@ from amanuensis.config import prepend, json_rw, json_ro, logger
 from amanuensis.config.loader import AttrOrderedDict
 from amanuensis.errors import ArgumentError
 from amanuensis.lexicon import LexiconModel
-from amanuensis.parser import parse_raw_markdown, GetCitations, HtmlRenderer, filesafe_title
+from amanuensis.parser import parse_raw_markdown, GetCitations, HtmlRenderer, filesafe_title, titlesort
 from amanuensis.resources import get_stream
 
 def valid_name(name):
@@ -300,7 +300,7 @@ def publish_turn(lexicon, drafts):
 	# Get all citations
 	citations_by_title = {}
 	for title, article in article_renderable_by_title.items():
-		citations_by_title[title] = article.render(GetCitations())
+		citations_by_title[title] = sorted(set(article.render(GetCitations())), key=titlesort)
 
 	# Get the written and phantom lists from the citation map
 	written_titles = list(citations_by_title.keys())
@@ -327,7 +327,7 @@ def publish_turn(lexicon, drafts):
 	# Render article HTML and save to article cache
 	rendered_html_by_title = {}
 	for title, article in article_renderable_by_title.items():
-		html = article.render(HtmlRenderer(written_titles))
+		html = article.render(HtmlRenderer(lexicon.name, written_titles))
 		filename = filesafe_title(title)
 		with lexicon.ctx.article.edit(filename, create=True) as f:
 			f['title'] = title

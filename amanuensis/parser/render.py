@@ -3,12 +3,17 @@ Internal module encapsulating visitors that render articles into
 readable formats.
 """
 
+from flask import url_for
+
+from amanuensis.parser.helpers import filesafe_title
+
 
 class HtmlRenderer():
 	"""
 	Renders an article token tree into published article HTML.
 	"""
-	def __init__(self, written_articles):
+	def __init__(self, lexicon_name, written_articles):
+		self.lexicon_name = lexicon_name
 		self.written_articles = written_articles
 
 	def TextSpan(self, span):
@@ -41,7 +46,12 @@ class HtmlRenderer():
 			link_class = ''
 		else:
 			link_class = ' class="phantom"'
-		return f'<a href="#"{link_class}>{"".join(span.recurse(self))}</a>'
+		# link = url_for(
+		# 	'lexicon.article',
+		# 	name=self.lexicon_name,
+		# 	title=filesafe_title(span.cite_target))
+		link = f'/lexicon/{self.lexicon_name}/article/{filesafe_title(span.cite_target)}'
+		return f'<a href="{link}"{link_class}>{"".join(span.recurse(self))}</a>'
 
 
 
