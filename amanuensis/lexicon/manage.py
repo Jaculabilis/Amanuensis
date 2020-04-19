@@ -285,11 +285,11 @@ def publish_turn(lexicon, drafts):
 	src_ctx =  lexicon.ctx.src
 	for filename in drafts:
 		with draft_ctx.read(filename) as source:
-			with src_ctx.new(filename) as dest:
+			with src_ctx.edit(filename, create=True) as dest:
 				dest.update(source)
 		draft_ctx.delete(filename)
 
-	# Rebuilding the interlink data begins with loading all articles
+	# Load all articles in the source directory and rebuild their renderable trees
 	article_model_by_title = {}
 	article_renderable_by_title = {}
 	for filename in src_ctx.ls():
@@ -297,27 +297,45 @@ def publish_turn(lexicon, drafts):
 			article_model_by_title[article.title] = article
 			article_renderable_by_title[article.title] = parse_raw_markdown(article.contents)
 
-	# Determine the full list of articles by checking for phantom citations
-	written_titles = list(article_model_by_title.keys())
-	phantom_titles = []
-	for article in article_renderable_by_title.values():
-		citations = article.render(GetCitations())
-		for target in citations:
-			if target not in written_titles and target not in phantom_titles:
-				phantom_titles.append(target)
+	# Get all citations
+	citations_by_title = {}
+	for title, article in article_renderable_by_title.items():
+		citations_by_title[title] = article.render(GetCitations())
 
-	# Render article HTML and save to cache
+	# Get the written and phantom lists from the citation map
+	written_titles = list(citations_by_title.keys())
+	phantom_titles = []
+	for citations in citations_by_title.values():
+		for title in citations:
+			if title not in written_titles and title not in phantom_titles:
+				phantom_titles.append(title)
+
+	# Build the citation map and save it to the info cache
+	# TODO delete obsolete entries?
+	with lexicon.ctx.edit('info', create=True) as info:
+		for title in written_titles:
+			info[title] = {
+				'citations': citations_by_title[title],
+				'character': article_model_by_title[title].character
+			}
+		for title in phantom_titles:
+			info[title] = {
+				'citations': [],
+				'character': None,
+			}
+
+	# Render article HTML and save to article cache
 	rendered_html_by_title = {}
 	for title, article in article_renderable_by_title.items():
 		html = article.render(HtmlRenderer(written_titles))
 		filename = filesafe_title(title)
-		with lexicon.ctx.article.new(filename) as f:
+		with lexicon.ctx.article.edit(filename, create=True) as f:
 			f['title'] = title
 			f['html'] = html
 
 	for title in phantom_titles:
-		html = ""
+		html = None
 		filename = filesafe_title(title)
-		with lexicon.ctx.article.new(filename) as f:
+		with lexicon.ctx.article.edit(filename, create=True) as f:
 			f['title'] = title
 			f['html'] = html

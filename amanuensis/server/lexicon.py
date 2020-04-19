@@ -70,7 +70,7 @@ def get_bp():
 	def article(name, title):
 		with g.lexicon.ctx.article.read(title) as a:
 			article = dict(a)
-			article['html'] = Markup(a['html'])
+			article['html'] = Markup(a['html'] or "")
 			return render_template('lexicon/article.html', article=article)
 
 	@bp.route('/rules/', methods=['GET'])
@@ -211,7 +211,6 @@ def get_bp():
 			form=form,
 			article_html=Markup(rendered_html))
 
-
 	@bp.route('/statistics/', methods=['GET'])
 	@lexicon_param
 	@player_required_if_not_public
@@ -319,8 +318,12 @@ def get_bp():
 		# check if article was previously approved
 		# check extrinsic constraints for blocking errors
 		parsed_draft = parse_raw_markdown(article['contents'])
-		rendered_html = parsed_draft.render(PreviewHtmlRenderer(
-			{'Article':'default','Phantom':None}))
+		with g.lexicon.ctx.read('info') as info:
+			authorship = {
+				title: article.character
+				for title, article in info.items()
+			}
+			rendered_html = parsed_draft.render(PreviewHtmlRenderer(authorship))
 		features = parsed_draft.render(FeatureCounter())
 
 		filename = f'{article["character"]}.{article["aid"]}'

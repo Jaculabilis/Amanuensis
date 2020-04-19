@@ -111,7 +111,7 @@ class json_rw(open_ex):
 		return self.config
 
 	def __exit__(self, exc_type, exc_value, traceback):
-		# Only write the enw value out if there wasn't an exception
+		# Only write the new value out if there wasn't an exception
 		if not exc_type:
 			self.fd.seek(0)
 			json.dump(self.config, self.fd, allow_nan=False, indent='\t')

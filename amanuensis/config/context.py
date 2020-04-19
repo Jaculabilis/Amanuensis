@@ -41,16 +41,16 @@ class ConfigDirectoryContext():
 			raise MissingConfigError(fpath)
 		return json_ro(fpath)
 
-	def edit(self, filename):
+	def edit(self, filename, create=False):
 		"""
 		Loads a JSON file in write mode.
 		"""
 		if not filename.endswith('.json'):
 			filename = f'{filename}.json'
 		fpath = os.path.join(self.path, filename)
-		if not os.path.isfile(fpath):
+		if not create and not os.path.isfile(fpath):
 			raise MissingConfigError(fpath)
-		return json_rw(fpath, new=False)
+		return json_rw(fpath, new=create)
 
 	def delete(self, filename):
 		"""Deletes a file."""
