@@ -332,10 +332,19 @@ def publish_turn(lexicon, drafts):
 		with lexicon.ctx.article.edit(filename, create=True) as f:
 			f['title'] = title
 			f['html'] = html
+			f['cites'] = citations_by_title[title]
+			f['citedby'] = [
+				citer for citer, citations
+				in citations_by_title.items()
+				if title in citations]
 
 	for title in phantom_titles:
-		html = None
 		filename = filesafe_title(title)
 		with lexicon.ctx.article.edit(filename, create=True) as f:
 			f['title'] = title
-			f['html'] = html
+			f['html'] = ""
+			f['cites'] = []
+			f['citedby'] = [
+				citer for citer, citations
+				in citations_by_title.items()
+				if title in citations]

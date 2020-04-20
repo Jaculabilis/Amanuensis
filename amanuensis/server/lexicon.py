@@ -69,11 +69,8 @@ def get_bp():
 	@player_required_if_not_public
 	def article(name, title):
 		with g.lexicon.ctx.article.read(title) as a:
-			article = dict(a)
-			article['html'] = Markup(a['html'] or "")
-			with g.lexicon.ctx.read('info') as info:
-				cites = info[a.title]['citations']
-			return render_template('lexicon/article.html', article=article, cites=cites)
+			article = { **a, 'html': Markup(a['html']) }
+			return render_template('lexicon/article.html', article=article)
 
 	@bp.route('/rules/', methods=['GET'])
 	@lexicon_param

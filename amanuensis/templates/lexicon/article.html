@@ -13,9 +13,16 @@
 {% endblock %}
 
 {% block citations %}
-{% for cite in cites %}
-<a href="{{ cite|articlelink }}">{{ cite }}</a> /
-{% endfor %}
+<p>
+	{% for citation in article.cites %}
+	<a href="{{ citation|articlelink }}">{{ citation }}</a> /
+	{% endfor %}
+</p>
+<p>
+	{% for citation in article.citedby %}
+	<a href="{{ citation|articlelink }}">{{ citation }}</a> /
+	{% endfor %}
+</p>
 {% endblock %}
 
 {% set template_content_blocks = [self.main(), self.citations()] %}
