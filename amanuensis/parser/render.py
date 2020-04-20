@@ -56,12 +56,12 @@ class HtmlRenderer():
 
 
 class PreviewHtmlRenderer():
-	def __init__(self, article_map):
-		"""
-		article_map maps article titles to character ids. An article
-		present in the map but mapped to None is a phantom article.
-		"""
-		self.article_map = article_map
+	def __init__(self, lexicon):
+		with lexicon.ctx.read('info') as info:
+			self.article_map = {
+				title: article.character
+				for title, article in info.items()
+			}
 
 	def TextSpan(self, span):
 		return span.innertext

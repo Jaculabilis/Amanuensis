@@ -185,12 +185,7 @@ def get_bp():
 				return redirect(url_for('lexicon.session', name=name))
 
 			parsed_draft = parse_raw_markdown(draft.contents)
-			with g.lexicon.ctx.read('info') as info:
-				authorship = {
-					title: article.character
-					for title, article in info.items()
-				}
-				rendered_html = parsed_draft.render(PreviewHtmlRenderer(authorship))
+			rendered_html = parsed_draft.render(PreviewHtmlRenderer(g.lexicon))
 
 			# If the article is ready and awaiting review
 			if not draft.status.approved:
@@ -324,12 +319,7 @@ def get_bp():
 		# check if article was previously approved
 		# check extrinsic constraints for blocking errors
 		parsed_draft = parse_raw_markdown(article['contents'])
-		with g.lexicon.ctx.read('info') as info:
-			authorship = {
-				title: article.character
-				for title, article in info.items()
-			}
-			rendered_html = parsed_draft.render(PreviewHtmlRenderer(authorship))
+		rendered_html = parsed_draft.render(PreviewHtmlRenderer(g.lexicon))
 		features = parsed_draft.render(FeatureCounter())
 
 		filename = f'{article["character"]}.{article["aid"]}'
