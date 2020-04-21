@@ -1,31 +1,22 @@
 import re
-import urllib
+import urllib.parse
 
-def normalize_title(title):
-	"""
-	Normalizes strings as titles:
-	- Strips leading and trailing whitespace
-	- Merges internal whitespace into a single space
-	- Capitalizes the first word
-	"""
-	cleaned = re.sub(r'\s+', " ", title.strip())
-	return cleaned[:1].capitalize() + cleaned[1:]
 
-def titlesort(title):
+def titlesort(title: str) -> str:
 	"""
 	Strips articles off of titles for alphabetical sorting purposes
 	"""
 	lower = title.lower()
 	if lower.startswith("the "):
 		return lower[4:]
-	elif lower.startswith("an "):
+	if lower.startswith("an "):
 		return lower[3:]
-	elif lower.startswith("a "):
+	if lower.startswith("a "):
 		return lower[2:]
-	else:
-		return lower
+	return lower
 
-def filesafe_title(title):
+
+def filesafe_title(title: str) -> str:
 	"""
 	Makes an article title filename-safe.
 	"""

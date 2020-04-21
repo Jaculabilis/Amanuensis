@@ -5,40 +5,21 @@ for verification against constraints.
 
 import re
 
-class RenderableVisitor():
-	"""Default implementation of the visitor pattern"""
-	def TextSpan(self, span):
-		return self
-	def LineBreak(self, span):
-		return self
-	def ParsedArticle(self, span):
-		span.recurse(self)
-		return self
-	def BodyParagraph(self, span):
-		span.recurse(self)
-		return self
-	def SignatureParagraph(self, span):
-		span.recurse(self)
-		return self
-	def BoldSpan(self, span):
-		span.recurse(self)
-		return self
-	def ItalicSpan(self, span):
-		span.recurse(self)
-		return self
-	def CitationSpan(self, span):
-		span.recurse(self)
-		return self
+from amanuensis.parser.core import RenderableVisitor
+
 
 class GetCitations(RenderableVisitor):
 	def __init__(self):
 		self.citations = []
+
 	def ParsedArticle(self, span):
 		span.recurse(self)
 		return self.citations
+
 	def CitationSpan(self, span):
 		self.citations.append(span.cite_target)
 		return self
+
 
 class FeatureCounter(RenderableVisitor):
 	def __init__(self):
@@ -47,7 +28,7 @@ class FeatureCounter(RenderableVisitor):
 		self.has_signature = False
 
 	def TextSpan(self, span):
-		self.word_count += len(re.split('\s+', span.innertext.strip()))
+		self.word_count += len(re.split(r'\s+', span.innertext.strip()))
 		return self
 
 	def SignatureParagraph(self, span):
