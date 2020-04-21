@@ -50,14 +50,14 @@ def prepend(*path):
 		joined = os.path.join(CONFIG_DIR, joined)
 	return joined
 
-def open_sh(*path, mode):
-	return amanuensis.config.loader.open_sh(prepend(*path), mode)
+def open_sh(*path, **kwargs):
+	return amanuensis.config.loader.open_sh(prepend(*path), **kwargs)
 
-def open_ex(*path, mode):
-	return amanuensis.config.loader.open_ex(prepend(*path), mode)
+def open_ex(*path, **kwargs):
+	return amanuensis.config.loader.open_ex(prepend(*path), **kwargs)
 
-def json_ro(*path):
-	return amanuensis.config.loader.json_ro(prepend(*path))
+def json_ro(*path, **kwargs):
+	return amanuensis.config.loader.json_ro(prepend(*path), **kwargs)
 
-def json_rw(*path):
-	return amanuensis.config.loader.json_rw(prepend(*path))
+def json_rw(*path, **kwargs):
+	return amanuensis.config.loader.json_rw(prepend(*path), **kwargs)
