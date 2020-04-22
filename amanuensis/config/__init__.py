@@ -6,6 +6,7 @@ import os
 # Module imports
 from amanuensis.errors import MissingConfigError, MalformedConfigError
 import amanuensis.config.context
+from amanuensis.config.context import is_guid
 import amanuensis.config.init
 import amanuensis.config.loader
 

@@ -68,7 +68,9 @@ class ConfigDirectoryContext():
 
 
 class ConfigFileMixin():
+	"""Mixin for objects that have config files."""
 	def config(self, edit=False):
+		"""Context manager for this object's config file."""
 		if edit:
 			return self.edit('config')
 		else:
