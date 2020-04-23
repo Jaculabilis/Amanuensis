@@ -55,9 +55,9 @@ def get_bp():
 	@player_required_if_not_public
 	def contents(name):
 		articles = []
-		filenames = g.lexicon.ctx.article.ls()
+		filenames = g.lexicon_.ctx.article.ls()
 		for filename in filenames:
-			with g.lexicon.ctx.article.read(filename) as a:
+			with g.lexicon_.ctx.article.read(filename) as a:
 				articles.append({
 					'title': a.title,
 					'link': url_for('lexicon.article', name=name, title=filesafe_title(a.title)),
@@ -68,7 +68,7 @@ def get_bp():
 	@lexicon_param
 	@player_required_if_not_public
 	def article(name, title):
-		with g.lexicon.ctx.article.read(title) as a:
+		with g.lexicon_.ctx.article.read(title) as a:
 			article = { **a, 'html': Markup(a['html']) }
 			return render_template('lexicon/article.html', article=article)
 
