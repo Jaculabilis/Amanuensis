@@ -3,14 +3,14 @@ from datetime import datetime
 from functools import wraps
 
 # Third party imports
-from flask import g, flash, redirect, url_for
+from flask import g, flash, redirect, url_for, current_app
 from flask_login import current_user
 
 # Module imports
 from amanuensis.lexicon import LexiconModel
 from amanuensis.parser import filesafe_title
 from amanuensis.user import UserModel
-
+from amanuensis.models import ModelFactory
 
 def register_custom_filters(app):
 	"""Adds custom filters to the Flask app"""
@@ -42,6 +42,9 @@ def lexicon_param(route):
 		if g.lexicon is None:
 			flash("Couldn't find a lexicon with the name '{}'".format(name))
 			return redirect(url_for("home.home"))
+		# TODO transition to new model
+		model_factory: ModelFactory = current_app.config['model_factory']
+		g.lexicon_ = model_factory.lexicon(name)
 		return route(**kwargs)
 	return with_lexicon
 

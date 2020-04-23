@@ -42,5 +42,5 @@ class ModelFactory():
 				raise ValueError(f'Invalid index entry: {lid}')
 		else:
 			lid = identifier
-			lexicon = LexiconModel(self.root, lid)
+		lexicon = LexiconModel(self.root, lid)
 		return lexicon
