@@ -4,7 +4,7 @@ from flask import Flask, render_template
 from flask_login import LoginManager
 
 from amanuensis.config import get, root
-from amanuensis.server.auth import get_bp as get_auth_bp
+# from amanuensis.server.auth import get_bp as get_auth_bp
 from amanuensis.server.home import get_bp as get_home_bp
 from amanuensis.server.helpers import register_custom_filters
 from amanuensis.server.lexicon import get_bp as get_lex_bp
@@ -29,7 +29,9 @@ login.login_view = 'auth.login'
 login.anonymous_user = AnonymousUserModel
 
 # Blueprint inits
-auth_bp = get_auth_bp(login)
+from amanuensis.server.auth import bp as auth_bp
+from amanuensis.server.auth import login_manager as login_manager
+login_manager.init_app(app)
 app.register_blueprint(auth_bp)
 
 home_bp = get_home_bp()
