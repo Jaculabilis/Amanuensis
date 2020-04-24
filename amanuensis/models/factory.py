@@ -1,3 +1,5 @@
+from typing import Optional
+
 from amanuensis.config import is_guid, RootConfigDirectoryContext
 from amanuensis.errors import ArgumentError
 from amanuensis.models.user import UserModel
@@ -7,6 +9,15 @@ from amanuensis.models.lexicon import LexiconModel
 class ModelFactory():
 	def __init__(self, root: RootConfigDirectoryContext):
 		self.root: RootConfigDirectoryContext = root
+
+	def try_user(self, identifier: str) -> Optional[UserModel]:
+		user: Optional[UserModel] = None
+		try:
+			user = self.user(identifier)
+		except Exception:
+			pass
+		finally:
+			return user
 
 	def user(self, identifier: str) -> UserModel:
 		"""Get the user model for the given id or username"""
