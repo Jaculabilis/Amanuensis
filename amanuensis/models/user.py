@@ -6,7 +6,6 @@ from amanuensis.config import (
 	RootConfigDirectoryContext,
 	UserConfigDirectoryContext,
 	ReadOnlyOrderedDict)
-from amanuensis.config.context import json_rw
 
 
 class UserModelBase():
@@ -52,8 +51,9 @@ class UserModel(UserModelBase):
 	def __init__(self, root: RootConfigDirectoryContext, uid: str):
 		self._uid: str = uid
 		# Creating the config context implicitly checks for existence
-		self._ctx: UserConfigDirectoryContext = root.user[uid]
-		with self._ctx.config(edit=False) as config:
+		self._ctx: UserConfigDirectoryContext = (
+			cast(UserConfigDirectoryContext, root.user[uid]))
+		with self._ctx.read_config() as config:
 			self._cfg: ReadOnlyOrderedDict = cast(ReadOnlyOrderedDict, config)
 
 	def __str__(self) -> str:
@@ -64,16 +64,13 @@ class UserModel(UserModelBase):
 
 	# Utility methods
 
-	def edit(self) -> json_rw:
-		return cast(json_rw, self.ctx.config(edit=True))
-
 	def set_password(self, password: str) -> None:
 		pw_hash = generate_password_hash(password)
-		with self.edit() as cfg:
+		with self.ctx.edit_config() as cfg:
 			cfg['password'] = pw_hash
 
 	def check_password(self, password) -> bool:
-		with self.ctx.config() as cfg:
+		with self.ctx.read_config() as cfg:
 			return check_password_hash(cfg.password, password)
 
 

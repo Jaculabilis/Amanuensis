@@ -4,7 +4,7 @@ manager usage.
 """
 import os
 import re
-from typing import Iterable, Union
+from typing import Iterable
 
 from amanuensis.config.context import json_ro, json_rw
 from amanuensis.errors import MissingConfigError, ConfigAlreadyExistsError
@@ -82,12 +82,13 @@ class ConfigFileConfigDirectoryContext(ConfigDirectoryContext):
 		if not os.path.isfile(config_path):
 			raise MissingConfigError(config_path)
 
-	def config(self, edit: bool = False) -> Union[json_ro, json_rw]:
-		"""Context manager for this object's config file."""
-		if edit:
-			return self.edit('config')
-		else:
-			return self.read('config')
+	def edit_config(self) -> json_rw:
+		"""rw context manager for this object's config file."""
+		return self.edit('config')
+
+	def read_config(self) -> json_ro:
+		"""ro context manager for this object's config file."""
+		return self.read('config')
 
 
 class IndexDirectoryContext(ConfigDirectoryContext):
@@ -102,25 +103,25 @@ class IndexDirectoryContext(ConfigDirectoryContext):
 			raise MissingConfigError(index_path)
 		self.cdc_type = cdc_type
 
-	def __getitem__(self, key: str):
+	def __getitem__(self, key: str) -> ConfigFileConfigDirectoryContext:
 		"""
 		Returns a context to the given item. key is treated as the
 		item's id if it's a guid string, otherwise it's treated as
 		the item's indexed name and run through the index first.
 		"""
 		if not is_guid(key):
-			with self.index() as index:
+			with self.read_index() as index:
 				iid = index.get(key)
 				if not iid:
 					raise MissingConfigError(key)
 				key = iid
 		return self.cdc_type(os.path.join(self.path, key))
 
-	def index(self, edit=False) -> Union[json_ro, json_rw]:
-		if edit:
-			return self.edit('index')
-		else:
-			return self.read('index')
+	def edit_index(self) -> json_rw:
+		return self.edit('index')
+
+	def read_index(self) -> json_ro:
+		return self.read('index')
 
 
 class RootConfigDirectoryContext(ConfigFileConfigDirectoryContext):

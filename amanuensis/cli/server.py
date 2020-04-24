@@ -52,7 +52,7 @@ def command_generate_secret(args):
 	"""
 	root: RootConfigDirectoryContext = args.root
 	secret_key: bytes = os.urandom(32)
-	with root.config(edit=True) as cfg:
+	with root.edit_config() as cfg:
 		cfg.secret_key = secret_key.hex()
 	logger.info("Regenerated Flask secret key")
 	return 0
@@ -106,11 +106,11 @@ def command_config(args):
 		return -1
 
 	if args.get:
-		with root.config(edit=False) as cfg:
+		with root.read_config() as cfg:
 			config_get(cfg, args.get)
 
 	if args.set:
-		with root.config(edit=True) as cfg:
+		with root.edit_config() as cfg:
 			config_set("config", cfg, args.set)
 
 	return 0

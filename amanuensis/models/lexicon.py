@@ -5,7 +5,6 @@ from amanuensis.config import (
 	RootConfigDirectoryContext,
 	LexiconConfigDirectoryContext,
 	ReadOnlyOrderedDict)
-from amanuensis.config.context import json_rw
 
 
 class LexiconModel():
@@ -13,8 +12,9 @@ class LexiconModel():
 	def __init__(self, root: RootConfigDirectoryContext, lid: str):
 		self._lid: str = lid
 		# Creating the config context implicitly checks for existence
-		self._ctx: LexiconConfigDirectoryContext = root.lexicon[lid]
-		with self._ctx.config(edit=False) as config:
+		self._ctx: LexiconConfigDirectoryContext = (
+			cast(LexiconConfigDirectoryContext, root.lexicon[lid]))
+		with self._ctx.read_config() as config:
 			self._cfg: ReadOnlyOrderedDict = cast(ReadOnlyOrderedDict, config)
 
 	def __str__(self) -> str:
@@ -46,12 +46,9 @@ class LexiconModel():
 	def title(self) -> str:
 		return self.cfg.get('title', f'Lexicon {self.cfg.name}')
 
-	def edit(self) -> json_rw:
-		return cast(json_rw, self.ctx.config(edit=True))
-
 	def log(self, message: str) -> None:
 		now = int(time.time())
-		with self.edit() as cfg:
+		with self.ctx.edit_config() as cfg:
 			cfg.log.append([now, message])
 
 	@property
