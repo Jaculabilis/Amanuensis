@@ -43,7 +43,7 @@ def command_create(args):
 			return -1
 
 	# Perform command
-	create_lexicon(root, args.model_factory, args.name, args.user)
+	create_lexicon(root, args.name, args.user)
 
 	# Output already logged by create_lexicon
 	return 0

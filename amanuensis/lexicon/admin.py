@@ -28,7 +28,6 @@ def valid_name(name: str) -> bool:
 
 def create_lexicon(
 	root: RootConfigDirectoryContext,
-	model_factory: ModelFactory,
 	name: str,
 	editor: UserModel) -> LexiconModel:
 	"""
@@ -74,6 +73,7 @@ def create_lexicon(
 		pass  # Create an empry config file
 
 	# Load the lexicon and add the editor and default character
+	model_factory: ModelFactory = ModelFactory(root)
 	lexicon = model_factory.lexicon(lid)
 	with lexicon.ctx.edit_config() as cfg:
 		cfg.join.joined.append(editor.uid)
