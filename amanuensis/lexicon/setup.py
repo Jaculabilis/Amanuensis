@@ -2,8 +2,13 @@
 Submodule of functions for managing lexicon games during the setup and
 joining part of the game lifecycle.
 """
+import json
+import uuid
+
+from amanuensis.config import AttrOrderedDict
 from amanuensis.errors import ArgumentError
 from amanuensis.models import LexiconModel, UserModel
+from amanuensis.resources import get_stream
 
 
 def player_can_join_lexicon(
@@ -56,3 +61,42 @@ def add_player_to_lexicon(
 	# Log to the lexicon's log
 	if added:
 		lexicon.log('Player "{0.cfg.username}" joined ({0.uid})'.format(player))
+
+
+def create_character_in_lexicon(
+	player: UserModel,
+	lexicon: LexiconModel,
+	name: str) -> None:
+	"""
+	Unconditionally creates a character for a player
+	"""
+	# Verify arguments
+	if lexicon is None:
+		raise ArgumentError(f'Invalid lexicon: {lexicon}')
+	if player is None:
+		raise ArgumentError(f'Invalid player: {player}')
+	if player.uid not in lexicon.cfg.join.joined:
+		raise ArgumentError(f'Player {player} not in lexicon {lexicon}')
+	if name is None:
+		raise ArgumentError(f'Invalid character name: "{name}"')
+	if any([
+			char.name for char in lexicon.cfg.character.values()
+			if char.name == name]):
+		raise ArgumentError(f'Duplicate character name: "{name}"')
+
+	# Load the character template
+	with get_stream('character.json') as template:
+		character = json.load(template, object_pairs_hook=AttrOrderedDict)
+
+	# Fill out the character's information
+	character.cid = uuid.uuid4().hex
+	character.name = name
+	character.player = player.uid
+	character.signature = "~" + character.name
+
+	# Add the character to the lexicon
+	with lexicon.ctx.edit_config() as cfg:
+		cfg.character.new(character.cid, character)
+
+	# Log addition
+	lexicon.log(f'Character "{name}" created ({character.cid})')

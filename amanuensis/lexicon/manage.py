@@ -90,45 +90,6 @@ def remove_player(lex, player):
 	# TODO Reassign the player's characters to the editor
 
 
-def add_character(lex, player, charinfo={}):
-	"""
-	Unconditionally adds a character to a lexicon
-
-	charinfo is a dictionary of character settings
-	"""
-	# Verify arguments
-	if lex is None:
-		raise ArgumentError("Invalid lexicon: '{}'".format(lex))
-	if player is None:
-		raise ArgumentError("Invalid player: '{}'".format(player))
-	if not charinfo or not charinfo.get("name"):
-		raise ArgumentError("Invalid character info: '{}'".format(charinfo))
-	charname = charinfo.get("name")
-	if any([
-			char.name for char in lex.character.values()
-			if char.name == charname]):
-		raise ArgumentError("Duplicate character name: '{}'".format(charinfo))
-
-	# Load the character template
-	with get_stream('character.json') as template:
-		character = json.load(template, object_pairs_hook=AttrOrderedDict)
-
-	# Fill out the character's information
-	character.cid = charinfo.get("cid") or uuid.uuid4().hex
-	character.name = charname
-	character.player = charinfo.get("player") or player.id
-	character.signature = charinfo.get("signature") or ("~" + character.name)
-
-	# Add the character to the lexicon
-	added = False
-	with json_rw(lex.config_path) as cfg:
-		cfg.character.new(character.cid, character)
-		added = True
-
-	# Log addition
-	if added:
-			lex.add_log("Character '{0.name}' created ({0.cid})".format(character))
-
 def delete_character(lex, charname):
 	"""
 	Delete a character from a lexicon

@@ -222,23 +222,24 @@ def command_char_create(args):
 
 	The specified player will be set as the character's player.
 	"""
+	lexicon: LexiconModel = args.lexicon
+	user: UserModel = args.user
+
 	# Module imports
-	from amanuensis.lexicon import LexiconModel
-	from amanuensis.lexicon.manage import add_character
-	from amanuensis.user import UserModel
+	from amanuensis.lexicon import create_character_in_lexicon
 
 	# Verify arguments
-	if not args.user.in_lexicon(args.lexicon):
+	if user.uid not in lexicon.cfg.join.joined:
 		logger.error('"{0.username}" is not a player in lexicon "{1.name}"'
-			''.format(args.user, args.lexicon))
+			''.format(user.cfg, lexicon.cfg))
 		return -1
 
 	# Perform command
-	add_character(args.lexicon, args.user, {"name": args.charname})
+	create_character_in_lexicon(user, lexicon, args.charname)
 
 	# Output
-	logger.info('Created character "{0.charname}" for "{0.user.username}" in '
-		'"{0.lexicon.name}"'.format(args))
+	logger.info(f'Created character "{args.charname}" for "{user.cfg.username}"'
+		f' in "{lexicon.cfg.name}"')
 	return 0
 
 
@@ -252,19 +253,20 @@ def command_char_delete(args):
 	Deleting a character dissociates them from any content
 	they have contributed rather than deleting it.
 	"""
-	# Module imports
-	from amanuensis.lexicon import LexiconModel
-	from amanuensis.lexicon.manage import delete_character
+	raise NotImplementedError()
+	# # Module imports
+	# from amanuensis.lexicon import LexiconModel
+	# from amanuensis.lexicon.manage import delete_character
 
-	# Verify arguments
-	lex = LexiconModel.by(name=args.lexicon)
-	if lex is None:
-		logger.error("Could not find lexicon '{}'".format(args.lexicon))
-		return -1
+	# # Verify arguments
+	# lex = LexiconModel.by(name=args.lexicon)
+	# if lex is None:
+	# 	logger.error("Could not find lexicon '{}'".format(args.lexicon))
+	# 	return -1
 
-	# Internal call
-	delete_character(lex, args.charname)
-	return 0
+	# # Internal call
+	# delete_character(lex, args.charname)
+	# return 0
 
 
 @alias('lcl')
@@ -273,19 +275,20 @@ def command_char_list(args):
 	"""
 	List all characters in a lexicon
 	"""
-	import json
-	# Module imports
-	from amanuensis.lexicon import LexiconModel
+	raise NotImplementedError()
+	# import json
+	# # Module imports
+	# from amanuensis.lexicon import LexiconModel
 
-	# Verify arguments
-	lex = LexiconModel.by(name=args.lexicon)
-	if lex is None:
-		logger.error("Could not find lexicon '{}'".format(args.lexicon))
-		return -1
+	# # Verify arguments
+	# lex = LexiconModel.by(name=args.lexicon)
+	# if lex is None:
+	# 	logger.error("Could not find lexicon '{}'".format(args.lexicon))
+	# 	return -1
 
-	# Internal call
-	print(json.dumps(lex.character, indent=2))
-	return 0
+	# # Internal call
+	# print(json.dumps(lex.character, indent=2))
+	# return 0
 
 #
 # Procedural commands
