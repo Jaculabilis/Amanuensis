@@ -9,7 +9,7 @@ from amanuensis.models import LexiconModel, UserModel
 def player_can_join_lexicon(
 	player: UserModel,
 	lexicon: LexiconModel,
-	password: str = None):
+	password: str = None) -> bool:
 	"""
 	Checks whether the given player can join a lexicon
 	"""
@@ -36,7 +36,7 @@ def player_can_join_lexicon(
 
 def add_player_to_lexicon(
 	player: UserModel,
-	lexicon: LexiconModel):
+	lexicon: LexiconModel) -> None:
 	"""
 	Unconditionally adds a player to a lexicon
 	"""

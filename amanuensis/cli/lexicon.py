@@ -6,7 +6,7 @@ from amanuensis.cli.helpers import (
 	add_argument, no_argument, requires_lexicon, requires_user, alias,
 	config_get, config_set, CONFIG_GET_ROOT_VALUE)
 from amanuensis.config import RootConfigDirectoryContext
-from amanuensis.models import LexiconModel
+from amanuensis.models import LexiconModel, UserModel
 
 logger = logging.getLogger(__name__)
 
@@ -130,6 +130,7 @@ def command_config(args):
 # Player/character commands
 #
 
+
 @alias('lpa')
 @requires_lexicon
 @requires_user
@@ -137,22 +138,24 @@ def command_player_add(args):
 	"""
 	Add a player to a lexicon
 	"""
+	lexicon: LexiconModel = args.lexicon
+	user: UserModel = args.user
+
 	# Module imports
-	from amanuensis.config import logger
-	from amanuensis.lexicon.manage import add_player
+	from amanuensis.lexicon import add_player_to_lexicon
 
 	# Verify arguments
-	if args.user.in_lexicon(args.lexicon):
-		logger.error('"{0.username}" is already a player in "{1.name}"'.format(
-			args.user, args.lexicon))
+	if user.uid in lexicon.cfg.join.joined:
+		logger.error(f'"{user.cfg.username}" is already a player '
+			f'in "{lexicon.cfg.name}"')
 		return -1
 
 	# Perform command
-	add_player(args.lexicon, args.user)
+	add_player_to_lexicon(user, lexicon)
 
 	# Output
-	logger.info('Added user "{0.username}" to lexicon "{1.name}"'.format(
-		args.user, args.lexicon))
+	logger.info(f'Added user "{user.cfg.username}" to '
+		f'lexicon "{lexicon.cfg.name}"')
 	return 0
 
 
@@ -166,26 +169,26 @@ def command_player_remove(args):
 	Removing a player dissociates them from any characters
 	they control but does not delete any character data.
 	"""
-	# Module imports
-	from amanuensis.config import logger
-	from amanuensis.lexicon.manage import remove_player
+	raise NotImplementedError()
+	# # Module imports
+	# from amanuensis.lexicon.manage import remove_player
 
-	# Verify arguments
-	if not args.user.in_lexicon(args.lexicon):
-		logger.error('"{0.username}" is not a player in lexicon "{1.name}"'
-			''.format(args.user, args.lexicon))
-		return -1
-	if args.user.id == args.lexicon.editor:
-		logger.error("Can't remove the editor of a lexicon")
-		return -1
+	# # Verify arguments
+	# if not args.user.in_lexicon(args.lexicon):
+	# 	logger.error('"{0.username}" is not a player in lexicon "{1.name}"'
+	# 		''.format(args.user, args.lexicon))
+	# 	return -1
+	# if args.user.id == args.lexicon.editor:
+	# 	logger.error("Can't remove the editor of a lexicon")
+	# 	return -1
 
-	# Perform command
-	remove_player(args.lexicon, args.user)
+	# # Perform command
+	# remove_player(args.lexicon, args.user)
 
-	# Output
-	logger.info('Removed "{0.username}" from lexicon "{1.name}"'.format(
-		args.user, args.lexicon))
-	return 0
+	# # Output
+	# logger.info('Removed "{0.username}" from lexicon "{1.name}"'.format(
+	# 	args.user, args.lexicon))
+	# return 0
 
 
 @alias('lpl')
@@ -194,19 +197,19 @@ def command_player_list(args):
 	"""
 	List all players in a lexicon
 	"""
-	import json
-	# Module imports
-	from amanuensis.config import logger
-	from amanuensis.user import UserModel
+	raise NotImplementedError()
+	# import json
+	# # Module imports
+	# from amanuensis.user import UserModel
 
-	# Perform command
-	players = list(map(
-		lambda uid: UserModel.by(uid=uid).username,
-		args.lexicon.join.joined))
+	# # Perform command
+	# players = list(map(
+	# 	lambda uid: UserModel.by(uid=uid).username,
+	# 	args.lexicon.join.joined))
 
-	# Output
-	print(json.dumps(players, indent=2))
-	return 0
+	# # Output
+	# print(json.dumps(players, indent=2))
+	# return 0
 
 
 @alias('lcc')
@@ -220,7 +223,6 @@ def command_char_create(args):
 	The specified player will be set as the character's player.
 	"""
 	# Module imports
-	from amanuensis.config import logger
 	from amanuensis.lexicon import LexiconModel
 	from amanuensis.lexicon.manage import add_character
 	from amanuensis.user import UserModel
@@ -251,7 +253,6 @@ def command_char_delete(args):
 	they have contributed rather than deleting it.
 	"""
 	# Module imports
-	from amanuensis.config import logger
 	from amanuensis.lexicon import LexiconModel
 	from amanuensis.lexicon.manage import delete_character
 
@@ -274,7 +275,6 @@ def command_char_list(args):
 	"""
 	import json
 	# Module imports
-	from amanuensis.config import logger
 	from amanuensis.lexicon import LexiconModel
 
 	# Verify arguments
