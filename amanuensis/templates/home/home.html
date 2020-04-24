@@ -34,7 +34,7 @@
 {% endblock %}
 {% set template_content_blocks = [self.main()] %}
 
-{% if current_user.is_admin %}
+{% if current_user.cfg.is_admin %}
 {% block admin_dash %}
 <a href="{{ url_for('home.admin') }}" style="display:block; text-align:center;">Admin dashboard</a>
 {% endblock %}

@@ -7,18 +7,18 @@ from flask import g, flash, redirect, url_for, current_app
 from flask_login import current_user
 
 # Module imports
-from amanuensis.lexicon import LexiconModel
 from amanuensis.parser import filesafe_title
-from amanuensis.user import UserModel
-from amanuensis.models import ModelFactory
+from amanuensis.models import ModelFactory, UserModel
+
 
 def register_custom_filters(app):
 	"""Adds custom filters to the Flask app"""
 
 	@app.template_filter("user_attr")
 	def get_user_attr(uid, attr):
-		user = UserModel.by(uid=uid)
-		val = getattr(user, attr)
+		factory: ModelFactory = current_app.config['model_factory']
+		user: UserModel = factory.user(uid)
+		val = getattr(user.cfg, attr)
 		return val
 
 	@app.template_filter("asdate")
@@ -30,23 +30,26 @@ def register_custom_filters(app):
 
 	@app.template_filter("articlelink")
 	def article_link(title):
-		return url_for('lexicon.article', name=g.lexicon.name, title=filesafe_title(title))
+		return url_for(
+			'lexicon.article',
+			name=g.lexicon.name,
+			title=filesafe_title(title))
 
 
-def lexicon_param(route):
-	"""Wrapper for loading a route's lexicon"""
-	@wraps(route)
-	def with_lexicon(**kwargs):
-		name = kwargs.get('name')
-		g.lexicon = LexiconModel.by(name=name)
-		if g.lexicon is None:
-			flash("Couldn't find a lexicon with the name '{}'".format(name))
-			return redirect(url_for("home.home"))
-		# TODO transition to new model
-		model_factory: ModelFactory = current_app.config['model_factory']
-		g.lexicon_ = model_factory.lexicon(name)
-		return route(**kwargs)
-	return with_lexicon
+# def lexicon_param(route):
+# 	"""Wrapper for loading a route's lexicon"""
+# 	@wraps(route)
+# 	def with_lexicon(**kwargs):
+# 		name = kwargs.get('name')
+# 		g.lexicon = LexiconModel.by(name=name)
+# 		if g.lexicon is None:
+# 			flash("Couldn't find a lexicon with the name '{}'".format(name))
+# 			return redirect(url_for("home.home"))
+# 		# TODO transition to new model
+# 		model_factory: ModelFactory = current_app.config['model_factory']
+# 		g.lexicon_ = model_factory.lexicon(name)
+# 		return route(**kwargs)
+# 	return with_lexicon
 
 
 def admin_required(route):
@@ -55,7 +58,7 @@ def admin_required(route):
 	"""
 	@wraps(route)
 	def admin_route(*args, **kwargs):
-		if not current_user.is_admin:
+		if not current_user.cfg.is_admin:
 			flash("You must be an admin to view this page")
 			return redirect(url_for('home.home'))
 		return route(*args, **kwargs)
@@ -68,10 +71,10 @@ def player_required(route):
 	"""
 	@wraps(route)
 	def player_route(*args, **kwargs):
-		if not current_user.in_lexicon(g.lexicon):
+		if current_user.uid not in g.lexicon.cfg.join.joined:
 			flash("You must be a player to view this page")
-			return (redirect(url_for('lexicon.contents', name=g.lexicon.name))
-				if g.lexicon.join.public
+			return (redirect(url_for('lexicon.contents', name=g.lexicon.cfg.name))
+				if g.lexicon.cfg.join.public
 				else redirect(url_for('home.home')))
 		return route(*args, **kwargs)
 	return player_route
@@ -84,8 +87,8 @@ def player_required_if_not_public(route):
 	"""
 	@wraps(route)
 	def player_route(*args, **kwargs):
-		if ((not g.lexicon.join.public)
-				and not current_user.in_lexicon(g.lexicon)):
+		if ((not g.lexicon.cfg.join.public)
+				and current_user.uid not in g.lexicon.cfg.join.joined):
 			flash("You must be a player to view this page")
 			return redirect(url_for('home.home'))
 		return route(*args, **kwargs)
@@ -99,7 +102,7 @@ def editor_required(route):
 	"""
 	@wraps(route)
 	def editor_route(*args, **kwargs):
-		if current_user.id != g.lexicon.editor:
+		if current_user.uid != g.lexicon.cfg.editor:
 			flash("You must be the editor to view this page")
 			return redirect(url_for('lexicon.contents', name=g.lexicon.name))
 		return route(*args, **kwargs)

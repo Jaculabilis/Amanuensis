@@ -1,41 +1,38 @@
-import os
+from flask import Flask
 
-from flask import Flask, render_template
-from flask_login import LoginManager
-
-from amanuensis.config import get, root
-# from amanuensis.server.auth import get_bp as get_auth_bp
-from amanuensis.server.home import get_bp as get_home_bp
-from amanuensis.server.helpers import register_custom_filters
-from amanuensis.server.lexicon import get_bp as get_lex_bp
-from amanuensis.user import AnonymousUserModel
+from amanuensis.config import RootConfigDirectoryContext
 from amanuensis.models import ModelFactory
+from amanuensis.server.auth import get_login_manager, bp_auth
+from amanuensis.server.helpers import register_custom_filters
+from amanuensis.server.home import bp_home
+# from amanuensis.server.lexicon import bp_lexicon
 
-# Flask app init
-static_root = os.path.abspath(get("static_root"))
-app = Flask(
-	__name__,
-	template_folder="../templates",
-	static_folder=static_root)
-app.secret_key = bytes.fromhex(get('secret_key'))
-app.config['model_factory'] = ModelFactory(root)
-app.jinja_options['trim_blocks'] = True
-app.jinja_options['lstrip_blocks'] = True
-register_custom_filters(app)
 
-# Flask-Login init
-login = LoginManager(app)
-login.login_view = 'auth.login'
-login.anonymous_user = AnonymousUserModel
+def get_app(root: RootConfigDirectoryContext) -> Flask:
+	# Flask app init
+	with root.read_config() as cfg:
+		app = Flask(
+			__name__,
+			template_folder='../templates',
+			static_folder=cfg.static_root
+		)
+		app.secret_key = bytes.fromhex(cfg.secret_key)
+	app.config['root'] = root
+	app.config['model_factory'] = ModelFactory(root)
+	app.jinja_options['trim_blocks'] = True
+	app.jinja_options['lstrip_blocks'] = True
+	register_custom_filters(app)
 
-# Blueprint inits
-from amanuensis.server.auth import bp as auth_bp
-from amanuensis.server.auth import login_manager as login_manager
-login_manager.init_app(app)
-app.register_blueprint(auth_bp)
+	# Flask-Login init
+	login_manager = get_login_manager(root)
+	login_manager.init_app(app)
 
-home_bp = get_home_bp()
-app.register_blueprint(home_bp)
+	# Blueprint inits
+	app.register_blueprint(bp_auth)
+	app.register_blueprint(bp_home)
+	# app.register_blueprint(bp_lexicon)
 
-lex_bp = get_lex_bp()
-app.register_blueprint(lex_bp)
+	# import code
+	# code.interact(local=locals())
+
+	return app

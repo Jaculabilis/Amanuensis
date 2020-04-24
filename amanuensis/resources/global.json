@@ -4,7 +4,7 @@
 	"address": "127.0.0.1",
 	"port": "5000",
 	"lexicon_data": "./lexicon",
-	"static_root": "./static",
+	"static_root": "../resources",
 	"email": {
 		"server": null,
 		"port": null,

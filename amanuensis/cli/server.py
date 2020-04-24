@@ -69,14 +69,17 @@ def command_run(args):
 	The default Flask server is not secure, and should
 	only be used for development.
 	"""
-	from amanuensis.server import app
-	from amanuensis.config import get, logger
+	from amanuensis.server import get_app
 
-	if get("secret_key") is None:
-		logger.error("Can't run server without a secret_key. Run generate-sec"
-			"ret first")
-		return -1
-	app.run(host=args.address, port=args.port, debug=args.debug)
+	root: RootConfigDirectoryContext = args.root
+
+	with root.read_config() as cfg:
+		if cfg.secret_key is None:
+			logger.error("Can't run server without a secret_key. "
+				"Run generate-secet first.")
+			return -1
+
+	get_app(root).run(host=args.address, port=args.port, debug=args.debug)
 	return 0
 
 

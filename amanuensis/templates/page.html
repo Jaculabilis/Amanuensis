@@ -11,7 +11,7 @@
 		<div id="header">
 			<div id="login-status" {% block login_status_attr %}{% endblock %}>
 				{% if current_user.is_authenticated %}
-				<b>{{ current_user.username -}}</b>
+				<b>{{ current_user.cfg.username -}}</b>
 				(<a href="{{ url_for('auth.logout') }}">Logout</a>)
 				{% else %}
 				<a href="{{ url_for('auth.login') }}">Login</a>
