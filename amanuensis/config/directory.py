@@ -123,7 +123,7 @@ class IndexDirectoryContext(ConfigDirectoryContext):
 			return self.read('index')
 
 
-class RootConfigDirectoryContext(ConfigDirectoryContext):
+class RootConfigDirectoryContext(ConfigFileConfigDirectoryContext):
 	"""
 	Context for the config directory with links to the lexicon and
 	user contexts.

@@ -1,13 +1,21 @@
+import logging
 import os
 
+from amanuensis.config import RootConfigDirectoryContext
 from amanuensis.cli.helpers import (
-	add_argument, no_argument, alias,
-	config_get, config_set, CONFIG_GET_ROOT_VALUE)
+	add_argument,
+	no_argument,
+	alias,
+	config_get,
+	config_set,
+	CONFIG_GET_ROOT_VALUE)
+
+logger = logging.getLogger(__name__)
 
 
 @alias('i')
-@add_argument(
-	"--refresh", action="store_true",
+@add_argument("--refresh",
+	action="store_true",
 	help="Refresh an existing config directory")
 def command_init(args):
 	"""
@@ -29,6 +37,7 @@ def command_init(args):
 
 	# Internal call
 	create_config_dir(args.config_dir, args.refresh)
+	logger.info(f'Initialized config dir at {args.config_dir}')
 	return 0
 
 
@@ -41,12 +50,10 @@ def command_generate_secret(args):
 	The Flask server will not run unless a secret key has
 	been generated.
 	"""
-	# Module imports
-	from amanuensis.config import json_rw, logger
-
-	secret_key = os.urandom(32)
-	with json_rw("config.json") as cfg:
-		cfg['secret_key'] = secret_key.hex()
+	root: RootConfigDirectoryContext = args.root
+	secret_key: bytes = os.urandom(32)
+	with root.config(edit=True) as cfg:
+		cfg.secret_key = secret_key.hex()
 	logger.info("Regenerated Flask secret key")
 	return 0
 
@@ -74,10 +81,17 @@ def command_run(args):
 
 
 @alias('n')
-@add_argument("--get", metavar="PATHSPEC", dest="get",
-	nargs="?", const=CONFIG_GET_ROOT_VALUE, help="Get the value of a config key")
-@add_argument("--set", metavar=("PATHSPEC", "VALUE"), dest="set",
-	nargs=2, help="Set the value of a config key")
+@add_argument("--get",
+	metavar="PATHSPEC",
+	dest="get",
+	nargs="?",
+	const=CONFIG_GET_ROOT_VALUE,
+	help="Get the value of a config key")
+@add_argument("--set",
+	metavar=("PATHSPEC", "VALUE"),
+	dest="set",
+	nargs=2,
+	help="Set the value of a config key")
 def command_config(args):
 	"""
 	Interact with the global config
@@ -85,19 +99,18 @@ def command_config(args):
 	PATHSPEC is a path into the config object formatted as
 	a dot-separated sequence of keys.
 	"""
-	# Module imports
-	from amanuensis.config import json_ro, json_rw, logger
+	root: RootConfigDirectoryContext = args.root
 
 	if args.get and args.set:
 		logger.error("Specify one of --get and --set")
 		return -1
 
 	if args.get:
-		with json_ro('config.json') as cfg:
+		with root.config(edit=False) as cfg:
 			config_get(cfg, args.get)
 
 	if args.set:
-		with json_rw('config.json') as cfg:
+		with root.config(edit=True) as cfg:
 			config_set("config", cfg, args.set)
 
 	return 0

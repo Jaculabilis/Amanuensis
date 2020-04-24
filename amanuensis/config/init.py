@@ -1,13 +1,13 @@
 # Standard library imports
-import copy
+from collections import OrderedDict
+import fcntl
 import json
-import logging.config
 import os
 import shutil
 
 # Module imports
-from amanuensis.errors import MissingConfigError, MalformedConfigError
-from amanuensis.config.loader import json_ro, json_rw
+# from amanuensis.errors import MissingConfigError, MalformedConfigError
+from amanuensis.config.context import json_ro, json_rw
 from amanuensis.resources import get_stream
 
 
@@ -15,8 +15,6 @@ def create_config_dir(config_dir, refresh=False):
 	"""
 	Create or refresh a config directory
 	"""
-	from collections import OrderedDict
-	import fcntl
 
 	def prepend(*path):
 		joined = os.path.join(*path)
@@ -38,7 +36,7 @@ def create_config_dir(config_dir, refresh=False):
 	global_config_path = prepend("config.json")
 	if refresh and os.path.isfile(global_config_path):
 		# We need to write an entirely different ordereddict to the config
-		# file, so we mimic the config.loader functionality manually.
+		# file, so we mimic the config.context functionality manually.
 		with open(global_config_path, 'r+', encoding='utf8') as cfg_file:
 			fcntl.lockf(cfg_file, fcntl.LOCK_EX)
 			old_cfg = json.load(cfg_file, object_pairs_hook=OrderedDict)
@@ -59,11 +57,6 @@ def create_config_dir(config_dir, refresh=False):
 	else:
 		with open(prepend("config.json"), 'wb') as f:
 			f.write(def_cfg.read())
-
-	# Ensure pidfile exists.
-	if not os.path.isfile(prepend("pid")):
-		with open(prepend("pid"), 'w') as f:
-			f.write(str(os.getpid()))
 
 	# Ensure lexicon subdir exists.
 	if not os.path.isdir(prepend("lexicon")):
@@ -101,4 +94,3 @@ def create_config_dir(config_dir, refresh=False):
 						print("Removing stale {} index entry '{}: {}'"
 							.format(dir_name, name, entry))
 						del index[name]
-
