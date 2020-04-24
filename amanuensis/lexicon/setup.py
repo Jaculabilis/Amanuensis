@@ -63,6 +63,35 @@ def add_player_to_lexicon(
 		lexicon.log('Player "{0.cfg.username}" joined ({0.uid})'.format(player))
 
 
+def player_can_create_character(
+	player: UserModel,
+	lexicon: LexiconModel,
+	name: str) -> bool:
+	"""
+	Checks whether a player can create a character with the given name
+	"""
+	# Trivial failures
+	if not player or not lexicon or not name:
+		return False
+	# User needs to be a player
+	if player.uid not in lexicon.cfg.join.joined:
+		return False
+	# Character can't be a dupe
+	if any([
+			char.name for char in lexicon.cfg.character.values()
+			if char.name == name]):
+		return False
+	# Player can't add more characters than the limit
+	if len([
+			char for char in lexicon.cfg.character.values()
+			if char.player == player.uid]) > lexicon.cfg.join.chars_per_player:
+		return False
+	# Players can't add characters after the game has started
+	if lexicon.cfg.turn.current:
+		return False
+	return True
+
+
 def create_character_in_lexicon(
 	player: UserModel,
 	lexicon: LexiconModel,
@@ -77,7 +106,7 @@ def create_character_in_lexicon(
 		raise ArgumentError(f'Invalid player: {player}')
 	if player.uid not in lexicon.cfg.join.joined:
 		raise ArgumentError(f'Player {player} not in lexicon {lexicon}')
-	if name is None:
+	if not name:
 		raise ArgumentError(f'Invalid character name: "{name}"')
 	if any([
 			char.name for char in lexicon.cfg.character.values()
