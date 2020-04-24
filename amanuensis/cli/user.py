@@ -1,12 +1,20 @@
 # Standard library imports
 import getpass
-import os
-import shutil
+import logging
+# import shutil
 
 # Module imports
 from amanuensis.cli.helpers import (
-	add_argument, no_argument, requires_user, alias,
-	config_get, config_set, CONFIG_GET_ROOT_VALUE)
+	add_argument,
+	no_argument,
+	requires_user,
+	alias,
+	config_get,
+	config_set,
+	CONFIG_GET_ROOT_VALUE)
+from amanuensis.models import UserModel
+
+logger = logging.getLogger(__name__)
 
 
 @alias('uc')
@@ -18,26 +26,34 @@ def command_create(args):
 	Create a user
 	"""
 	# Module imports
-	from amanuensis.config import logger
 	from amanuensis.user import (
-		UserModel, valid_username, valid_email, create_user)
+		valid_username, valid_email, create_user)
 
 	# Verify arguments
 	if not valid_username(args.username):
 		logger.error("Invalid username: usernames may only contain alphanumer"
 			"ic characters, dashes, and underscores")
 		return -1
-	if UserModel.by(name=args.username) is not None:
-		logger.error("Invalid username: username is already taken")
-		return -1
 	if not args.displayname:
 		args.displayname = args.username
 	if args.email and not valid_email(args.email):
 		logger.error("Invalid email")
 		return -1
+	try:
+		existing_user = args.model_factory.user(args.username)
+		if existing_user is not None:
+			logger.error("Invalid username: username is already taken")
+			return -1
+	except Exception:
+		pass  # User doesn't already exist, good to go
 
 	# Perform command
-	new_user, tmp_pw = create_user(args.username, args.displayname, args.email)
+	new_user, tmp_pw = create_user(
+		args.root,
+		args.model_factory,
+		args.username,
+		args.displayname,
+		args.email)
 
 	# Output
 	print(tmp_pw)
@@ -50,41 +66,43 @@ def command_delete(args):
 	"""
 	Delete a user
 	"""
-	# Module imports
-	from amanuensis.config import logger, prepend, json_rw
+	raise NotImplementedError()
+	# # Module imports
+	# from amanuensis.config import logger, prepend, json_rw
 
-	# Perform command
-	user_path = prepend('user', args.user.id)
-	shutil.rmtree(user_path)
-	with json_rw('user', 'index.json') as index:
-		del index[args.user.username]
+	# # Perform command
+	# user_path = prepend('user', args.user.id)
+	# shutil.rmtree(user_path)
+	# with json_rw('user', 'index.json') as index:
+	# 	del index[args.user.username]
 
-	# TODO resolve user id references in all games
+	# # TODO resolve user id references in all games
 
-	# Output
-	logger.info("Deleted user {0.username} ({0.id})".format(args.user))
-	return 0
+	# # Output
+	# logger.info("Deleted user {0.username} ({0.id})".format(args.user))
+	# return 0
 
 
 @alias('ul')
 @no_argument
 def command_list(args):
 	"""List all users"""
-	# Module imports
-	from amanuensis.config import prepend, json_ro
-	from amanuensis.user import UserModel
+	raise NotImplementedError()
+	# # Module imports
+	# from amanuensis.config import prepend, json_ro
+	# from amanuensis.user import UserModel
 
-	# Perform command
-	users = []
-	with json_ro('user', 'index.json') as index:
-		for username, uid in index.items():
-			users.append(UserModel.by(uid=uid))
+	# # Perform command
+	# users = []
+	# with json_ro('user', 'index.json') as index:
+	# 	for username, uid in index.items():
+	# 		users.append(UserModel.by(uid=uid))
 
-	# Output
-	users.sort(key=lambda u: u.username)
-	for user in users:
-		print("{0.id}  {0.displayname} ({0.username})".format(user))
-	return 0
+	# # Output
+	# users.sort(key=lambda u: u.username)
+	# for user in users:
+	# 	print("{0.id}  {0.displayname} ({0.username})".format(user))
+	# return 0
 
 
 @alias('un')
@@ -99,8 +117,7 @@ def command_config(args):
 	"""
 	Interact with a user's config
 	"""
-	# Module imports
-	from amanuensis.config import logger, json_rw
+	user: UserModel = args.user
 
 	# Verify arguments
 	if args.get and args.set:
@@ -109,11 +126,11 @@ def command_config(args):
 
 	# Perform command
 	if args.get:
-		config_get(args.user.config, args.get)
+		config_get(user.cfg, args.get)
 
 	if args.set:
-		with json_rw(args.user.config_path) as cfg:
-			config_set(args.user.id, cfg, args.set)
+		with user.ctx.edit_config() as cfg:
+			config_set(user.uid, cfg, args.set)
 
 	# Output
 	return 0
@@ -127,15 +144,14 @@ def command_passwd(args):
 	"""
 	Set a user's password
 	"""
-	# Module imports
-	from amanuensis.config import logger
+	user: UserModel = args.user
 
 	# Verify arguments
-	pw = args.password or getpass.getpass("Password: ")
+	password: str = args.password or getpass.getpass("Password: ")
 
 	# Perform command
-	args.user.set_password(pw)
+	user.set_password(password)
 
 	# Output
-	logger.info('Updated password for {}'.format(args.user.username))
+	logger.info('Updated password for {}'.format(user.cfg.username))
 	return 0
