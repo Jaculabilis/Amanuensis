@@ -24,7 +24,7 @@ def home():
 		elif lexicon.cfg.join.public:
 			public_lexicons.append(lexicon)
 	return render_template(
-		'home/home.html',
+		'home/home.jinja',
 		user_lexicons=user_lexicons,
 		public_lexicons=public_lexicons)
 
@@ -36,7 +36,7 @@ def admin():
 	root: RootConfigDirectoryContext = current_app.config['root']
 	users = list(load_all_users(root))
 	lexicons = list(load_all_lexicons(root))
-	return render_template('home/admin.html', users=users, lexicons=lexicons)
+	return render_template('home/admin.jinja', users=users, lexicons=lexicons)
 
 
 @bp_home.route("/admin/create/", methods=['GET', 'POST'])
@@ -55,4 +55,4 @@ def admin_create():
 			cfg.prompt = prompt
 		return redirect(url_for('lexicon.session', name=lexicon_name))
 
-	return render_template('home/create.html', form=form)
+	return render_template('home/create.jinja', form=form)
