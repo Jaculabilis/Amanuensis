@@ -68,53 +68,6 @@ def get_user_lexicons(user):
 		if user.in_lexicon(lexicon)]
 
 
-def valid_add(lex, player, password=None):
-	"""
-	Checks whether the given player can join a lexicon
-	"""
-	# Trivial failures
-	if lex is None:
-		return False
-	if player is None:
-		return False
-	# Can't join if already in the game
-	if player.id in lex.join.joined:
-		return False
-	# Can't join if the game is closed
-	if not lex.join.open:
-		return False
-	# Can't join if the player max is reached
-	if len(lex.join.joined) >= lex.join.max_players:
-		return False
-	# Can't join if the password doesn't check out
-	if lex.join.password is not None and lex.join.password != password:
-		return False
-
-	return True
-
-
-def add_player(lex, player):
-	"""
-	Unconditionally adds a player to a lexicon
-	"""
-	# Verify arguments
-	if lex is None:
-		raise ArgumentError("Invalid lexicon: '{}'".format(lex))
-	if player is None:
-		raise ArgumentError("Invalid player: '{}'".format(player))
-
-	# Idempotently add player
-	added = False
-	with json_rw(lex.config_path) as cfg:
-		if player.id not in cfg.join.joined:
-			cfg.join.joined.append(player.id)
-			added = True
-
-	# Log to the lexicon's log
-	if added:
-		lex.add_log("Player '{0.username}' joined ({0.id})".format(player))
-
-
 def remove_player(lex, player):
 	"""
 	Remove a player from a lexicon
