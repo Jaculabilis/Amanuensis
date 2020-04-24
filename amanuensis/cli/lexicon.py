@@ -1,14 +1,20 @@
 # Standard library imports
 import json
+import logging
 
 # Module imports
 from amanuensis.cli.helpers import (
 	add_argument, no_argument, requires_lexicon, requires_user, alias,
 	config_get, config_set, CONFIG_GET_ROOT_VALUE)
+from amanuensis.config import RootConfigDirectoryContext
+from amanuensis.models import LexiconModel
+
+logger = logging.getLogger(__name__)
 
 #
 # CRUD commands
 #
+
 
 @alias('lc')
 @add_argument("--name", required=True, help="The name of the new lexicon")
@@ -24,22 +30,21 @@ def command_create(args):
 	opening the lexicon for player joins.
 	"""
 	# Module imports
-	from amanuensis.config import logger, json_ro
-	from amanuensis.lexicon.manage import valid_name, create_lexicon
+	from amanuensis.lexicon import valid_name, create_lexicon
+
+	root: RootConfigDirectoryContext = args.root
 
 	# Verify arguments
 	if not valid_name(args.name):
-		logger.error("Lexicon name contains illegal characters: '{}'".format(
-			args.name))
+		logger.error(f'Lexicon name contains illegal characters: "{args.name}"')
 		return -1
-	with json_ro('lexicon', 'index.json') as index:
+	with root.lexicon.read_index() as index:
 		if args.name in index.keys():
-			logger.error('A lexicon with name "{}" already exists'.format(
-				args.name))
+			logger.error(f'A lexicon with name "{args.name}" already exists')
 			return -1
 
 	# Perform command
-	lexicon = create_lexicon(args.name, args.user)
+	create_lexicon(root, args.model_factory, args.name, args.user)
 
 	# Output already logged by create_lexicon
 	return 0
