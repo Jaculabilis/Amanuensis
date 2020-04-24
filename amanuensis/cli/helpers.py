@@ -2,12 +2,19 @@
 from argparse import ArgumentParser
 from functools import wraps
 from json.decoder import JSONDecodeError
+from logging import getLogger
+from sys import exc_info
+
+logger = getLogger(__name__)
 
 
-# These function wrappers allow us to use the same function for executing a
-# command and for configuring it. This keeps command arg configuration close to
-# where the command is defined and allows the main parser to use the same
-# function to both set up and execute commands.
+#
+# The add_argument and no_argument function wrappers allow the same
+# function to both configure a command and execute it. This keeps
+# command argument configuration close to where the command is defined
+# and reduces the number of things the main parser has to handle.
+#
+
 
 def add_argument(*args, **kwargs):
 	"""Passes the given args and kwargs to subparser.add_argument"""
@@ -47,13 +54,21 @@ def no_argument(command):
 	return augmented_command
 
 
-# Wrappers for commands requiring lexicon or username options
+#
+# Many commands require specifying a lexicon or user to operate on, so
+# the requires_lexicon and requires_user wrappers replace @add_argument
+# as well as automatically create the model for the object from the
+# provided identifier.
+#
+
 
 LEXICON_ARGS = ['--lexicon']
 LEXICON_KWARGS = {
 	'metavar': 'LEXICON',
 	'dest': 'lexicon',
 	'help': 'Specify a user to operate on'}
+
+
 def requires_lexicon(command):
 	@wraps(command)
 	def augmented_command(cmd_args):
@@ -67,34 +82,33 @@ def requires_lexicon(command):
 			return None
 
 		# Verify lexicon argument in execute pass
-		val = (getattr(cmd_args, 'lexicon')
-			if hasattr(cmd_args, 'lexicon')
-			else None)
+		val = getattr(cmd_args, 'lexicon', None)
 		if not val:
-			from amanuensis.config import logger
-			logger.error("This command requires specifying a lexicon")
+			logger.error("Missing --lexicon argument")
 			return -1
-		from amanuensis.lexicon import LexiconModel
-		cmd_args.lexicon = LexiconModel.by(name=val) #TODO catch specific exceptions
-		if cmd_args.lexicon is None:
-			from amanuensis.config import logger
-			logger.error('Could not find lexicon "{}"'.format(val))
+		try:
+			model_factory = cmd_args.model_factory
+			cmd_args.lexicon = model_factory.lexicon(val)
+		except Exception:
+			ex_type, value, tb = exc_info()
+			logger.error(
+				f'Loading lexicon "{val}" failed with '
+				f'{ex_type.__name__}: {value}')
 			return -1
 		return command(cmd_args)
 
 	augmented_command.__dict__['wrapper'] = True
 	return augmented_command
 
+
 USER_ARGS = ['--user']
 USER_KWARGS = {
 	'metavar': 'USER',
 	'dest': 'user',
 	'help': 'Specify a user to operate on'}
+
+
 def requires_user(command):
-	"""
-	Performs all necessary setup and verification for passing a user to a CLI
-	command.
-	"""
 	@wraps(command)
 	def augmented_command(cmd_args):
 		# Add user argument in parser pass
@@ -107,18 +121,18 @@ def requires_user(command):
 			return None
 
 		# Verify user argument in execute pass
-		val = (getattr(cmd_args, "user")
-			if hasattr(cmd_args, "user")
-			else None)
+		val = getattr(cmd_args, "user", None)
 		if not val:
-			from amanuensis.config import logger
-			logger.error("This command requires specifying a user")
+			logger.error("Missing --user argument")
 			return -1
-		from amanuensis.user import UserModel
-		cmd_args.user = UserModel.by(name=val) #TODO catch specific exceptions
-		if cmd_args.user is None:
-			from amanuensis.config import logger
-			logger.error('Could not find user "{}"'.format(val))
+		try:
+			model_factory = cmd_args.model_factory
+			cmd_args.user = model_factory.user(val)
+		except Exception:
+			ex_type, value, tb = exc_info()
+			logger.error(
+				f'Loading user "{val}" failed with '
+				f'{ex_type.__name__}: {value}')
 			return -1
 		return command(cmd_args)
 
@@ -140,15 +154,16 @@ def alias(cmd_alias):
 # Helpers for common command tasks
 
 CONFIG_GET_ROOT_VALUE = object()
+
+
 def config_get(cfg, pathspec):
 	"""
 	Performs config --get for a given config
 
-	cfg is from a with json_ro context
+	cfg is from a `with json_ro` context
 	path is the full pathspec, unsplit
 	"""
 	import json
-	from amanuensis.config import logger
 
 	if pathspec is CONFIG_GET_ROOT_VALUE:
 		path = []
@@ -162,6 +177,7 @@ def config_get(cfg, pathspec):
 	print(json.dumps(cfg, indent=2))
 	return 0
 
+
 def config_set(obj_id, cfg, set_tuple):
 	"""
 	Performs config --set for a given config
@@ -170,7 +186,6 @@ def config_set(obj_id, cfg, set_tuple):
 	set_tuple is a tuple of the pathspec and the value
 	"""
 	import json
-	from amanuensis.config import logger
 	pathspec, value = set_tuple
 	if not pathspec:
 		logger.error("Path must be non-empty")
@@ -178,7 +193,7 @@ def config_set(obj_id, cfg, set_tuple):
 	try:
 		value = json.loads(value)
 	except JSONDecodeError:
-		pass # Leave value as string
+		pass  # Leave value as string
 	for spec in path[:-1]:
 		if spec not in cfg:
 			logger.error("Path not found")
