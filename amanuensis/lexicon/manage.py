@@ -16,77 +16,8 @@ from amanuensis.lexicon import LexiconModel
 from amanuensis.parser import parse_raw_markdown, GetCitations, HtmlRenderer, filesafe_title, titlesort
 from amanuensis.resources import get_stream
 
-def valid_name(name):
-	"""
-	Validates that a lexicon name consists only of alpahnumerics, dashes,
-	underscores, and spaces
-	"""
-	return re.match(r"^[A-Za-z0-9-_ ]+$", name) is not None
 
 
-def create_lexicon(name, editor):
-	"""
-	Creates a lexicon with the given name and sets the given user as its editor
-	"""
-	# Verify arguments
-	if not name:
-		raise ArgumentError('Empty lexicon name: "{}"'.format(name))
-	if not valid_name(name):
-		raise ArgumentError('Invalid lexicon name: "{}"'.format(name))
-	with json_ro('lexicon', 'index.json') as index:
-		if name in index.keys():
-			raise ArgumentError('Lexicon name already taken: "{}"'.format(
-				name))
-	if editor is None:
-		raise ArgumentError("Invalid editor: '{}'".format(editor))
-
-	# Create the lexicon directory and initialize it with a blank lexicon
-	lid = uuid.uuid4().hex
-	lex_dir = prepend("lexicon", lid)
-	os.mkdir(lex_dir)
-	with get_stream("lexicon.json") as s:
-		with open(prepend(lex_dir, 'config.json'), 'wb') as f:
-			f.write(s.read())
-
-	# Fill out the new lexicon
-	with json_rw(lex_dir, 'config.json') as cfg:
-		cfg['lid'] = lid
-		cfg['name'] = name
-		cfg['editor'] = editor.uid
-		cfg['time']['created'] = int(time.time())
-
-	with json_rw(lex_dir, 'info.json', new=True) as info:
-		pass
-
-	# Create subdirectories
-	os.mkdir(prepend(lex_dir, 'draft'))
-	os.mkdir(prepend(lex_dir, 'src'))
-	os.mkdir(prepend(lex_dir, 'article'))
-
-	# Update the index with the new lexicon
-	with json_rw('lexicon', 'index.json') as index:
-		index[name] = lid
-
-	# Load the Lexicon and log creation
-	l = LexiconModel(lid)
-	l.add_log("Lexicon created")
-
-	logger.info("Created Lexicon {0.name}, ed. {1.displayname} ({0.id})".format(
-		l, editor))
-
-	# Add the editor
-	add_player(l, editor)
-
-	# Add the fallback character
-	add_character(l, editor, {
-		"cid": "default",
-		"name": "Ersatz Scrivener",
-		"player": None,
-	})
-	with l.edit() as cfg:
-		cfg.character.default.player = None
-
-	return l
 
 
 def delete_lexicon(lex, purge=False):
