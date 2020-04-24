@@ -7,6 +7,7 @@ import logging
 import os
 import re
 import time
+from typing import Iterable
 import uuid
 
 from amanuensis.config import RootConfigDirectoryContext, AttrOrderedDict
@@ -89,3 +90,15 @@ def create_lexicon(
 	logger.info(message)
 
 	return lexicon
+
+
+def load_all_lexicons(
+	root: RootConfigDirectoryContext) -> Iterable[LexiconModel]:
+	"""
+	Iterably loads every lexicon in the config store
+	"""
+	model_factory: ModelFactory = ModelFactory(root)
+	with root.lexicon.read_index() as index:
+		for lid in index.values():
+			lexicon: LexiconModel = model_factory.lexicon(lid)
+			yield lexicon

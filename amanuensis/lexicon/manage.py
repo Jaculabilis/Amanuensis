@@ -44,20 +44,6 @@ def delete_lexicon(lex, purge=False):
 	shutil.rmtree(lex_path)
 
 
-def get_all_lexicons():
-	"""
-	Loads each lexicon in the lexicon index
-	"""
-	# Get all the lexicon ids in the index
-	with json_ro('lexicon', 'index.json') as index:
-		lids = list(index.values())
-
-	# Load all of the lexicons
-	lexes = list(map(lambda id: LexiconModel.by(lid=id), lids))
-
-	return lexes
-
-
 def get_user_lexicons(user):
 	"""
 	Loads each lexicon that the given user is a player in
@@ -111,4 +97,3 @@ def delete_character(lex, charname):
 	# Remove character from character list
 	with json_rw(lex.config_path) as cfg:
 		del cfg.character[char.cid]
-
