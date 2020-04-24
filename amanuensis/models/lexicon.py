@@ -8,6 +8,10 @@ from amanuensis.config import (
 
 
 class LexiconModel():
+	PREGAME = "unstarted"
+	ONGOING = "ongoing"
+	COMPLETE = "completed"
+
 	"""Represents a lexicon in the Amanuensis config store"""
 	def __init__(self, root: RootConfigDirectoryContext, lid: str):
 		self._lid: str = lid
@@ -54,7 +58,7 @@ class LexiconModel():
 	@property
 	def status(self) -> str:
 		if self.cfg.turn.current is None:
-			return "unstarted"
+			return LexiconModel.PREGAME
 		if self.cfg.turn.current > self.cfg.turn.max:
-			return "completed"
-		return "ongoing"
+			return LexiconModel.COMPLETE
+		return LexiconModel.ONGOING
