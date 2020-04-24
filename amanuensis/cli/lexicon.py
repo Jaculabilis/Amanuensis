@@ -1,5 +1,4 @@
 # Standard library imports
-import json
 import logging
 
 # Module imports
@@ -57,16 +56,17 @@ def command_delete(args):
 	"""
 	Delete a lexicon and optionally its data
 	"""
-	# Module imports
-	from amanuensis.config import logger
-	from amanuensis.lexicon.manage import delete_lexicon
+	raise NotImplementedError()
+	# # Module imports
+	# from amanuensis.config import logger
+	# from amanuensis.lexicon.manage import delete_lexicon
 
-	# Perform command
-	delete_lexicon(args.lexicon, args.purge)
+	# # Perform command
+	# delete_lexicon(args.lexicon, args.purge)
 
-	# Output
-	logger.info('Deleted lexicon "{}"'.format(args.lexicon.name))
-	return 0
+	# # Output
+	# logger.info('Deleted lexicon "{}"'.format(args.lexicon.name))
+	# return 0
 
 
 @alias('ll')
@@ -75,37 +75,40 @@ def command_list(args):
 	"""
 	List all lexicons and their statuses
 	"""
-	# Module imports
-	from amanuensis.lexicon.manage import get_all_lexicons
+	raise NotImplementedError()
+	# # Module imports
+	# from amanuensis.lexicon.manage import get_all_lexicons
 
-	# Execute command
-	lexicons = get_all_lexicons()
+	# # Execute command
+	# lexicons = get_all_lexicons()
 
-	# Output
-	statuses = []
-	for lex in lexicons:
-		statuses.append("{0.lid}  {0.name} ({1})".format(lex, lex.status()))
-	for s in statuses:
-		print(s)
-	return 0
+	# # Output
+	# statuses = []
+	# for lex in lexicons:
+	# 	statuses.append("{0.lid}  {0.name} ({1})".format(lex, lex.status()))
+	# for s in statuses:
+	# 	print(s)
+	# return 0
 
 
 @alias('ln')
 @requires_lexicon
-@add_argument(
-	"--get", metavar="PATHSPEC", dest="get",
-	nargs="?", const=CONFIG_GET_ROOT_VALUE,
+@add_argument("--get",
+	metavar="PATHSPEC",
+	dest="get",
+	nargs="?",
+	const=CONFIG_GET_ROOT_VALUE,
 	help="Get the value of a config key")
-@add_argument(
-	"--set", metavar=("PATHSPEC", "VALUE"), dest="set",
-	nargs=2, help="Set the value of a config key")
+@add_argument("--set",
+	metavar=("PATHSPEC", "VALUE"),
+	dest="set",
+	nargs=2,
+	help="Set the value of a config key")
 def command_config(args):
 	"""
 	Interact with a lexicon's config
 	"""
-	# Module imports
-	from amanuensis.config import logger, json_ro, json_rw
-	from amanuensis.lexicon import LexiconModel
+	lexicon: LexiconModel = args.lexicon
 
 	# Verify arguments
 	if args.get and args.set:
@@ -114,11 +117,11 @@ def command_config(args):
 
 	# Execute command
 	if args.get:
-		config_get(args.lexicon.config, args.get)
+		config_get(lexicon.cfg, args.get)
 
 	if args.set:
-		with json_rw(args.lexicon.config_path) as cfg:
-			config_set(args.lexicon.id, cfg, args.set)
+		with lexicon.ctx.edit_config() as cfg:
+			config_set(lexicon.lid, cfg, args.set)
 
 	# config_* functions handle output
 	return 0
