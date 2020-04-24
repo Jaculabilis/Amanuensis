@@ -36,7 +36,9 @@ def get_login_manager(root: RootConfigDirectoryContext) -> LoginManager:
 	return login_manager
 
 
-bp_auth = Blueprint('auth', __name__, url_prefix='/auth')
+bp_auth = Blueprint('auth', __name__,
+	url_prefix='/auth',
+	template_folder='.')
 
 
 @bp_auth.route('/login/', methods=['GET', 'POST'])
@@ -55,7 +57,7 @@ def login():
 				.format(user.cfg))
 			return redirect(url_for('home.home'))
 		flash("Login not recognized")
-	return render_template('auth/login.html', form=form)
+	return render_template('auth.login.jinja', form=form)
 
 
 @bp_auth.route("/logout/", methods=['GET'])
