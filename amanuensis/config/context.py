@@ -1,140 +1,82 @@
-import os
-import re
+"""
+`with` context managers for mediating config file access.
+"""
+# Standard library imports
+import fcntl
+import json
 
-from amanuensis.config.loader import json_ro, json_rw
-from amanuensis.errors import MissingConfigError, ConfigAlreadyExistsError
+# Application imports
+from amanuensis.config.dict import AttrOrderedDict, ReadOnlyOrderedDict
 
 
-def is_guid(s):
-	return re.match(r'[0-9a-z]{32}', s.lower())
+class open_lock():
+	"""A context manager that opens a file with the specified file lock"""
+	def __init__(self, path, mode, lock_type):
+		self.fd = open(path, mode, encoding='utf8')
+		fcntl.lockf(self.fd, lock_type)
+
+	def __enter__(self):
+		return self.fd
+
+	def __exit__(self, exc_type, exc_value, traceback):
+		fcntl.lockf(self.fd, fcntl.LOCK_UN)
+		self.fd.close()
 
 
-class ConfigDirectoryContext():
+class open_sh(open_lock):
+	"""A context manager that opens a file with a shared lock"""
+	def __init__(self, path, mode):
+		super().__init__(path, mode, fcntl.LOCK_SH)
+
+
+class open_ex(open_lock):
+	"""A context manager that opens a file with an exclusive lock"""
+	def __init__(self, path, mode):
+		super().__init__(path, mode, fcntl.LOCK_EX)
+
+
+class json_ro(open_sh):
 	"""
-	Base class for CRUD operations on config files in a config
-	directory.
+	A context manager that opens a file in a shared, read-only mode.
+	The contents of the file are read as JSON and returned as a read-
+	only OrderedDict.
 	"""
 	def __init__(self, path):
-		self.path = path
-		if not os.path.isdir(self.path):
-			raise MissingConfigError(path)
+		super().__init__(path, 'r')
+		self.config = None
 
-	def new(self, filename):
-		"""
-		Creates a JSON file that doesn't already exist.
-		"""
-		if not filename.endswith('.json'):
-			filename = f'{filename}.json'
-		fpath = os.path.join(self.path, filename)
-		if os.path.isfile(fpath):
-			raise ConfigAlreadyExistsError(fpath)
-		return json_rw(fpath, new=True)
-
-	def read(self, filename):
-		"""
-		Loads a JSON file in read-only mode.
-		"""
-		if not filename.endswith('.json'):
-			filename = f'{filename}.json'
-		fpath = os.path.join(self.path, filename)
-		if not os.path.isfile(fpath):
-			raise MissingConfigError(fpath)
-		return json_ro(fpath)
-
-	def edit(self, filename, create=False):
-		"""
-		Loads a JSON file in write mode.
-		"""
-		if not filename.endswith('.json'):
-			filename = f'{filename}.json'
-		fpath = os.path.join(self.path, filename)
-		if not create and not os.path.isfile(fpath):
-			raise MissingConfigError(fpath)
-		return json_rw(fpath, new=create)
-
-	def delete(self, filename):
-		"""Deletes a file."""
-		if not filename.endswith('.json'):
-			filename = f'{filename}.json'
-		fpath = os.path.join(self.path, filename)
-		if not os.path.isfile(fpath):
-			raise MissingConfigError(fpath)
-		os.remove(fpath)
-
-	def ls(self):
-		"""Lists all files in this directory."""
-		filenames = os.listdir(self.path)
-		return filenames
+	def __enter__(self) -> ReadOnlyOrderedDict:
+		self.config = json.load(self.fd, object_pairs_hook=ReadOnlyOrderedDict)
+		return self.config
 
 
-class ConfigFileMixin():
-	"""Mixin for objects that have config files."""
-	def config(self, edit=False):
-		"""Context manager for this object's config file."""
-		if edit:
-			return self.edit('config')
+class json_rw(open_ex):
+	"""
+	A context manager that opens a file with an exclusive lock. The
+	file mode defaults to r+, which requires that the file exist. The
+	file mode can be set to w+ to create a new file by setting the new
+	kwarg in the ctor. The contents of the file are read as JSON and
+	returned in an AttrOrderedDict. Any changes to the context dict
+	will be written out to the file when the context manager exits,
+	unless an exception is raised before exiting.
+	"""
+	def __init__(self, path, new=False):
+		mode = 'w+' if new else 'r+'
+		super().__init__(path, mode)
+		self.config = None
+		self.new = new
+
+	def __enter__(self) -> AttrOrderedDict:
+		if not self.new:
+			self.config = json.load(self.fd, object_pairs_hook=AttrOrderedDict)
 		else:
-			return self.read('config')
+			self.config = AttrOrderedDict()
+		return self.config
 
-
-class IndexDirectoryContext(ConfigDirectoryContext):
-	"""
-	A lookup layer for getting config directory contexts for lexicon
-	or user directories.
-	"""
-	def __init__(self, path, cdc_type):
-		super().__init__(path)
-		self.cdc_type = cdc_type
-
-	def __getitem__(self, key):
-		"""
-		Returns a context to the given item. key is treated as the
-		item's id if it's a guid string, otherwise it's treated as
-		the item's indexed name and run through the index first.
-		"""
-		if not is_guid(key):
-			with self.index() as index:
-				iid = index.get(key)
-				if not iid:
-					raise MissingConfigError(key)
-				key = iid
-		return self.cdc_type(os.path.join(self.path, key))
-
-	def index(self, edit=False):
-		if edit:
-			return self.edit('index')
-		else:
-			return self.read('index')
-
-
-class RootConfigDirectoryContext(ConfigDirectoryContext):
-	"""
-	Context for the config directory with links to the lexicon and
-	user contexts.
-	"""
-	def __init__(self, path):
-		super().__init__(path)
-		self.lexicon = IndexDirectoryContext(
-			os.path.join(self.path, 'lexicon'),
-			LexiconConfigDirectoryContext)
-		self.user = IndexDirectoryContext(
-			os.path.join(self.path, 'user'),
-			UserConfigDirectoryContext)
-
-
-class LexiconConfigDirectoryContext(ConfigFileMixin, ConfigDirectoryContext):
-	"""
-	A config context for a lexicon's config directory.
-	"""
-	def __init__(self, path):
-		super().__init__(path)
-		self.draft = ConfigDirectoryContext(os.path.join(self.path, 'draft'))
-		self.src = ConfigDirectoryContext(os.path.join(self.path, 'src'))
-		self.article = ConfigDirectoryContext(os.path.join(self.path, 'article'))
-
-
-class UserConfigDirectoryContext(ConfigFileMixin, ConfigDirectoryContext):
-	"""
-	A config context for a user's config directory.
-	"""
-	pass
+	def __exit__(self, exc_type, exc_value, traceback):
+		# Only write the new value out if there wasn't an exception
+		if not exc_type:
+			self.fd.seek(0)
+			json.dump(self.config, self.fd, allow_nan=False, indent='\t')
+			self.fd.truncate()
+		super().__exit__(exc_type, exc_value, traceback)
