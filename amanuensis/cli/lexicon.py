@@ -294,13 +294,14 @@ def command_char_list(args):
 # Procedural commands
 #
 
+
 @alias('lpt')
 @requires_lexicon
-@add_argument(
-	"--as-deadline", action="store_true",
+@add_argument("--as-deadline",
+	action="store_true",
 	help="Notifies players of the publish result")
-@add_argument(
-	"--force", action="store_true",
+@add_argument("--force",
+	action="store_true",
 	help="Publish all approved articles, regardless of other checks")
 def command_publish_turn(args):
 	"""
@@ -313,7 +314,7 @@ def command_publish_turn(args):
 	settings.
 	"""
 	# Module imports
-	from amanuensis.lexicon.manage import attempt_publish
+	from amanuensis.lexicon import attempt_publish
 
 	# Internal call
 	attempt_publish(args.lexicon)

@@ -8,6 +8,7 @@
 # run after commandline parsing has already occurred.
 #
 
+
 def server_commands(commands={}):
 	if commands:
 		return commands
@@ -17,6 +18,7 @@ def server_commands(commands={}):
 			name = name[8:].replace("_", "-")
 			commands[name] = func
 	return commands
+
 
 def lexicon_commands(commands={}):
 	if commands:
@@ -28,6 +30,7 @@ def lexicon_commands(commands={}):
 			commands["lexicon-" + name] = func
 	return commands
 
+
 def user_commands(commands={}):
 	if commands:
 		return commands
@@ -38,11 +41,14 @@ def user_commands(commands={}):
 			commands["user-" + name] = func
 	return commands
 
+
 def get_commands():
 	return {**server_commands(), **lexicon_commands(), **user_commands()}
 
+
 def cmd_desc(func):
 	return ((func.__doc__ or "").strip() or '\n').splitlines()[0]
+
 
 def describe_commands():
 	longest = max(map(len, server_commands().keys()))

@@ -1,4 +1,5 @@
 from amanuensis.lexicon.admin import valid_name, create_lexicon
+from amanuensis.lexicon.gameloop import attempt_publish
 from amanuensis.lexicon.setup import (
 	player_can_join_lexicon,
 	add_player_to_lexicon,
@@ -7,6 +8,7 @@ from amanuensis.lexicon.setup import (
 __all__ = [member.__name__ for member in [
 	valid_name,
 	create_lexicon,
+	attempt_publish,
 	player_can_join_lexicon,
 	add_player_to_lexicon,
 	create_character_in_lexicon,
