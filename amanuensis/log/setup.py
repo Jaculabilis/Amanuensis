@@ -36,7 +36,10 @@ def init_logging(verbose: bool, log_filename: str):
 	logger = logging.getLogger("amanuensis")
 	if log_filename:
 		logger.addHandler(get_file_handler(log_filename))
+		logger.setLevel(logging.DEBUG)
 	elif verbose:
 		logger.addHandler(detailed_console_handler)
+		logger.setLevel(logging.DEBUG)
 	else:
 		logger.addHandler(basic_console_handler)
+		logger.setLevel(logging.INFO)
