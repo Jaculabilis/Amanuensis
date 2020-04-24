@@ -1,9 +1,11 @@
 import time
+from typing import cast
 
-from amanuensis.config.context import (
+from amanuensis.config import (
 	RootConfigDirectoryContext,
-	LexiconConfigDirectoryContext)
-from amanuensis.config.loader import ReadOnlyOrderedDict, json_rw
+	LexiconConfigDirectoryContext,
+	ReadOnlyOrderedDict)
+from amanuensis.config.context import json_rw
 
 
 class LexiconModel():
@@ -13,7 +15,7 @@ class LexiconModel():
 		# Creating the config context implicitly checks for existence
 		self._ctx: LexiconConfigDirectoryContext = root.lexicon[lid]
 		with self._ctx.config(edit=False) as config:
-			self._cfg: ReadOnlyOrderedDict = config
+			self._cfg: ReadOnlyOrderedDict = cast(ReadOnlyOrderedDict, config)
 
 	def __str__(self) -> str:
 		return f'<Lexicon {self.cfg.name}>'
@@ -45,7 +47,7 @@ class LexiconModel():
 		return self.cfg.get('title', f'Lexicon {self.cfg.name}')
 
 	def edit(self) -> json_rw:
-		return self.ctx.config(edit=True)
+		return cast(json_rw, self.ctx.config(edit=True))
 
 	def log(self, message: str) -> None:
 		now = int(time.time())

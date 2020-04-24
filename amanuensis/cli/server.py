@@ -4,6 +4,7 @@ from amanuensis.cli.helpers import (
 	add_argument, no_argument, alias,
 	config_get, config_set, CONFIG_GET_ROOT_VALUE)
 
+
 @alias('i')
 @add_argument(
 	"--refresh", action="store_true",
@@ -13,8 +14,7 @@ def command_init(args):
 	Initialize a config directory at --config-dir
 
 	A clean config directory will contain a config.json, a
-	pidfile, a lexicon config directory, and a user config
-	directory.
+	lexicon config directory, and a user config directory.
 
 	Refreshing an existing directory will add keys to the global config that
 	are present in the default configs. Users and lexicons that are missing

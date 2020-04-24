@@ -1,9 +1,12 @@
+from typing import cast
+
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from amanuensis.config.context import (
+from amanuensis.config import (
 	RootConfigDirectoryContext,
-	UserConfigDirectoryContext)
-from amanuensis.config.loader import ReadOnlyOrderedDict
+	UserConfigDirectoryContext,
+	ReadOnlyOrderedDict)
+from amanuensis.config.context import json_rw
 
 
 class UserModelBase():
@@ -51,7 +54,7 @@ class UserModel(UserModelBase):
 		# Creating the config context implicitly checks for existence
 		self._ctx: UserConfigDirectoryContext = root.user[uid]
 		with self._ctx.config(edit=False) as config:
-			self._cfg: ReadOnlyOrderedDict = config
+			self._cfg: ReadOnlyOrderedDict = cast(ReadOnlyOrderedDict, config)
 
 	def __str__(self) -> str:
 		return f'<{self.cfg.username}>'
@@ -61,9 +64,12 @@ class UserModel(UserModelBase):
 
 	# Utility methods
 
+	def edit(self) -> json_rw:
+		return cast(json_rw, self.ctx.config(edit=True))
+
 	def set_password(self, password: str) -> None:
 		pw_hash = generate_password_hash(password)
-		with self.ctx.config(edit=True) as cfg:
+		with self.edit() as cfg:
 			cfg['password'] = pw_hash
 
 	def check_password(self, password) -> bool:

@@ -6,8 +6,10 @@ import sys
 
 # Module imports
 from amanuensis.cli import describe_commands, get_commands
-from amanuensis.config.context import RootConfigDirectoryContext
-import amanuensis.config as config
+from amanuensis.config import (
+	RootConfigDirectoryContext,
+	ENV_CONFIG_DIR,
+	ENV_LOG_FILE)
 from amanuensis.errors import AmanuensisError
 from amanuensis.log import init_logging
 from amanuensis.models import ModelFactory
@@ -28,7 +30,7 @@ def get_parser(valid_commands):
 	# The config directory.
 	parser.add_argument("--config-dir",
 		dest="config_dir",
-		default=os.environ.get(config.ENV_CONFIG_DIR, "./config"),
+		default=os.environ.get(ENV_CONFIG_DIR, "./config"),
 		help="The config directory for Amanuensis")
 	# Logging settings.
 	parser.add_argument("--verbose", "-v",
@@ -37,7 +39,7 @@ def get_parser(valid_commands):
 		help="Enable verbose console logging")
 	parser.add_argument("--log-file",
 		dest="log_file",
-		default=os.environ.get(config.ENV_LOG_FILE),
+		default=os.environ.get(ENV_LOG_FILE),
 		help="Enable verbose file logging")
 	parser.set_defaults(func=lambda args: parser.print_help())
 	subp = parser.add_subparsers(
@@ -89,7 +91,7 @@ def main(argv):
 	try:
 		args.func(args)
 	except AmanuensisError as e:
-		config.logger.error('Unexpected internal {}: {}'.format(
+		logger.error('Unexpected internal {}: {}'.format(
 			type(e).__name__, str(e)))
 
 

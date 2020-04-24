@@ -1,6 +1,10 @@
 # Module imports
 from amanuensis.config.dict import AttrOrderedDict, ReadOnlyOrderedDict
-from amanuensis.config.directory import RootConfigDirectoryContext, is_guid
+from amanuensis.config.directory import (
+	RootConfigDirectoryContext,
+	UserConfigDirectoryContext,
+	LexiconConfigDirectoryContext,
+	is_guid)
 
 # Environment variable name constants
 ENV_SECRET_KEY = "AMANUENSIS_SECRET_KEY"
@@ -13,5 +17,7 @@ __all__ = [
 	AttrOrderedDict.__name__,
 	ReadOnlyOrderedDict.__name__,
 	RootConfigDirectoryContext.__name__,
+	UserConfigDirectoryContext.__name__,
+	LexiconConfigDirectoryContext.__name__,
 	is_guid.__name__,
 ]
