@@ -48,7 +48,7 @@ class LexiconModel():
 
 	@property
 	def title(self) -> str:
-		return self.cfg.get('title', f'Lexicon {self.cfg.name}')
+		return self.cfg.get('title') or f'Lexicon {self.cfg.name}'
 
 	def log(self, message: str) -> None:
 		now = int(time.time())
