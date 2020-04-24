@@ -15,7 +15,7 @@ class ModelFactory():
 			raise ArgumentError('identifer must not be None')
 		# Ensure we have a user guid
 		if not is_guid(identifier):
-			with self.root.user.index() as index:
+			with self.root.user.read_index() as index:
 				uid = index.get(identifier, None)
 			if uid is None:
 				raise KeyError(f'Unknown username: {identifier})')
@@ -33,7 +33,7 @@ class ModelFactory():
 			raise ArgumentError('identifier must not be None')
 		# Ensure we have a lexicon guid
 		if not is_guid(identifier):
-			with self.root.lexicon.index() as index:
+			with self.root.lexicon.read_index() as index:
 				lid = index.get(identifier, None)
 			if lid is None:
 				raise KeyError(f'Unknown lexicon: {identifier}')
