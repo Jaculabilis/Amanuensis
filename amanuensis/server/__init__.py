@@ -2,11 +2,11 @@ from flask import Flask
 
 from amanuensis.config import RootConfigDirectoryContext
 from amanuensis.models import ModelFactory
-from amanuensis.server.auth import get_login_manager, bp_auth
-from amanuensis.server.helpers import register_custom_filters
-from amanuensis.server.home import bp_home
-from amanuensis.server.lexicon import bp_lexicon
-from amanuensis.server.session import bp_session
+from .auth import get_login_manager, bp_auth
+from .helpers import register_custom_filters
+from .home import bp_home
+from .lexicon import bp_lexicon
+from .session import bp_session
 
 
 def get_app(root: RootConfigDirectoryContext) -> Flask:

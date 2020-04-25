@@ -6,8 +6,9 @@ import os
 import re
 from typing import Iterable
 
-from amanuensis.config.context import json_ro, json_rw
 from amanuensis.errors import MissingConfigError, ConfigAlreadyExistsError
+
+from .context import json_ro, json_rw
 
 
 def is_guid(s: str) -> bool:

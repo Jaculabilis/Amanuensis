@@ -2,11 +2,12 @@
 import logging
 
 # Module imports
-from amanuensis.cli.helpers import (
-	add_argument, no_argument, requires_lexicon, requires_user, alias,
-	config_get, config_set, CONFIG_GET_ROOT_VALUE)
 from amanuensis.config import RootConfigDirectoryContext
 from amanuensis.models import LexiconModel, UserModel
+
+from .helpers import (
+	add_argument, no_argument, requires_lexicon, requires_user, alias,
+	config_get, config_set, CONFIG_GET_ROOT_VALUE)
 
 logger = logging.getLogger(__name__)
 

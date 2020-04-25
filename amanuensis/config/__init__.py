@@ -1,6 +1,6 @@
 # Module imports
-from amanuensis.config.dict import AttrOrderedDict, ReadOnlyOrderedDict
-from amanuensis.config.directory import (
+from .dict import AttrOrderedDict, ReadOnlyOrderedDict
+from .directory import (
 	RootConfigDirectoryContext,
 	UserConfigDirectoryContext,
 	LexiconConfigDirectoryContext,

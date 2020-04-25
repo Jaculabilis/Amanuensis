@@ -1,5 +1,5 @@
-from amanuensis.user.manage import load_all_users
-from amanuensis.user.signup import (
+from .manage import load_all_users
+from .signup import (
 	create_user,
 	valid_username,
 	valid_email)

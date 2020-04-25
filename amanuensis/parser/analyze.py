@@ -5,7 +5,7 @@ for verification against constraints.
 
 import re
 
-from amanuensis.parser.core import RenderableVisitor
+from .core import RenderableVisitor
 
 
 class GetCitations(RenderableVisitor):

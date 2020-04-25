@@ -15,8 +15,9 @@ from flask_login import (
 	LoginManager)
 
 from amanuensis.config import RootConfigDirectoryContext
-from amanuensis.server.auth.forms import LoginForm
 from amanuensis.models import ModelFactory, AnonymousUserModel
+
+from .forms import LoginForm
 
 logger = logging.getLogger(__name__)
 

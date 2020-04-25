@@ -6,7 +6,7 @@ Lexipython markdown.
 import re
 from typing import Sequence
 
-from amanuensis.parser.core import (
+from .core import (
 	TextSpan,
 	LineBreak,
 	ParsedArticle,

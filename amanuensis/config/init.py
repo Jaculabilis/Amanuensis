@@ -6,9 +6,9 @@ import os
 import shutil
 
 # Module imports
-# from amanuensis.errors import MissingConfigError, MalformedConfigError
-from amanuensis.config.context import json_ro, json_rw
 from amanuensis.resources import get_stream
+
+from .context import json_ro, json_rw
 
 
 def create_config_dir(config_dir, refresh=False):

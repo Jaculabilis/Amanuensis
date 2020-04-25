@@ -4,7 +4,9 @@ import logging
 # import shutil
 
 # Module imports
-from amanuensis.cli.helpers import (
+from amanuensis.models import UserModel
+
+from .helpers import (
 	add_argument,
 	no_argument,
 	requires_user,
@@ -12,7 +14,6 @@ from amanuensis.cli.helpers import (
 	config_get,
 	config_set,
 	CONFIG_GET_ROOT_VALUE)
-from amanuensis.models import UserModel
 
 logger = logging.getLogger(__name__)
 

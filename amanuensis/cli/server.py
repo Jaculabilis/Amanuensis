@@ -2,7 +2,8 @@ import logging
 import os
 
 from amanuensis.config import RootConfigDirectoryContext
-from amanuensis.cli.helpers import (
+
+from .helpers import (
 	add_argument,
 	no_argument,
 	alias,

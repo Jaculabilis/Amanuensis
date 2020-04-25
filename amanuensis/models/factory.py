@@ -2,8 +2,9 @@ from typing import Optional
 
 from amanuensis.config import is_guid, RootConfigDirectoryContext
 from amanuensis.errors import ArgumentError
-from amanuensis.models.user import UserModel
-from amanuensis.models.lexicon import LexiconModel
+
+from .user import UserModel
+from .lexicon import LexiconModel
 
 
 class ModelFactory():

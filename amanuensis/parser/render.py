@@ -5,7 +5,7 @@ readable formats.
 
 from typing import Iterable
 
-from amanuensis.parser.helpers import filesafe_title
+from .helpers import filesafe_title
 
 
 class HtmlRenderer():

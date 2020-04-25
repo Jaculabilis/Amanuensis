@@ -6,7 +6,7 @@ import fcntl
 import json
 
 # Application imports
-from amanuensis.config.dict import AttrOrderedDict, ReadOnlyOrderedDict
+from .dict import AttrOrderedDict, ReadOnlyOrderedDict
 
 
 class open_lock():

@@ -1,9 +1,9 @@
-from amanuensis.lexicon.admin import (
+from .admin import (
 	valid_name,
 	create_lexicon,
 	load_all_lexicons)
-from amanuensis.lexicon.gameloop import attempt_publish
-from amanuensis.lexicon.setup import (
+from .gameloop import attempt_publish
+from .setup import (
 	player_can_join_lexicon,
 	add_player_to_lexicon,
 	create_character_in_lexicon)
