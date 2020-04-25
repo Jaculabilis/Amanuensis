@@ -5,7 +5,8 @@ from amanuensis.models import ModelFactory
 from amanuensis.server.auth import get_login_manager, bp_auth
 from amanuensis.server.helpers import register_custom_filters
 from amanuensis.server.home import bp_home
-# from amanuensis.server.lexicon import bp_lexicon
+from amanuensis.server.lexicon import bp_lexicon
+from amanuensis.server.session import bp_session
 
 
 def get_app(root: RootConfigDirectoryContext) -> Flask:
@@ -30,9 +31,7 @@ def get_app(root: RootConfigDirectoryContext) -> Flask:
 	# Blueprint inits
 	app.register_blueprint(bp_auth)
 	app.register_blueprint(bp_home)
-	# app.register_blueprint(bp_lexicon)
-
-	# import code
-	# code.interact(local=locals())
+	app.register_blueprint(bp_lexicon)
+	app.register_blueprint(bp_session)
 
 	return app

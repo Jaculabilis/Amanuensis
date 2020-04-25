@@ -10,38 +10,30 @@ from flask import (
 	flash,
 	request,
 	Markup)
-from flask_login import login_required, current_user
+from flask_login import current_user
 
-from amanuensis.config import root
-from amanuensis.config.loader import ReadOnlyOrderedDict
 from amanuensis.errors import MissingConfigError
-from amanuensis.lexicon.manage import (
-	valid_add,
-	add_player,
-	add_character,
+from amanuensis.lexicon import (
 	attempt_publish)
 from amanuensis.parser import (
 	parse_raw_markdown,
 	PreviewHtmlRenderer,
-	FeatureCounter,
-	filesafe_title)
+	FeatureCounter)
 from amanuensis.server.forms import (
 	LexiconConfigForm,
-	LexiconJoinForm,
 	LexiconCharacterForm,
 	LexiconReviewForm)
 from amanuensis.server.helpers import (
 	lexicon_param,
 	player_required,
-	editor_required,
-	player_required_if_not_public)
+	editor_required)
 
 
 def jsonfmt(obj):
 	return Markup(json.dumps(obj))
 
 
-bp_session = Blueprint('lexicon', __name__,
+bp_session = Blueprint('session', __name__,
 	url_prefix='/lexicon/<name>/session',
 	template_folder='.')
 
@@ -60,10 +52,15 @@ def session(name):
 				drafts.append(draft)
 			if draft.status.approved:
 				approved.append(draft)
+	characters = []
+	for char in g.lexicon.cfg.character.values():
+		if char.player == current_user.uid:
+			characters.append(char)
 	return render_template(
-		'session.session.jinja',
+		'session.root.jinja',
 		ready_articles=drafts,
-		approved_articles=approved)
+		approved_articles=approved,
+		characters=characters)
 
 
 def edit_character(name, form, cid):
@@ -82,7 +79,7 @@ def edit_character(name, form, cid):
 def create_character(name, form):
 	if form.validate_on_submit():
 		# On POST, verify character can be added
-		if not g.lexicon.can_add_character(current_user.id):
+		if not g.lexicon.can_add_character(current_user.uid):
 			flash('Operation not permitted')
 			return redirect(url_for('session.session', name=name))
 		# Add the character
@@ -103,11 +100,11 @@ def character(name):
 	form = LexiconCharacterForm()
 	cid = request.args.get('cid')
 	if cid:
-		if cid not in g.lexicon.character:
+		if cid not in g.lexicon.cfg.character:
 			flash('Character not found')
 			return redirect(url_for('session.session', name=name))
-		if (g.lexicon.character.get(cid).player != current_user.id
-				and g.lexicon.editor != current_user.id):
+		if (g.lexicon.cfg.character.get(cid).player != current_user.uid
+				and g.lexicon.cfg.editor != current_user.uid):
 			flash('Access denied')
 			return redirect(url_for('session.session', name=name))
 		return edit_character(name, form, cid)
@@ -164,13 +161,13 @@ def review(name):
 				if form.approved.data == 'Y':
 					draft.status.ready = True
 					draft.status.approved = True
-					g.lexicon.add_log(f"Article '{draft.title}' approved ({draft.aid})")
-					if g.lexicon.publish.asap:
+					g.lexicon.log(f"Article '{draft.title}' approved ({draft.aid})")
+					if g.lexicon.cfg.publish.asap:
 						attempt_publish(g.lexicon)
 				else:
 					draft.status.ready = False
 					draft.status.approved = False
-					g.lexicon.add_log(f"Article '{draft.title}' rejected ({draft.aid})")
+					g.lexicon.log(f"Article '{draft.title}' rejected ({draft.aid})")
 				return redirect(url_for('session.session', name=name))
 
 		# If the article was already reviewed and this is just the preview
@@ -198,11 +195,11 @@ def editor(name):
 		# Character not specified, load all characters and articles
 		# and return render_template
 		characters = [
-			char for char in g.lexicon.character.values()
-			if char.player == current_user.id
+			char for char in g.lexicon.cfg.character.values()
+			if char.player == current_user.uid
 		]
 		articles = [
-			article for article in g.lexicon.get_drafts_for_player(uid=current_user.id)
+			article for article in g.lexicon.get_drafts_for_player(uid=current_user.uid)
 			if any([article.character == char.cid for char in characters])
 		]
 		return render_template(
@@ -211,12 +208,12 @@ def editor(name):
 			articles=articles,
 			jsonfmt=jsonfmt)
 
-	character = g.lexicon.character.get(cid)
+	character = g.lexicon.cfg.character.get(cid)
 	if not character:
 		# Character was specified, but id was invalid
 		flash("Character not found")
 		return redirect(url_for('session.session', name=name))
-	if character.player != current_user.id:
+	if character.player != current_user.uid:
 		# Player doesn't control this character
 		flash("Access forbidden")
 		return redirect(url_for('session.session', name=name))
@@ -226,7 +223,7 @@ def editor(name):
 		# Character specified but not article, load character articles
 		# and retuen r_t
 		articles = [
-			article for article in g.lexicon.get_drafts_for_player(uid=current_user.id)
+			article for article in g.lexicon.get_drafts_for_player(uid=current_user.uid)
 			if article.character == character.cid
 		]
 		return render_template(
@@ -257,11 +254,11 @@ def editor_new(name):
 	new_aid = uuid.uuid4().hex
 	# TODO harden this
 	cid = request.args.get("cid")
-	character = g.lexicon.character.get(cid)
+	character = g.lexicon.cfg.character.get(cid)
 	article = {
 		"version": "0",
 		"aid": new_aid,
-		"lexicon": g.lexicon.id,
+		"lexicon": g.lexicon.lid,
 		"character": cid,
 		"title": "",
 		"turn": 1,

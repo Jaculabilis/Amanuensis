@@ -32,7 +32,7 @@ def register_custom_filters(app):
 	def article_link(title):
 		return url_for(
 			'lexicon.article',
-			name=g.lexicon.name,
+			name=g.lexicon.cfg.name,
 			title=filesafe_title(title))
 
 
@@ -102,6 +102,6 @@ def editor_required(route):
 	def editor_route(*args, **kwargs):
 		if current_user.uid != g.lexicon.cfg.editor:
 			flash("You must be the editor to view this page")
-			return redirect(url_for('lexicon.contents', name=g.lexicon.name))
+			return redirect(url_for('lexicon.contents', name=g.lexicon.cfg.name))
 		return route(*args, **kwargs)
 	return editor_route

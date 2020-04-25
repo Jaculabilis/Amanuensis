@@ -2,8 +2,8 @@
 <div class="dashboard-lexicon-item dashboard-lexicon-{{ lexicon.status }}">
 	<p>
 		<span class="dashboard-lexicon-item-title">
-			{# <a href="{{ url_for('lexicon.contents', name=lexicon.cfg.name) }}"> #}
-				Lexicon {{ lexicon.cfg.name }}{# </a> #}
+			<a href="{{ url_for('lexicon.contents', name=lexicon.cfg.name) }}">
+				Lexicon {{ lexicon.cfg.name }}</a>
 		</span>
 		[{{ lexicon.status.capitalize() }}]
 	</p>
@@ -23,9 +23,9 @@
 		{% else %}
 		Players: {{ lexicon.cfg.join.joined|count }}/{{ lexicon.cfg.join.max_players }}
 		{% if lexicon.cfg.join.public and lexicon.cfg.join.open %}
-		{# / <a href="{{ url_for('lexicon.join', name=lexicon.cfg.name) }}"> #}
+		/ <a href="{{ url_for('lexicon.join', name=lexicon.cfg.name) }}">
 			Join game
-		{# </a> #}
+		</a>
 		{% endif %}
 		{% endif %}
 	</p>

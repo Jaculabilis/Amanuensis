@@ -39,7 +39,7 @@ def join(name):
 		# Gate on join validity
 		if player_can_join_lexicon(current_user, g.lexicon, form.password.data):
 			add_player_to_lexicon(current_user, g.lexicon)
-			return redirect(url_for("lexicon.contents", name=name)) # SESSION
+			return redirect(url_for('session.session', name=name))
 		else:
 			flash("Could not join game")
 			return redirect(url_for("home.home", name=name))

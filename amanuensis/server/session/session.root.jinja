@@ -4,24 +4,24 @@
 
 {% set template_content_blocks = [] %}
 
-{% if current_user.id == g.lexicon.editor %}
+{% if current_user.uid == g.lexicon.cfg.editor %}
 {% block bl_editor %}
 <p>Editor actions</p>
 <ul>
 	<li>
-		<a href="{{ url_for('lexicon.settings', name=g.lexicon.name) }}">
+		<a href="{{ url_for('session.settings', name=g.lexicon.cfg.name) }}">
 			Edit lexicon settings
 		</a>
 	</li>
 	<li>
-		<a href="{{ url_for('lexicon.character', name=g.lexicon.name, cid='default') }}">
+		<a href="{{ url_for('session.character', name=g.lexicon.cfg.name, cid='default') }}">
 			Edit default character
 		</a>
 	</li>
 	{% for article in ready_articles %}
 	<li>
-		<a href="{{ url_for('lexicon.review', name=g.lexicon.name, aid=article.aid) }}">
-			Review <i>{{ article.title }}</i> by {{ g.lexicon.character[article.character].name }}
+		<a href="{{ url_for('session.review', name=g.lexicon.cfg.name, aid=article.aid) }}">
+			Review <i>{{ article.title }}</i> by {{ g.lexicon.cfg.character[article.character].name }}
 		</a>
 	</li>
 	{% endfor %}
@@ -30,8 +30,8 @@
 <ul>
 	{% for article in approved_articles %}
 	<li>
-		<a href="{{ url_for('lexicon.review', name=g.lexicon.name, aid=article.aid) }}">
-			<i>{{ article.title }}</i> by {{ g.lexicon.character[article.character].name }}
+		<a href="{{ url_for('session.review', name=g.lexicon.cfg.name, aid=article.aid) }}">
+			<i>{{ article.title }}</i> by {{ g.lexicon.cfg.character[article.character].name }}
 		</a>
 	</li>
 	{% endfor %}
@@ -46,24 +46,23 @@
 {% endfor %}
 <p>Player actions</p>
 <ul>
-	{% set characters = g.lexicon.get_characters_for_player(current_user.id) %}
 	{% for char in characters %}
 	<li>
-		<a href="{{ url_for('lexicon.character', name=g.lexicon.name, cid=char.cid) }}">
+		<a href="{{ url_for('session.character', name=g.lexicon.cfg.name, cid=char.cid) }}">
 			Edit {{ char.name }}
 		</a>
 	</li>
 	{% endfor %}
 	{%
-		if characters|count is lt(g.lexicon.join.chars_per_player)
-		and not g.lexicon.turn.current
+		if characters|count is lt(g.lexicon.cfg.join.chars_per_player)
+		and not g.lexicon.cfg.turn.current
 	%}
 	<li>
-		<a href="{{ url_for('lexicon.character', name=g.lexicon.name) }}">Create a character</a>
+		<a href="{{ url_for('session.character', name=g.lexicon.cfg.name) }}">Create a character</a>
 	</li>
 	{% endif %}
 	<li>
-		<a href="{{ url_for('lexicon.editor', name=g.lexicon.name) }}">
+		<a href="{{ url_for('session.editor', name=g.lexicon.cfg.name) }}">
 			Article editor
 		</a>
 	</li>

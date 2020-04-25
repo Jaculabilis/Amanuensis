@@ -11,7 +11,7 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='editor.css') }}">
 	<script>
 		params = {
-			updateURL: "{{ url_for('lexicon.editor_update', name=g.lexicon.name) }}",
+			updateURL: "{{ url_for('session.editor_update', name=g.lexicon.cfg.name) }}",
 			{% if character %}
 			character: {{ jsonfmt(character) }},
 			{% else %}
@@ -31,7 +31,7 @@
 		<div id="editor-left" class="column">
 			<div class="contentblock">
 				<div id="editor-header">
-					<a href="{{ url_for('lexicon.session', name=g.lexicon.name) }}">
+					<a href="{{ url_for('session.session', name=g.lexicon.cfg.name) }}">
 						{{ g.lexicon.title }}
 					</a>
 					{% if article and not article.status.approved %}
@@ -53,7 +53,7 @@
 						{% for article in articles %}
 						{% if article.character == char.cid %}
 						<li>
-							<a href="{{ url_for('lexicon.editor', name=g.lexicon.name, cid=char.cid, aid=article.aid) }}">{{ article.title if article.title.strip() else "Untitled" }}</a>
+							<a href="{{ url_for('session.editor', name=g.lexicon.cfg.name, cid=char.cid, aid=article.aid) }}">{{ article.title if article.title.strip() else "Untitled" }}</a>
 							<span>
 							{% if not article.status.ready %}
 							[Draft]
@@ -67,7 +67,7 @@
 						{% endif %}
 						{% endfor %}
 						<li>
-							<a href="{{ url_for('lexicon.editor_new', name=g.lexicon.name, cid=char.cid) }}">
+							<a href="{{ url_for('session.editor_new', name=g.lexicon.cfg.name, cid=char.cid) }}">
 								New
 							</a>
 						</li>
