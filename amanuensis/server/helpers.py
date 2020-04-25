@@ -36,20 +36,18 @@ def register_custom_filters(app):
 			title=filesafe_title(title))
 
 
-# def lexicon_param(route):
-# 	"""Wrapper for loading a route's lexicon"""
-# 	@wraps(route)
-# 	def with_lexicon(**kwargs):
-# 		name = kwargs.get('name')
-# 		g.lexicon = LexiconModel.by(name=name)
-# 		if g.lexicon is None:
-# 			flash("Couldn't find a lexicon with the name '{}'".format(name))
-# 			return redirect(url_for("home.home"))
-# 		# TODO transition to new model
-# 		model_factory: ModelFactory = current_app.config['model_factory']
-# 		g.lexicon_ = model_factory.lexicon(name)
-# 		return route(**kwargs)
-# 	return with_lexicon
+def lexicon_param(route):
+	"""Wrapper for loading a route's lexicon"""
+	@wraps(route)
+	def with_lexicon(**kwargs):
+		name = kwargs.get('name')
+		model_factory: ModelFactory = current_app.config['model_factory']
+		g.lexicon = model_factory.lexicon(name)
+		if g.lexicon is None:
+			flash(f'Couldn\'t find a lexicon with the name "{name}"')
+			return redirect(url_for("home.home"))
+		return route(**kwargs)
+	return with_lexicon
 
 
 def admin_required(route):

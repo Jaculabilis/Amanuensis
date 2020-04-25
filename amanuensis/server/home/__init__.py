@@ -55,6 +55,6 @@ def admin_create():
 		lexicon = create_lexicon(lexicon_name, editor)
 		with lexicon.ctx.edit_config() as cfg:
 			cfg.prompt = prompt
-		return redirect(url_for('lexicon.session', name=lexicon_name))
+		return redirect(url_for('session.session', name=lexicon_name))
 
 	return render_template('home.create.jinja', form=form)

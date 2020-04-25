@@ -216,10 +216,10 @@ class LexiconCreateForm(FlaskForm):
 # 		return True
 
 
-# class LexiconJoinForm(FlaskForm):
-# 	"""/lexicon/<name>/join/"""
-# 	password = StringField('Password')
-# 	submit = SubmitField("Submit")
+class LexiconJoinForm(FlaskForm):
+	"""/lexicon/<name>/join/"""
+	password = StringField('Password')
+	submit = SubmitField("Submit")
 
 
 # class LexiconCharacterForm(FlaskForm):
