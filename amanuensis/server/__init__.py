@@ -13,7 +13,7 @@ def get_app(root: RootConfigDirectoryContext) -> Flask:
 	with root.read_config() as cfg:
 		app = Flask(
 			__name__,
-			template_folder='../templates',
+			template_folder='.',
 			static_folder=cfg.static_root
 		)
 		app.secret_key = bytes.fromhex(cfg.secret_key)
