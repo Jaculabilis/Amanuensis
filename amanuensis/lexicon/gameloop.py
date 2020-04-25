@@ -2,8 +2,9 @@
 Submodule of functions for managing lexicon games during the core game
 loop of writing and publishing articles.
 """
-from typing import Iterable, Any
+from typing import Iterable, Any, List
 
+from amanuensis.config import ReadOnlyOrderedDict
 from amanuensis.models import LexiconModel
 from amanuensis.parser import (
 	parse_raw_markdown,
@@ -11,6 +12,37 @@ from amanuensis.parser import (
 	HtmlRenderer,
 	titlesort,
 	filesafe_title)
+
+
+def get_player_characters(
+	lexicon: LexiconModel,
+	uid: str) -> Iterable[ReadOnlyOrderedDict]:
+	"""
+	Returns each character in the lexicon owned by the given player
+	"""
+	for character in lexicon.cfg.character.values():
+		if character.player == uid:
+			yield character
+
+
+def get_player_drafts(
+	lexicon: LexiconModel,
+	uid: str) -> Iterable[ReadOnlyOrderedDict]:
+	"""
+	Returns each draft in the lexicon by a character owned by the
+	given player.
+	"""
+	characters = list(get_player_characters(lexicon, uid))
+	drafts: List[Any] = []
+	for filename in lexicon.ctx.draft.ls():
+		for character in characters:
+			if filename.startswith(character.cid):
+				drafts.append(filename)
+				break
+	for i in range(len(drafts)):
+		with lexicon.ctx.draft.read(drafts[i]) as draft:
+			drafts[i] = draft
+	return drafts
 
 
 def attempt_publish(lexicon: LexiconModel) -> None:
