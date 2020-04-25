@@ -48,7 +48,7 @@ def get_bp():
 				flash("Could not join game")
 				return redirect(url_for("home.home", name=name))
 
-		return render_template('lexicon/join.html', form=form)
+		return render_template('lexicon/join.jinja', form=form)
 
 	@bp.route('/contents/', methods=['GET'])
 	@lexicon_param
@@ -62,7 +62,7 @@ def get_bp():
 					'title': a.title,
 					'link': url_for('lexicon.article', name=name, title=filesafe_title(a.title)),
 				})
-		return render_template('lexicon/contents.html', articles=articles)
+		return render_template('lexicon/contents.jinja', articles=articles)
 
 	@bp.route('/article/<title>')
 	@lexicon_param
@@ -70,13 +70,13 @@ def get_bp():
 	def article(name, title):
 		with g.lexicon_.ctx.article.read(title) as a:
 			article = { **a, 'html': Markup(a['html']) }
-			return render_template('lexicon/article.html', article=article)
+			return render_template('lexicon/article.jinja', article=article)
 
 	@bp.route('/rules/', methods=['GET'])
 	@lexicon_param
 	@player_required_if_not_public
 	def rules(name):
-		return render_template('lexicon/rules.html')
+		return render_template('lexicon/rules.jinja')
 
 	@bp.route('/session/', methods=['GET'])
 	@lexicon_param
@@ -93,7 +93,7 @@ def get_bp():
 				if draft.status.approved:
 					approved.append(draft)
 		return render_template(
-			'lexicon/session.html',
+			'lexicon/session.jinja',
 			ready_articles=drafts,
 			approved_articles=approved)
 
@@ -107,7 +107,7 @@ def get_bp():
 		if not form.is_submitted():
 			# On GET, populate with the character
 			form.for_character(g.lexicon, cid)
-		return render_template('lexicon/character.html', form=form, action='edit')
+		return render_template('lexicon/character.jinja', form=form, action='edit')
 
 	def create_character(name, form):
 		if form.validate_on_submit():
@@ -123,7 +123,7 @@ def get_bp():
 		if not form.is_submitted():
 			# On GET, populate form for new character
 			form.for_new()
-		return render_template('lexicon/character.html', form=form, action='create')
+		return render_template('lexicon/character.jinja', form=form, action='create')
 
 	@bp.route('/session/character/', methods=['GET', 'POST'])
 	@lexicon_param
@@ -152,17 +152,17 @@ def get_bp():
 		# Load the config for the lexicon on load
 		if not form.is_submitted():
 			form.populate_from_lexicon(g.lexicon)
-			return render_template("lexicon/settings.html", form=form)
+			return render_template("lexicon/settings.jinja", form=form)
 
 		if form.validate():
 			if not form.update_lexicon(g.lexicon):
 				flash("Error updating settings")
-				return render_template("lexicon/settings.html", form=form)
+				return render_template("lexicon/settings.jinja", form=form)
 			flash("Settings updated")
 			return redirect(url_for('lexicon.session', name=name))
 
 		flash("Validation error")
-		return render_template("lexicon/settings.html", form=form)
+		return render_template("lexicon/settings.jinja", form=form)
 
 	@bp.route('/session/review/', methods=['GET', 'POST'])
 	@lexicon_param
@@ -205,7 +205,7 @@ def get_bp():
 				form = None
 
 		return render_template(
-			"lexicon/review.html",
+			"lexicon/review.jinja",
 			form=form,
 			article_html=Markup(rendered_html))
 
@@ -213,7 +213,7 @@ def get_bp():
 	@lexicon_param
 	@player_required_if_not_public
 	def stats(name):
-		return render_template('lexicon/statistics.html')
+		return render_template('lexicon/statistics.jinja')
 
 	@bp.route('/session/editor/', methods=['GET'])
 	@lexicon_param
@@ -238,7 +238,7 @@ def get_bp():
 				if any([article.character == char.cid for char in characters])
 			]
 			return render_template(
-				'lexicon/editor.html',
+				'lexicon/editor.jinja',
 				characters=characters,
 				articles=articles,
 				jsonfmt=jsonfmt)
@@ -262,7 +262,7 @@ def get_bp():
 				if article.character == character.cid
 			]
 			return render_template(
-				'lexicon/editor.html',
+				'lexicon/editor.jinja',
 				character=character,
 				articles=articles,
 				jsonfmt=jsonfmt)
@@ -276,7 +276,7 @@ def get_bp():
 			return redirect(url_for('lexicon.session', name=name))
 
 		return render_template(
-			'lexicon/editor.html',
+			'lexicon/editor.jinja',
 			character=character,
 			article=article,
 			jsonfmt=jsonfmt)
