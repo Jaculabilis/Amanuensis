@@ -5,6 +5,7 @@ from .admin import (
 from .gameloop import (
 	get_player_characters,
 	get_player_drafts,
+	get_draft,
 	attempt_publish)
 from .setup import (
 	player_can_join_lexicon,
@@ -17,6 +18,7 @@ __all__ = [member.__name__ for member in [
 	load_all_lexicons,
 	get_player_characters,
 	get_player_drafts,
+	get_draft,
 	attempt_publish,
 	player_can_join_lexicon,
 	add_player_to_lexicon,

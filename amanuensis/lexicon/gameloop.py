@@ -2,7 +2,7 @@
 Submodule of functions for managing lexicon games during the core game
 loop of writing and publishing articles.
 """
-from typing import Iterable, Any, List
+from typing import Iterable, Any, List, Optional
 
 from amanuensis.config import ReadOnlyOrderedDict
 from amanuensis.models import LexiconModel
@@ -43,6 +43,21 @@ def get_player_drafts(
 		with lexicon.ctx.draft.read(drafts[i]) as draft:
 			drafts[i] = draft
 	return drafts
+
+
+def get_draft(lexicon: LexiconModel, aid: str) -> Optional[ReadOnlyOrderedDict]:
+	"""
+	Loads an article from its id
+	"""
+	article_fn = None
+	for filename in lexicon.ctx.draft.ls():
+		if filename.endswith(f'{aid}.json'):
+			article_fn = filename
+			break
+	if not article_fn:
+		return None
+	with lexicon.ctx.draft.read(article_fn) as article:
+		return article
 
 
 def attempt_publish(lexicon: LexiconModel) -> None:
