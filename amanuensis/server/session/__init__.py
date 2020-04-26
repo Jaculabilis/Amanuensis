@@ -1,4 +1,3 @@
-import json
 import uuid
 
 from flask import (
@@ -12,10 +11,7 @@ from flask import (
 	Markup)
 from flask_login import current_user
 
-from amanuensis.lexicon import (
-	get_player_characters,
-	get_player_drafts,
-	attempt_publish)
+from amanuensis.lexicon import attempt_publish
 from amanuensis.models import LexiconModel
 from amanuensis.parser import (
 	parse_raw_markdown,
@@ -30,9 +26,7 @@ from amanuensis.server.helpers import (
 	player_required,
 	editor_required)
 
-
-def jsonfmt(obj):
-	return Markup(json.dumps(obj))
+from .editor import load_editor, new_draft, update_draft
 
 
 bp_session = Blueprint('session', __name__,
@@ -187,89 +181,24 @@ def review(name):
 @player_required
 def editor(name):
 	lexicon: LexiconModel = g.lexicon
-	aid = request.args.get('aid')
-	if aid:
-		# Article specfied, load editor in edit mode
-		article_fn = None
-		for filename in lexicon.ctx.draft.ls():
-			if filename.endswith(f'{aid}.json'):
-				article_fn = filename
-				break
-		if not article_fn:
-			flash("Draft not found")
-			return redirect(url_for('session.session', name=name))
-		with lexicon.ctx.draft.read(article_fn) as a:
-			article = a
-		# Check that the player owns this article
-		character = lexicon.cfg.character.get(article.character)
-		if character.player != current_user.uid:
-			flash("Access forbidden")
-			return redirect(url_for('session.session', name=name))
-		return render_template(
-			'session.editor.jinja',
-			character=character,
-			article=article,
-			jsonfmt=jsonfmt)
-
-	# Article not specified, load editor in load mode
-	characters = list(get_player_characters(lexicon, current_user.uid))
-	articles = list(get_player_drafts(lexicon, current_user.uid))
-	print(characters)
-	print(articles)
-	return render_template(
-		'session.editor.jinja',
-		characters=characters,
-		articles=articles)
+	aid: str = request.args.get('aid')
+	return load_editor(lexicon, aid)
 
 
 @bp_session.route('/editor/new', methods=['GET'])
 @lexicon_param
 @player_required
 def editor_new(name):
-	new_aid = uuid.uuid4().hex
-	# TODO harden this
-	cid = request.args.get("cid")
-	character = g.lexicon.cfg.character.get(cid)
-	article = {
-		"version": "0",
-		"aid": new_aid,
-		"lexicon": g.lexicon.lid,
-		"character": cid,
-		"title": "",
-		"turn": 1,
-		"status": {
-			"ready": False,
-			"approved": False
-		},
-		"contents": f"\n\n{character.signature}",
-	}
-	filename = f"{cid}.{new_aid}"
-	with g.lexicon.ctx.draft.new(filename) as j:
-		j.update(article)
-	return redirect(url_for('session.editor', name=name, cid=cid, aid=new_aid))
+	lexicon: LexiconModel = g.lexicon
+	cid: str = request.args.get('cid')
+	return new_draft(lexicon, cid)
 
 
 @bp_session.route('/editor/update', methods=['POST'])
 @lexicon_param
 @player_required
 def editor_update(name):
-	article = request.json['article']
-	# TODO verification
-	# check if article was previously approved
-	# check extrinsic constraints for blocking errors
-	parsed_draft = parse_raw_markdown(article['contents'])
-	rendered_html = parsed_draft.render(PreviewHtmlRenderer(g.lexicon))
-	features = parsed_draft.render(FeatureCounter())
-
-	filename = f'{article["character"]}.{article["aid"]}'
-	with g.lexicon.ctx.draft.edit(filename) as a:
-		a.update(article)
-
-	# TODO return more info
-	return {
-		'article': article,
-		'info': {
-			'rendered': rendered_html,
-			'word_count': features.word_count,
-		}
-	}
+	lexicon: LexiconModel = g.lexicon
+	article_json = request.json['article']
+	return update_draft(lexicon, article_json)
+	# only need to be sending around title, status, contents, aid
