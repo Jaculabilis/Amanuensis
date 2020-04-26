@@ -12,9 +12,11 @@ from flask import (
 	Markup)
 from flask_login import current_user
 
-from amanuensis.errors import MissingConfigError
 from amanuensis.lexicon import (
+	get_player_characters,
+	get_player_drafts,
 	attempt_publish)
+from amanuensis.models import LexiconModel
 from amanuensis.parser import (
 	parse_raw_markdown,
 	PreviewHtmlRenderer,
@@ -184,67 +186,40 @@ def review(name):
 @lexicon_param
 @player_required
 def editor(name):
-	"""
-	cases:
-	- neither cid nor aid: load all chars and articles
-	- cid: list articles just for cid
-	- aid:
-	"""
-	cid = request.args.get('cid')
-	if not cid:
-		# Character not specified, load all characters and articles
-		# and return render_template
-		characters = [
-			char for char in g.lexicon.cfg.character.values()
-			if char.player == current_user.uid
-		]
-		articles = [
-			article for article in g.lexicon.get_drafts_for_player(uid=current_user.uid)
-			if any([article.character == char.cid for char in characters])
-		]
-		return render_template(
-			'session.editor.jinja',
-			characters=characters,
-			articles=articles,
-			jsonfmt=jsonfmt)
-
-	character = g.lexicon.cfg.character.get(cid)
-	if not character:
-		# Character was specified, but id was invalid
-		flash("Character not found")
-		return redirect(url_for('session.session', name=name))
-	if character.player != current_user.uid:
-		# Player doesn't control this character
-		flash("Access forbidden")
-		return redirect(url_for('session.session', name=name))
-
+	lexicon: LexiconModel = g.lexicon
 	aid = request.args.get('aid')
-	if not aid:
-		# Character specified but not article, load character articles
-		# and retuen r_t
-		articles = [
-			article for article in g.lexicon.get_drafts_for_player(uid=current_user.uid)
-			if article.character == character.cid
-		]
+	if aid:
+		# Article specfied, load editor in edit mode
+		article_fn = None
+		for filename in lexicon.ctx.draft.ls():
+			if filename.endswith(f'{aid}.json'):
+				article_fn = filename
+				break
+		if not article_fn:
+			flash("Draft not found")
+			return redirect(url_for('session.session', name=name))
+		with lexicon.ctx.draft.read(article_fn) as a:
+			article = a
+		# Check that the player owns this article
+		character = lexicon.cfg.character.get(article.character)
+		if character.player != current_user.uid:
+			flash("Access forbidden")
+			return redirect(url_for('session.session', name=name))
 		return render_template(
 			'session.editor.jinja',
 			character=character,
-			articles=articles,
+			article=article,
 			jsonfmt=jsonfmt)
 
-	filename = f'{cid}.{aid}'
-	try:
-		with g.lexicon.ctx.draft.read(filename) as a:
-			article = a
-	except MissingConfigError:
-		flash("Draft not found")
-		return redirect(url_for('session.session', name=name))
-
+	# Article not specified, load editor in load mode
+	characters = list(get_player_characters(lexicon, current_user.uid))
+	articles = list(get_player_drafts(lexicon, current_user.uid))
+	print(characters)
+	print(articles)
 	return render_template(
 		'session.editor.jinja',
-		character=character,
-		article=article,
-		jsonfmt=jsonfmt)
+		characters=characters,
+		articles=articles)
 
 
 @bp_session.route('/editor/new', methods=['GET'])

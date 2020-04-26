@@ -30,22 +30,29 @@
 	<div id="wrapper">
 		<div id="editor-left" class="column">
 			<div class="contentblock">
+				{# Thin header bar #}
 				<div id="editor-header">
+					{# Header always includes backlink to lexicon #}
 					<a href="{{ url_for('session.session', name=g.lexicon.cfg.name) }}">
 						{{ g.lexicon.title }}
 					</a>
+					{# If article is not finalized, show button to submit and retract #}
 					{% if article and not article.status.approved %}
 					<button id="button-submit" onclick="submitArticle()">Submit article</button>
 					{% endif %}
+					{# Header always includes character/player info #}
 					<span>
 						<b>
 							{% if character %}
 							{{ character.name }} / 
 							{% endif %}
-							{{ current_user.username }}
+							{{ current_user.cfg.username }}
 						</b>
 					</span>
 				</div>
+				{# In load mode, `characters` is specified and `article` is #}
+				{# not, and the main body of the editor column contains a #}
+				{# list of articles that can be loaded. #}
 				{% for char in characters %}
 				<div id="editor-charselect">
 					<b>{{ char.name }}</b>
@@ -53,7 +60,9 @@
 						{% for article in articles %}
 						{% if article.character == char.cid %}
 						<li>
-							<a href="{{ url_for('session.editor', name=g.lexicon.cfg.name, cid=char.cid, aid=article.aid) }}">{{ article.title if article.title.strip() else "Untitled" }}</a>
+							<a href="{{ url_for('session.editor', name=g.lexicon.cfg.name, aid=article.aid) }}">
+								{{ article.title if article.title.strip() else "Untitled" }}
+							</a>
 							<span>
 							{% if not article.status.ready %}
 							[Draft]
@@ -74,6 +83,8 @@
 					</ul>
 				</div>
 				{% endfor %}
+				{# In edit mode, `article` is specified and `characters` is #}
+				{# not, and the editor pane contains the article editor. #}
 				{% if article %}
 				<div id="editor-buttons">
 					Character literals:
