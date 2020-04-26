@@ -18,9 +18,12 @@
 			character: null,
 			{% endif %}
 			{% if article %}
-			article: {{ jsonfmt(article) }},
+			article: {
+				aid: {{ jsonfmt(article.aid) }},
+				status: {{ jsonfmt(article.status) }},
+			}
 			{% else %}
-			article: null,
+			article: null
 			{% endif %}
 		};
 	</script>
@@ -94,8 +97,8 @@
 					<button>]</button>
 					<button>~</button>
 				</div>
-				<input id="editor-title" placeholder="Title" oninput="onContentChange()" disabled>
-				<textarea id="editor-content" class="fullwidth" oninput="onContentChange()" disabled></textarea>
+				<input id="editor-title" placeholder="Title" oninput="onContentChange()" disabled value="{{ article.title }}">
+				<textarea id="editor-content" class="fullwidth" oninput="onContentChange()" disabled>{{ article.contents }}</textarea>
 				{% endif %}
 			</div>
 		</div>

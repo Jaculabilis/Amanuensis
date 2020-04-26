@@ -7,7 +7,8 @@ function ifNoFurtherChanges(callback, timeout=2000) {
 	nonce = nonce_local;
 	setTimeout(() => {
 		if (nonce == nonce_local) {
-			callback()
+			callback();
+			nonce = 0;
 		}
 	}, timeout);
 }
@@ -17,11 +18,6 @@ window.onload = function() {
 	// Kill noscript message first
 	document.getElementById("preview").innerHTML = "<p>&nbsp;</p>";
 
-	if (params.article != null) {
-		document.getElementById("editor-title").value = params.article.title;
-		document.getElementById("editor-content").value = params.article.contents;
-	}
-
 	onContentChange(0);
 };
 
@@ -30,10 +26,7 @@ function buildArticleObject() {
 	var contents = document.getElementById("editor-content").value;
 	return {
 		aid: params.article.aid,
-		lexicon: params.article.lexicon,
-		character: params.article.character,
 		title: title,
-		turn: params.article.turn,
 		status: params.article.status,
 		contents: contents
 	};
@@ -47,11 +40,12 @@ function update(article) {
 	req.onreadystatechange = function () {
 		if (req.readyState == 4 && req.status == 200) {
 			// Update internal state with the returned article object
-			params.article = req.response.article;
+			params.status = req.response.status;
+			document.getElementById("editor-title").value = req.response.title;
 			// Set editor editability based on article status
 			updateEditorStatus();
 			// Update the preview with the parse information
-			updatePreview(req.response.info);
+			updatePreview(req.response);
 		}
 	};
 	var payload = { article: article };
@@ -66,11 +60,31 @@ function updateEditorStatus() {
 	submitButton.innerText = ready ? "Edit article" : "Submit article";
 }
 
-function updatePreview(info) {
-	var title = document.getElementById("editor-title").value;
-	var previewHtml = "<h1>" + title + "</h1>\n" + info.rendered;
+function updatePreview(response) {
+	var previewHtml = "<h1>" + response.title + "</h1>\n" + response.rendered;
 	document.getElementById("preview").innerHTML = previewHtml;
-	document.getElementById("preview-control").innerHTML = info.word_count;
+
+	var citations = "<ol>";
+	for (var i = 0; i < response.citations.length; i++) {
+		citations += "<li>" + response.citations[i] + "</li>";
+	}
+	citations += "</ol>";
+	document.getElementById("preview-citations").innerHTML = citations;
+
+	var info = "";
+	for (var i = 0; i < response.info.length; i++) {
+		info += "<span class=\"message-info\">" + response.info[i] + "</span><br>";
+	}
+	var warning = "";
+	for (var i = 0; i < response.warning.length; i++) {
+		warning += "<span class=\"message-warning\">" + response.warning[i] + "</span><br>";
+	}
+	var error = "";
+	for (var i = 0; i < response.error.length; i++) {
+		error += "<span class=\"message-error\">" + response.error[i] + "</span><br>";
+	}
+	var control = info + "<br>" + warning + "<br>" + error;
+	document.getElementById("preview-control").innerHTML = control;
 }
 
 function onContentChange(timeout=2000) {
@@ -89,9 +103,7 @@ function submitArticle() {
 }
 
 window.addEventListener("beforeunload", function(e) {
-	var content = document.getElementById("editor-content").value
-	var hasText = content.length > 0 && content != params.article.contents;
-	if (hasText) {
+	if (nonce != 0) {
 		e.returnValue = "Are you sure?";
 	}
 });

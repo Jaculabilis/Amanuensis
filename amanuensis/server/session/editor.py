@@ -8,12 +8,16 @@ from flask import (
 	flash, redirect, url_for, render_template, Markup)
 from flask_login import current_user
 
-from amanuensis.lexicon import get_player_characters, get_player_drafts
+from amanuensis.lexicon import (
+	get_player_characters,
+	get_player_drafts,
+	get_draft)
 from amanuensis.models import LexiconModel
 from amanuensis.parser import (
+	normalize_title,
 	parse_raw_markdown,
 	PreviewHtmlRenderer,
-	FeatureCounter)
+	ConstraintAnalysis)
 
 
 def load_editor(lexicon: LexiconModel, aid: str):
@@ -22,16 +26,10 @@ def load_editor(lexicon: LexiconModel, aid: str):
 	"""
 	if aid:
 		# Article specfied, load editor in edit mode
-		article_fn = None
-		for filename in lexicon.ctx.draft.ls():
-			if filename.endswith(f'{aid}.json'):
-				article_fn = filename
-				break
-		if not article_fn:
+		article = get_draft(lexicon, aid)
+		if not article:
 			flash("Draft not found")
 			return redirect(url_for('session.session', name=lexicon.cfg.name))
-		with lexicon.ctx.draft.read(article_fn) as a:
-			article = a
 		# Check that the player owns this article
 		character = lexicon.cfg.character.get(article.character)
 		if character.player != current_user.uid:
@@ -91,28 +89,45 @@ def update_draft(lexicon: LexiconModel, article_json):
 	"""
 	Update a draft and perform analysis on it
 	"""
+	# Check if the update is permitted
 	aid = article_json.get('aid')
-	# TODO check if article can be updated
-	# article exists
-	# player owns article
-	# article is not already approved
+	article = get_draft(lexicon, aid)
+	if not article:
+		raise ValueError("missing article")
+	if lexicon.cfg.character.get(article.character).player != current_user.uid:
+		return ValueError("bad user")
+	if article.status.approved:
+		raise ValueError("bad status")
 
+	# Perform the update
+	title = article_json.get('title')
 	contents = article_json.get('contents')
-	if contents is not None:
-		parsed = parse_raw_markdown(contents)
-		# HTML parsing
-		rendered_html = parsed.render(PreviewHtmlRenderer(lexicon))
-		# Constraint analysis
-		# features = parsed_draft.render(FeatureCounter()) TODO
-		filename = f'{article_json["character"]}.{article_json["aid"]}'
-		with lexicon.ctx.draft.edit(filename) as article:
-			# TODO
-			article.contents = contents
-		return {
-			'article': article,
-			'info': {
-				'rendered': rendered_html,
-				#'word_count': features.word_count,
-			}
-		}
-	return {}
+	status = article_json.get('status')
+
+	parsed = parse_raw_markdown(contents)
+
+	# HTML parsing
+	preview = parsed.render(PreviewHtmlRenderer(lexicon))
+	# Constraint analysis
+	analysis = parsed.render(ConstraintAnalysis(lexicon))
+
+	# Article update
+	filename = f'{article.character}.{aid}'
+	with lexicon.ctx.draft.edit(filename) as draft:
+		draft.title = normalize_title(title)
+		draft.contents = contents
+		draft.status.ready = status.get('ready', False)
+
+	# Return canonical information to editor
+	return {
+		'title': draft.title,
+		'status': {
+			'ready': draft.status.ready,
+			'approved': draft.status.approved,
+		},
+		'rendered': preview.contents,
+		'citations': preview.citations,
+		'info': analysis.info,
+		'warning': analysis.warning,
+		'error': analysis.error,
+	}

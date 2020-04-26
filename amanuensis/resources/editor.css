@@ -51,14 +51,11 @@ div#editor-right {
 div#editor-right div.contentblock {
 	margin: 10px 5px 10px 10px;
 }
-div#editor-right p#editor-warnings {
+span.message-warning {
 	color: #808000;
 }
-div#editor-right p#editor-errors {
+span.message-error {
 	color: #ff0000;
-}
-span.new {
-	color: #008000;
 }
 @media only screen and (max-width: 816px) {
 	div#wrapper {

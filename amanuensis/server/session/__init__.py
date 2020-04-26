@@ -1,5 +1,3 @@
-import uuid
-
 from flask import (
 	Blueprint,
 	render_template,
@@ -15,8 +13,7 @@ from amanuensis.lexicon import attempt_publish
 from amanuensis.models import LexiconModel
 from amanuensis.parser import (
 	parse_raw_markdown,
-	PreviewHtmlRenderer,
-	FeatureCounter)
+	PreviewHtmlRenderer)
 from amanuensis.server.forms import (
 	LexiconConfigForm,
 	LexiconCharacterForm,
@@ -201,4 +198,3 @@ def editor_update(name):
 	lexicon: LexiconModel = g.lexicon
 	article_json = request.json['article']
 	return update_draft(lexicon, article_json)
-	# only need to be sending around title, status, contents, aid

@@ -5,10 +5,11 @@ readable formats.
 
 from typing import Iterable
 
+from .core import RenderableVisitor
 from .helpers import filesafe_title
 
 
-class HtmlRenderer():
+class HtmlRenderer(RenderableVisitor):
 	"""
 	Renders an article token tree into published article HTML.
 	"""
@@ -55,13 +56,15 @@ class HtmlRenderer():
 		return f'<a href="{link}"{link_class}>{"".join(span.recurse(self))}</a>'
 
 
-class PreviewHtmlRenderer():
+class PreviewHtmlRenderer(RenderableVisitor):
 	def __init__(self, lexicon):
 		with lexicon.ctx.read('info') as info:
 			self.article_map = {
 				title: article.character
 				for title, article in info.items()
 			}
+		self.citations = []
+		self.contents = ""
 
 	def TextSpan(self, span):
 		return span.innertext
@@ -70,7 +73,8 @@ class PreviewHtmlRenderer():
 		return '<br>'
 
 	def ParsedArticle(self, span):
-		return '\n'.join(span.recurse(self))
+		self.contents = '\n'.join(span.recurse(self))
+		return self
 
 	def BodyParagraph(self, span):
 		return f'<p>{"".join(span.recurse(self))}</p>'
@@ -91,9 +95,10 @@ class PreviewHtmlRenderer():
 	def CitationSpan(self, span):
 		if span.cite_target in self.article_map:
 			if self.article_map.get(span.cite_target):
-				link_class = ' style="color:#0000ff"'
+				link_class = '[extant]'
 			else:
-				link_class = ' style="color:#ff0000"'
+				link_class = '[phantom]'
 		else:
-			link_class = ' style="color:#008000"'
-		return f'<a href="#"{link_class}>{"".join(span.recurse(self))}</a>'
+			link_class = '[new]'
+		self.citations.append(f'{span.cite_target} {link_class}')
+		return f'<u>{"".join(span.recurse(self))}</u>[{len(self.citations)}]'
