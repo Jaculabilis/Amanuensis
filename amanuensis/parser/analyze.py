@@ -4,7 +4,7 @@ for verification against constraints.
 """
 
 import re
-from typing import Iterable
+from typing import List
 
 from amanuensis.models import LexiconModel
 
@@ -26,29 +26,20 @@ class GetCitations(RenderableVisitor):
 
 class ConstraintAnalysis(RenderableVisitor):
 	def __init__(self, lexicon: LexiconModel):
-		self.info: Iterable[str] = []
-		self.warning: Iterable[str] = []
-		self.error: Iterable[str] = []
+		self.info: List[str] = []
+		self.warning: List[str] = []
+		self.error: List[str] = []
 
 		self.word_count = 0
 		self.citation_count = 0
-		self.has_signature = False
-
-	def ParsedArticle(self, span):
-		# Execute over the article tree
-		span.recurse(self)
-		# Perform analysis
-		self.info.append(f'Word count: {self.word_count}')
-		if not self.has_signature:
-			self.warning.append('Missing signature')
-		return self
+		self.signatures = 0
 
 	def TextSpan(self, span):
 		self.word_count += len(re.split(r'\s+', span.innertext.strip()))
 		return self
 
 	def SignatureParagraph(self, span):
-		self.has_signature = True
+		self.signatures += 1
 		span.recurse(self)
 		return self
 

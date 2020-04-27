@@ -83,7 +83,7 @@ function updatePreview(response) {
 	for (var i = 0; i < response.error.length; i++) {
 		error += "<span class=\"message-error\">" + response.error[i] + "</span><br>";
 	}
-	var control = info + "<br>" + warning + "<br>" + error;
+	var control = info + warning + error;
 	document.getElementById("preview-control").innerHTML = control;
 }
 

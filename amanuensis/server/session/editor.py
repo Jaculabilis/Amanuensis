@@ -11,13 +11,14 @@ from flask_login import current_user
 from amanuensis.lexicon import (
 	get_player_characters,
 	get_player_drafts,
-	get_draft)
+	get_draft,
+	title_constraint_analysis,
+	content_constraint_analysis)
 from amanuensis.models import LexiconModel
 from amanuensis.parser import (
 	normalize_title,
 	parse_raw_markdown,
-	PreviewHtmlRenderer,
-	ConstraintAnalysis)
+	PreviewHtmlRenderer)
 
 
 def load_editor(lexicon: LexiconModel, aid: str):
@@ -109,7 +110,10 @@ def update_draft(lexicon: LexiconModel, article_json):
 	# HTML parsing
 	preview = parsed.render(PreviewHtmlRenderer(lexicon))
 	# Constraint analysis
-	analysis = parsed.render(ConstraintAnalysis(lexicon))
+	title_warnings, title_errors = title_constraint_analysis(
+		lexicon, current_user, title)
+	content_infos, content_warnings, content_errors = content_constraint_analysis(
+		lexicon, current_user, article.character, parsed)
 
 	# Article update
 	filename = f'{article.character}.{aid}'
@@ -127,7 +131,7 @@ def update_draft(lexicon: LexiconModel, article_json):
 		},
 		'rendered': preview.contents,
 		'citations': preview.citations,
-		'info': analysis.info,
-		'warning': analysis.warning,
-		'error': analysis.error,
+		'info': content_infos,
+		'warning': title_warnings + content_warnings,
+		'error': title_errors + content_errors,
 	}

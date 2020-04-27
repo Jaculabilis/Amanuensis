@@ -2,16 +2,17 @@
 Submodule of functions for managing lexicon games during the core game
 loop of writing and publishing articles.
 """
-from typing import Iterable, Any, List, Optional
+from typing import Iterable, Any, List, Optional, Tuple
 
 from amanuensis.config import ReadOnlyOrderedDict
-from amanuensis.models import LexiconModel
+from amanuensis.models import LexiconModel, UserModel
 from amanuensis.parser import (
 	parse_raw_markdown,
 	GetCitations,
 	HtmlRenderer,
 	titlesort,
-	filesafe_title)
+	filesafe_title,
+	ConstraintAnalysis)
 
 
 def get_player_characters(
@@ -58,6 +59,94 @@ def get_draft(lexicon: LexiconModel, aid: str) -> Optional[ReadOnlyOrderedDict]:
 		return None
 	with lexicon.ctx.draft.read(article_fn) as article:
 		return article
+
+
+def title_constraint_analysis(
+	lexicon: LexiconModel,
+	player: UserModel,
+	title: str) -> Tuple[List[str], List[str]]:
+	"""
+	Checks article constraints for the lexicon against a proposed
+	draft title.
+	"""
+	warnings = []
+	errors = []
+	with lexicon.ctx.read('info') as info:
+		# No title
+		if not title:
+			errors.append('Missing title')
+			return warnings, errors  # No point in further analysis
+		# The article does not sort under the player's assigned index
+		pass
+		# The article's title is new, but its index is full
+		pass
+		# The article's title is a phantom, but the player has cited it before
+		info
+		# Another player is writing an article with this title
+		pass  # warning
+		# Another player has an approved article with this title
+		pass
+		# An article with this title was already written and addendums are
+		# disabled
+		pass
+		# An article with this title was already written and this player has
+		# reached the maximum number of addendum articles
+		pass
+		# The article's title matches a character's name
+		pass  # warning
+
+	return warnings, errors
+
+
+def content_constraint_analysis(
+	lexicon: LexiconModel,
+	player: UserModel,
+	cid: str,
+	parsed) -> Tuple[List[str], List[str], List[str]]:
+	"""
+	Checks article constraints for the lexicon against the content of
+	a draft
+	"""
+	infos = []
+	warnings = []
+	errors = []
+	character = lexicon.cfg.character.get(cid)
+	content_analysis: ConstraintAnalysis = (
+		parsed.render(ConstraintAnalysis(lexicon)))
+	with lexicon.ctx.read('info') as info:
+		infos.append(f'Word count: {content_analysis.word_count}')
+		# Self-citation when forbidden
+		pass
+		# A new citation matches a character's name
+		pass  # warning
+		# Not enough extant citations
+		# Too many extant citations
+		# Not enough phantom citations
+		# Too many phantom citations
+		# Not enough total citations
+		# Too many total citations
+		# Not enough characters' articles cited
+		# Too many characters' articles cited
+		# Exceeded hard word limit
+		if (lexicon.cfg.article.word_limit.hard is not None
+			and content_analysis.word_count > lexicon.cfg.article.word_limit.hard):
+			errors.append('Exceeded maximum word count '
+				f'({lexicon.cfg.article.word_limit.hard})')
+		# Exceeded soft word limit
+		elif (lexicon.cfg.article.word_limit.soft is not None
+			and content_analysis.word_count > lexicon.cfg.article.word_limit.soft):
+			warnings.append('Exceeded suggested maximum word count '
+				f'({lexicon.cfg.article.word_limit.soft})')
+		# Missing signature
+		if content_analysis.signatures < 1:
+			warnings.append('Missing signature')
+		# Multiple signatures
+		if content_analysis.signatures > 1:
+			warnings.append('Multiple signatures')
+		# Signature altered from default
+		pass  # warning
+
+	return infos, warnings, errors
 
 
 def attempt_publish(lexicon: LexiconModel) -> None:
