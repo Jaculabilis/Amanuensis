@@ -114,6 +114,8 @@ def update_draft(lexicon: LexiconModel, article_json):
 		lexicon, current_user, title)
 	content_infos, content_warnings, content_errors = content_constraint_analysis(
 		lexicon, current_user, article.character, parsed)
+	if any(title_errors) or any(content_errors):
+		status['ready'] = False
 
 	# Article update
 	filename = f'{article.character}.{aid}'

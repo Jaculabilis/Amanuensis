@@ -43,6 +43,7 @@ function update(article) {
 		if (req.readyState == 4 && req.status == 200) {
 			// Update internal state with the returned article object
 			params.status = req.response.status;
+			params.errors = req.response.error.length;
 			document.getElementById("editor-title").value = req.response.title;
 			// Set editor editability based on article status
 			updateEditorStatus();
@@ -55,11 +56,13 @@ function update(article) {
 }
 
 function updateEditorStatus() {
-	var ready = !!params.article.status.ready || !!params.article.status.approved;
+	var ready = !!params.status.ready || !!params.status.approved;
 	document.getElementById("editor-title").disabled = ready;
 	document.getElementById("editor-content").disabled = ready;
+	var hasErrors = params.errors > 0;
 	var submitButton = document.getElementById("button-submit");
 	submitButton.innerText = ready ? "Edit article" : "Submit article";
+	submitButton.disabled = hasErrors;
 }
 
 function updatePreview(response) {
