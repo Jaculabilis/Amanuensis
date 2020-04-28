@@ -95,7 +95,7 @@ def player_can_create_character(
 def create_character_in_lexicon(
 	player: UserModel,
 	lexicon: LexiconModel,
-	name: str) -> None:
+	name: str) -> str:
 	"""
 	Unconditionally creates a character for a player
 	"""
@@ -129,3 +129,5 @@ def create_character_in_lexicon(
 
 	# Log addition
 	lexicon.log(f'Character "{name}" created ({character.cid})')
+
+	return character.cid

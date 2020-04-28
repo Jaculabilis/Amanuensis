@@ -9,6 +9,9 @@
 	<p>
 		{{ form.characterName.label }}<br>{{ form.characterName(size=32) }}
 	</p>
+	{% for error in form.characterName.errors %}
+	<span style="color: #ff0000">{{ error }}</span><br>
+	{% endfor %}</p>
 	<p>
 		{{ form.defaultSignature.label }}<br>{{ form.defaultSignature(class_='fullwidth') }}
 	</p>

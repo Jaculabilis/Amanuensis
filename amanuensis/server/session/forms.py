@@ -3,8 +3,6 @@ from wtforms import (
 	StringField, SubmitField, TextAreaField, RadioField)
 from wtforms.validators import DataRequired
 
-from amanuensis.lexicon import create_character_in_lexicon
-
 
 class LexiconCharacterForm(FlaskForm):
 	"""/lexicon/<name>/session/character/"""
@@ -17,24 +15,12 @@ class LexiconCharacterForm(FlaskForm):
 	def for_new(self):
 		self.characterName.data = ""
 		self.defaultSignature.data = "~"
+		return self
 
-	def for_character(self, lexicon, cid):
-		char = lexicon.cfg.character.get(cid)
-		self.characterName.data = char.name
-		self.defaultSignature.data = char.signature
-
-	def add_character(self, lexicon, user):
-		create_character_in_lexicon(user, lexicon, self.characterName.data)
-		# add_character(lexicon, user, {
-		# 	'name': self.characterName.data,
-		# 	'signature': self.defaultSignature.data,
-		# })
-
-	def update_character(self, lexicon, cid):
-		with lexicon.ctx.edit_config() as cfg:
-			char = cfg.character.get(cid)
-			char.name = self.characterName.data
-			char.signature = self.defaultSignature.data
+	def for_character(self, character):
+		self.characterName.data = character.name
+		self.defaultSignature.data = character.signature
+		return self
 
 
 class LexiconReviewForm(FlaskForm):

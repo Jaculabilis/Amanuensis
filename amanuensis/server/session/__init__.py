@@ -9,7 +9,10 @@ from flask import (
 	Markup)
 from flask_login import current_user
 
-from amanuensis.lexicon import attempt_publish
+from amanuensis.lexicon import (
+	attempt_publish,
+	get_player_characters,
+	create_character_in_lexicon)
 from amanuensis.models import LexiconModel
 from amanuensis.parser import (
 	parse_raw_markdown,
@@ -57,34 +60,52 @@ def session(name):
 		characters=characters)
 
 
-def edit_character(name, form, cid):
-	if form.validate_on_submit():
-		# Update character
-		form.update_character(g.lexicon, cid)
-		flash('Character updated')
+def edit_character(name, form, character):
+	if not form.is_submitted():
+		# GET, populate with values
+		return render_template(
+			'session.character.jinja', form=form.for_character(character))
+
+	if not form.validate():
+		# POST with invalid data, return unchanged
+		return render_template('session.character.jinja', form=form)
+
+	# POST with valid data, update character
+	with g.lexicon.ctx.edit_config() as cfg:
+		char = cfg.character[character.cid]
+		char.name = form.characterName.data
+		char.signature = form.defaultSignature.data
+	flash('Character updated')
+	return redirect(url_for('session.session', name=name))
+
+
+def create_character(name: str, form: LexiconCharacterForm):
+	# Characters can't be created if the game has already started
+	if g.lexicon.status != LexiconModel.PREGAME:
+		flash("Characters can't be added after the game has started")
+		return redirect(url_for('session.session', name=name))
+	# Characters can't be created beyond the per-player limit
+	player_characters = get_player_characters(g.lexicon, current_user.uid)
+	if len(list(player_characters)) >= g.lexicon.cfg.join.chars_per_player:
+		flash("Can't create more characters")
 		return redirect(url_for('session.session', name=name))
 
 	if not form.is_submitted():
-		# On GET, populate with the character
-		form.for_character(g.lexicon, cid)
-	return render_template('session.character.jinja', form=form, action='edit')
+		# GET, populate with default values
+		return render_template(
+			'session.character.jinja', form=form.for_new())
 
+	if not form.validate():
+		# POST with invalid data, return unchanged
+		return render_template('session.character.jinja', form=form)
 
-def create_character(name, form):
-	if form.validate_on_submit():
-		# On POST, verify character can be added
-		if not g.lexicon.can_add_character(current_user.uid):
-			flash('Operation not permitted')
-			return redirect(url_for('session.session', name=name))
-		# Add the character
-		form.add_character(g.lexicon, current_user)
-		flash('Character created')
-		return redirect(url_for('session.session', name=name))
-
-	if not form.is_submitted():
-		# On GET, populate form for new character
-		form.for_new()
-	return render_template('session.character.jinja', form=form, action='create')
+	# POST with valid data, create character
+	char_name = form.characterName.data
+	cid = create_character_in_lexicon(current_user, g.lexicon, char_name)
+	with g.lexicon.ctx.edit_config() as cfg:
+		cfg.character[cid].signature = form.defaultSignature.data
+	flash('Character created')
+	return redirect(url_for('session.session', name=name))
 
 
 @bp_session.route('/character/', methods=['GET', 'POST'])
@@ -93,16 +114,21 @@ def create_character(name, form):
 def character(name):
 	form = LexiconCharacterForm()
 	cid = request.args.get('cid')
-	if cid:
-		if cid not in g.lexicon.cfg.character:
-			flash('Character not found')
-			return redirect(url_for('session.session', name=name))
-		if (g.lexicon.cfg.character.get(cid).player != current_user.uid
-				and g.lexicon.cfg.editor != current_user.uid):
-			flash('Access denied')
-			return redirect(url_for('session.session', name=name))
-		return edit_character(name, form, cid)
-	return create_character(name, form)
+	if not cid:
+		# No character specified, creating a new character
+		return create_character(name, form)
+
+	character = g.lexicon.cfg.character.get(cid)
+	if not character:
+		# Bad character id, abort
+		flash('Character not found')
+		return redirect(url_for('session.session', name=name))
+	if current_user.uid not in (character.player, g.lexicon.cfg.editor):
+		# Only its owner and the editor can edit a character
+		flash('Access denied')
+		return redirect(url_for('session.session', name=name))
+	# Edit allowed
+	return edit_character(name, form, character)
 
 
 @bp_session.route('/settings/', methods=['GET', 'POST'])
