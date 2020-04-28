@@ -40,18 +40,6 @@ def Lexicon(should_exist: bool = True):
 
 
 # Forms
-class LexiconCreateForm(FlaskForm):
-	"""/admin/create/"""
-	lexiconName = StringField(
-		'Lexicon name',
-		validators=[DataRequired(), Lexicon(should_exist=False)])
-	editorName = StringField(
-		'Username of editor',
-		validators=[DataRequired(), User(should_exist=True)])
-	promptText = TextAreaField('Prompt')
-	submit = SubmitField('Create')
-
-
 class LexiconConfigForm(FlaskForm):
 	"""/lexicon/<name>/session/settings/"""
 	# General

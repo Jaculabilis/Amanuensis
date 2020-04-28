@@ -4,10 +4,10 @@ from flask_login import login_required, current_user
 from amanuensis.config import RootConfigDirectoryContext
 from amanuensis.lexicon import create_lexicon, load_all_lexicons
 from amanuensis.models import UserModel
-from amanuensis.server.forms import LexiconCreateForm
 from amanuensis.server.helpers import admin_required
 from amanuensis.user import load_all_users
 
+from .forms import LexiconCreateForm
 
 bp_home = Blueprint('home', __name__,
 	url_prefix='/home',
