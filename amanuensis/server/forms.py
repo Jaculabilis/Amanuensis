@@ -1,7 +1,7 @@
 from flask import current_app
 from flask_wtf import FlaskForm
 from wtforms import (
-	StringField, PasswordField, BooleanField, SubmitField, TextAreaField,
+	StringField, BooleanField, SubmitField, TextAreaField,
 	IntegerField, SelectField, RadioField)
 from wtforms.validators import DataRequired, ValidationError, Optional
 from wtforms.widgets.html5 import NumberInput
@@ -191,12 +191,6 @@ class LexiconConfigForm(FlaskForm):
 	# 		l.article.addendum.allowed = self.articleAddendumAllowed.data
 	# 		l.article.addendum.max = self.articleAddendumMax.data
 	# 	return True
-
-
-class LexiconJoinForm(FlaskForm):
-	"""/lexicon/<name>/join/"""
-	password = StringField('Password')
-	submit = SubmitField('Submit')
 
 
 class LexiconCharacterForm(FlaskForm):

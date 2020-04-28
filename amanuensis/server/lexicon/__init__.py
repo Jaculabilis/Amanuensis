@@ -10,10 +10,11 @@ from flask_login import login_required, current_user
 
 from amanuensis.lexicon import player_can_join_lexicon, add_player_to_lexicon
 from amanuensis.parser import filesafe_title
-from amanuensis.server.forms import LexiconJoinForm
 from amanuensis.server.helpers import (
 	lexicon_param,
 	player_required_if_not_public)
+
+from .forms import LexiconJoinForm
 
 
 bp_lexicon = Blueprint('lexicon', __name__,
