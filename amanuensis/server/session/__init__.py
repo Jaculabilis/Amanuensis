@@ -14,14 +14,15 @@ from amanuensis.models import LexiconModel
 from amanuensis.parser import (
 	parse_raw_markdown,
 	PreviewHtmlRenderer)
-from amanuensis.server.forms import (
-	LexiconConfigForm,
-	LexiconCharacterForm,
-	LexiconReviewForm)
 from amanuensis.server.helpers import (
 	lexicon_param,
 	player_required,
 	editor_required)
+
+from .forms import (
+	LexiconCharacterForm,
+	LexiconReviewForm)
+from .settings import LexiconConfigForm
 
 from .editor import load_editor, new_draft, update_draft
 
