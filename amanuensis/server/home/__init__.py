@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 
 from amanuensis.config import RootConfigDirectoryContext
 from amanuensis.lexicon import create_lexicon, load_all_lexicons
-from amanuensis.models import UserModel
+from amanuensis.models import UserModel, ModelFactory
 from amanuensis.server.helpers import admin_required
 from amanuensis.user import load_all_users
 
@@ -47,14 +47,19 @@ def admin():
 def admin_create():
 	form = LexiconCreateForm()
 
-	if form.validate_on_submit():
-		lexicon_name = form.lexiconName.data
-		editor_name = form.editorName.data
-		prompt = form.promptText.data
-		editor = UserModel.by(name=editor_name)
-		lexicon = create_lexicon(lexicon_name, editor)
-		with lexicon.ctx.edit_config() as cfg:
-			cfg.prompt = prompt
-		return redirect(url_for('session.session', name=lexicon_name))
+	if not form.validate_on_submit():
+		# GET or POST with invalid form data
+		return render_template('home.create.jinja', form=form)
 
-	return render_template('home.create.jinja', form=form)
+	# POST with valid data
+	root: RootConfigDirectoryContext = current_app.config['root']
+	model_factory: ModelFactory = current_app.config['model_factory']
+	lexicon_name = form.lexiconName.data
+	editor_name = form.editorName.data
+	prompt = form.promptText.data
+	# Editor's existence was checked by form validators
+	editor = model_factory.user(editor_name)
+	lexicon = create_lexicon(root, lexicon_name, editor)
+	with lexicon.ctx.edit_config() as cfg:
+		cfg.prompt = prompt
+	return redirect(url_for('session.session', name=lexicon_name))
