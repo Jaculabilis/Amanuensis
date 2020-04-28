@@ -172,7 +172,9 @@ def review(name):
 			return redirect(url_for('session.session', name=name))
 
 		parsed_draft = parse_raw_markdown(draft.contents)
-		rendered_html = parsed_draft.render(PreviewHtmlRenderer(g.lexicon))
+		preview = parsed_draft.render(PreviewHtmlRenderer(g.lexicon))
+		rendered_html = preview.contents
+		citations = preview.citations
 
 		# If the article is ready and awaiting review
 		if not draft.status.approved:
@@ -197,7 +199,8 @@ def review(name):
 	return render_template(
 		"session.review.jinja",
 		form=form,
-		article_html=Markup(rendered_html))
+		article_html=Markup(rendered_html),
+		citations=citations)
 
 
 @bp_session.route('/editor/', methods=['GET'])

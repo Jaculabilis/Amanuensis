@@ -17,8 +17,14 @@
 </form>
 {% endblock %}
 
+{% block citationblock %}
+{% for citation in citations %}
+{{ citation }}<br>
+{% endfor %}
+{% endblock %}
+
 {% if form %}
-{% set template_content_blocks = [self.article(), self.evaluation()] %}
+{% set template_content_blocks = [self.article(), self.citationblock(), self.evaluation()] %}
 {% else %}
-{% set template_content_blocks = [self.article()] %}
+{% set template_content_blocks = [self.article(), self.citationblock()] %}
 {% endif %}
