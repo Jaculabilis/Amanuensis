@@ -32,20 +32,24 @@ def join(name):
 
 	form = LexiconJoinForm()
 
-	if form.validate_on_submit():
-		# Gate on password if one is required
-		if (g.lexicon.cfg.join.password
-				and form.password.data != g.lexicon.cfg.join.password):
-			return redirect(url_for("lexicon.join", name=name))
-		# Gate on join validity
-		if player_can_join_lexicon(current_user, g.lexicon, form.password.data):
-			add_player_to_lexicon(current_user, g.lexicon)
-			return redirect(url_for('session.session', name=name))
-		else:
-			flash("Could not join game")
-			return redirect(url_for("home.home", name=name))
+	if not form.validate_on_submit():
+		# GET or POST with invalid form data
+		return render_template('lexicon.join.jinja', form=form)
 
-	return render_template('lexicon.join.jinja', form=form)
+	# POST with valid data
+	# If the game is passworded, check password
+	if (g.lexicon.cfg.join.password
+		and form.password.data != g.lexicon.cfg.join.password):
+		# Bad creds, try again
+		flash('Incorrect password')
+		return redirect(url_for('lexicon.join', name=name))
+	# If the password was correct, check if the user can join
+	if player_can_join_lexicon(current_user, g.lexicon, form.password.data):
+		add_player_to_lexicon(current_user, g.lexicon)
+		return redirect(url_for('session.session', name=name))
+	else:
+		flash('Could not join game')
+		return redirect(url_for('home.home', name=name))
 
 
 @bp_lexicon.route('/contents/', methods=['GET'])
