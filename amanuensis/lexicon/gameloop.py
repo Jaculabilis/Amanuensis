@@ -46,7 +46,9 @@ def get_player_drafts(
 	return drafts
 
 
-def get_draft(lexicon: LexiconModel, aid: str) -> Optional[ReadOnlyOrderedDict]:
+def get_draft(
+	lexicon: LexiconModel,
+	aid: str) -> Optional[ReadOnlyOrderedDict]:
 	"""
 	Loads an article from its id
 	"""

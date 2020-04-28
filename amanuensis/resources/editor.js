@@ -18,7 +18,9 @@ window.onload = function() {
 	// Kill noscript message first
 	document.getElementById("preview").innerHTML = "<p>&nbsp;</p>";
 
-	onContentChange(0);
+	if (document.body.contains(document.getElementById("editor-content"))) {
+		onContentChange(0);
+	}
 };
 
 function buildArticleObject() {
@@ -77,7 +79,8 @@ function updatePreview(response) {
 	}
 	var warning = "";
 	for (var i = 0; i < response.warning.length; i++) {
-		warning += "<span class=\"message-warning\">" + response.warning[i] + "</span><br>";
+		warning += "<span class=\"message-warning\">" + 
+			response.warning[i] + "</span><br>";
 	}
 	var error = "";
 	for (var i = 0; i < response.error.length; i++) {
