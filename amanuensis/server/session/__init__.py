@@ -12,7 +12,8 @@ from flask_login import current_user
 from amanuensis.lexicon import (
 	attempt_publish,
 	get_player_characters,
-	create_character_in_lexicon)
+	create_character_in_lexicon,
+	get_draft)
 from amanuensis.models import LexiconModel
 from amanuensis.parser import (
 	parse_raw_markdown,
@@ -158,14 +159,14 @@ def settings(name):
 @lexicon_param
 @editor_required
 def review(name):
-	aid = request.args.get('aid')
-	if not aid:
+	# Ensure the article exists
+	draft = get_draft(g.lexicon, request.args.get('aid'))
+	if not draft:
 		flash("Unknown article id")
 		return redirect(url_for('session.session', name=name))
 
-	draft_ctx = g.lexicon.ctx.draft
-	draft_filename = [fn for fn in draft_ctx.ls() if aid in fn][0]
-	with draft_ctx.edit(draft_filename) as draft:
+	draft_filename = f'{draft.character}.{draft.aid}'
+	with g.lexicon.ctx.draft.edit(draft_filename) as draft:
 		# If the article was unreadied in the meantime, abort
 		if not draft.status.ready:
 			flash("Article was rescinded")
@@ -176,31 +177,35 @@ def review(name):
 		rendered_html = preview.contents
 		citations = preview.citations
 
-		# If the article is ready and awaiting review
-		if not draft.status.approved:
-			form = LexiconReviewForm()
-			if form.validate_on_submit():
-				if form.approved.data == 'Y':
-					draft.status.ready = True
-					draft.status.approved = True
-					g.lexicon.log(f"Article '{draft.title}' approved ({draft.aid})")
-					if g.lexicon.cfg.publish.asap:
-						attempt_publish(g.lexicon)
-				else:
-					draft.status.ready = False
-					draft.status.approved = False
-					g.lexicon.log(f"Article '{draft.title}' rejected ({draft.aid})")
-				return redirect(url_for('session.session', name=name))
+		# If the article was already reviewed, just preview it
+		if draft.status.approved:
+			return render_template(
+				"session.review.jinja",
+				article_html=Markup(rendered_html),
+				citations=citations)
 
-		# If the article was already reviewed and this is just the preview
+		# Otherwise, prepare the review form
+		form = LexiconReviewForm()
+		if not form.validate_on_submit():
+			# GET or POST with invalid data
+			return render_template(
+				"session.review.jinja",
+				form=form,
+				article_html=Markup(rendered_html),
+				citations=citations)
+
+		# POST with valid data
+		if form.approved.data == LexiconReviewForm.APPROVED:
+			draft.status.ready = True
+			draft.status.approved = True
+			g.lexicon.log(f"Article '{draft.title}' approved ({draft.aid})")
+			if g.lexicon.cfg.publish.asap:
+				attempt_publish(g.lexicon)
 		else:
-			form = None
-
-	return render_template(
-		"session.review.jinja",
-		form=form,
-		article_html=Markup(rendered_html),
-		citations=citations)
+			draft.status.ready = False
+			draft.status.approved = False
+			g.lexicon.log(f"Article '{draft.title}' rejected ({draft.aid})")
+		return redirect(url_for('session.session', name=name))
 
 
 @bp_session.route('/editor/', methods=['GET'])
