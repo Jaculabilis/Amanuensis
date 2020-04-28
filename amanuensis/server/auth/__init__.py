@@ -46,19 +46,27 @@ bp_auth = Blueprint('auth', __name__,
 def login():
 	model_factory: ModelFactory = current_app.config['model_factory']
 	form = LoginForm()
-	if form.validate_on_submit():
-		username = form.username.data
-		user = model_factory.try_user(username)
-		if user is not None and user.check_password(form.password.data):
-			remember_me = form.remember.data
-			login_user(user, remember=remember_me)
-			with user.ctx.edit_config() as cfg:
-				cfg.last_login = int(time.time())
-			logger.info('Logged in user "{0.username}" ({0.uid})'
-				.format(user.cfg))
-			return redirect(url_for('home.home'))
+
+	if not form.validate_on_submit():
+		# Either the request was GET and we should render the form,
+		# or the request was POST and validation failed.
+		return render_template('auth.login.jinja', form=form)
+
+	# POST with valid data
+	username = form.username.data
+	user = model_factory.try_user(username)
+	if not user or not user.check_password(form.password.data):
+		# Bad creds
 		flash("Login not recognized")
-	return render_template('auth.login.jinja', form=form)
+		return redirect(url_for('auth.login'))
+
+	# Login credentials were correct
+	remember_me = form.remember.data
+	login_user(user, remember=remember_me)
+	with user.ctx.edit_config() as cfg:
+		cfg.last_login = int(time.time())
+	logger.info('Logged in user "{0.username}" ({0.uid})'.format(user.cfg))
+	return redirect(url_for('home.home'))
 
 
 @bp_auth.route("/logout/", methods=['GET'])
