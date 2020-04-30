@@ -30,9 +30,9 @@ class ConstraintAnalysis(RenderableVisitor):
 		self.warning: List[str] = []
 		self.error: List[str] = []
 
-		self.word_count = 0
-		self.citation_count = 0
-		self.signatures = 0
+		self.word_count: int = 0
+		self.citations: list = []
+		self.signatures: int = 0
 
 	def TextSpan(self, span):
 		self.word_count += len(re.split(r'\s+', span.innertext.strip()))
@@ -44,6 +44,6 @@ class ConstraintAnalysis(RenderableVisitor):
 		return self
 
 	def CitationSpan(self, span):
-		self.citation_count += 1
+		self.citations.append(span.cite_target)
 		span.recurse(self)
 		return self

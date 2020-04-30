@@ -126,25 +126,77 @@ def content_constraint_analysis(
 	infos: list = []
 	warnings: list = []
 	errors: list = []
-	character = lexicon.cfg.character.get(cid)# noqa
 	content_analysis: ConstraintAnalysis = (
 		parsed.render(ConstraintAnalysis(lexicon)))
-	with lexicon.ctx.read('info') as info:# noqa
+	with lexicon.ctx.read('info') as info:
 		# I: Word count
 		infos.append(f'Word count: {content_analysis.word_count}')
-		# Self-citation when forbidden
-		pass
-		# A new citation matches a character's name
-		pass  # warning
+		# E: Self-citation when forbidden
+		for citation in content_analysis.citations:
+			citation_info = info.get(citation)
+			if (citation_info and citation_info.character == cid
+			and not lexicon.cfg.article.citation.allow_self):
+				errors.append(f'Cited your own article: {citation}')
+		# W: A new citation matches a character's name
+			if not citation_info:
+				for char in lexicon.cfg.character.values():
+					if len(char.name) > 10 and citation == char.name:
+						warnings.append(f'"{citation}" is the name of a '
+							' character. Are you sure you want to do that?')
 		# A new citation would create more articles than can be written
-		# Not enough extant citations
-		# Too many extant citations
-		# Not enough phantom citations
-		# Too many phantom citations
-		# Not enough total citations
-		# Too many total citations
-		# Not enough characters' articles cited
-		# Too many characters' articles cited
+		pass  # TODO
+		# E: Not enough extant citations
+		citation_cfg = lexicon.cfg.article.citation
+		extant_count = len(set([
+			c for c in content_analysis.citations
+			if c in info and info[c].character]))
+		if (citation_cfg.min_extant is not None
+		and extant_count < citation_cfg.min_extant):
+			errors.append('Not enough extant articles cited '
+				f'({extant_count}/{citation_cfg.min_extant})')
+		# E: Too many extant citations
+		if (citation_cfg.max_extant is not None
+		and extant_count > citation_cfg.max_extant):
+			errors.append('Too many extant articles cited '
+				f'({extant_count}/{citation_cfg.max_extant})')
+		# E: Not enough phantom citations
+		phantom_count = len(set([
+			c for c in content_analysis.citations
+			if c not in info or not info[c].character]))
+		if (citation_cfg.min_phantom is not None
+		and phantom_count < citation_cfg.min_phantom):
+			errors.append('Not enough phantom articles cited '
+				f'({phantom_count}/{citation_cfg.min_phantom})')
+		# E: Too many phantom citations
+		if (citation_cfg.max_phantom is not None
+		and phantom_count > citation_cfg.max_phantom):
+			errors.append('Too many phantom articles cited '
+				f'({phantom_count}/{citation_cfg.max_phantom})')
+		# E: Not enough total citations
+		total_count = len(set(content_analysis.citations))
+		if (citation_cfg.min_total is not None
+		and total_count < citation_cfg.min_total):
+			errors.append('Not enough articles cited '
+				f'({total_count}/{citation_cfg.min_total})')
+		# E: Too many total citations
+		if (citation_cfg.max_total is not None
+		and total_count > citation_cfg.max_total):
+			errors.append('Too many articles cited '
+				f'({total_count}/{citation_cfg.max_total})')
+		# E: Not enough characters' articles cited
+		char_count = len(set([
+			info[c].character
+			for c in content_analysis.citations
+			if c in info and info[c].character]))
+		if (citation_cfg.min_chars is not None
+		and char_count < citation_cfg.min_chars):
+			errors.append('Not enough characters cited '
+				f'({char_count}/{citation_cfg.min_chars})')
+		# E: Too many characters' articles cited
+		if (citation_cfg.max_chars is not None
+		and char_count > citation_cfg.max_chars):
+			errors.append('Too many characters cited '
+				f'({char_count}/{citation_cfg.max_chars})')
 		# E: Exceeded hard word limit
 		if (lexicon.cfg.article.word_limit.hard is not None
 			and content_analysis.word_count > lexicon.cfg.article.word_limit.hard):
@@ -161,8 +213,6 @@ def content_constraint_analysis(
 		# W: Multiple signatures
 		if content_analysis.signatures > 1:
 			warnings.append('Multiple signatures')
-		# Signature altered from default
-		pass  # warning
 
 	return infos, warnings, errors
 
