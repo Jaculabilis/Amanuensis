@@ -195,11 +195,9 @@ def sort_by_index_spec(articles, index_specs, key=None):
 		index
 		for pri in sorted(index_by_pri.keys(), reverse=True)
 		for index in index_by_pri[pri]]
-	print(str(articles)[:200])
 	articles_titlesorted = sorted(
 		articles,
 		key=lambda a: titlesort(key(a)))
-	print(str(articles_titlesorted)[:200])
 	indexed = OrderedDict()
 	for index in index_list_order:
 		indexed[index.pattern] = []
@@ -226,7 +224,6 @@ def attempt_publish(lexicon: LexiconModel) -> bool:
 	# publish policy
 	characters = [
 		cid for cid, char in lexicon.cfg.character.items() if char.player]
-	print(characters)
 	has_approved = {cid: 0 for cid in characters}
 	has_ready = {cid: 0 for cid in characters}
 	for draft in drafts.values():
@@ -237,8 +234,6 @@ def attempt_publish(lexicon: LexiconModel) -> bool:
 	# If quorum isn't defined, require all characters to have an article
 	quorum = lexicon.cfg.publish.quorum or len(characters)
 	if sum(has_approved.values()) < quorum:
-		print(sum(has_approved.values()))
-		print(quorum)
 		lexicon.log(f'Publish failed: no quorum')
 		return False
 	# If articles are up for review, check if this blocks publish
