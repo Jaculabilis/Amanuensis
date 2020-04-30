@@ -110,7 +110,7 @@ def update_draft(lexicon: LexiconModel, article_json):
 	# HTML parsing
 	preview = parsed.render(PreviewHtmlRenderer(lexicon))
 	# Constraint analysis
-	title_warnings, title_errors = title_constraint_analysis(
+	title_infos, title_warnings, title_errors = title_constraint_analysis(
 		lexicon, current_user, title)
 	content_infos, content_warnings, content_errors = content_constraint_analysis(
 		lexicon, current_user, article.character, parsed)
@@ -133,7 +133,7 @@ def update_draft(lexicon: LexiconModel, article_json):
 		},
 		'rendered': preview.contents,
 		'citations': preview.citations,
-		'info': content_infos,
+		'info': title_infos + content_infos,
 		'warning': title_warnings + content_warnings,
 		'error': title_errors + content_errors,
 	}

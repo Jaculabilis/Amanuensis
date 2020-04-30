@@ -66,18 +66,28 @@ def get_draft(
 def title_constraint_analysis(
 	lexicon: LexiconModel,
 	player: UserModel,
-	title: str) -> Tuple[List[str], List[str]]:
+	title: str) -> Tuple[List[str], List[str], List[str]]:
 	"""
 	Checks article constraints for the lexicon against a proposed
 	draft title.
 	"""
-	warnings = []
-	errors = []
+	infos: list = []
+	warnings: list = []
+	errors: list = []
 	with lexicon.ctx.read('info') as info:
-		# No title
+		# E: No title
 		if not title:
 			errors.append('Missing title')
-			return warnings, errors  # No point in further analysis
+			return infos, warnings, errors  # No point in further analysis
+		# I: This article is new
+		if title not in info:
+			infos.append('New article')
+		# I: This article is a phantom
+		elif info[title].character is None:
+			infos.append('Phantom article')
+		# E: This article has already been written and addendums are disabled
+		elif not lexicon.cfg.article.addendum.allowed:
+			errors.append('Article already exists')
 		# The article does not sort under the player's assigned index
 		pass
 		# The article's title is new, but its index is full
@@ -97,7 +107,7 @@ def title_constraint_analysis(
 		# The article's title matches a character's name
 		pass  # warning
 
-	return warnings, errors
+	return infos, warnings, errors
 
 
 def content_constraint_analysis(
@@ -109,13 +119,14 @@ def content_constraint_analysis(
 	Checks article constraints for the lexicon against the content of
 	a draft
 	"""
-	infos = []
-	warnings = []
-	errors = []
+	infos: list = []
+	warnings: list = []
+	errors: list = []
 	character = lexicon.cfg.character.get(cid)
 	content_analysis: ConstraintAnalysis = (
 		parsed.render(ConstraintAnalysis(lexicon)))
 	with lexicon.ctx.read('info') as info:
+		# I: Word count
 		infos.append(f'Word count: {content_analysis.word_count}')
 		# Self-citation when forbidden
 		pass
@@ -130,20 +141,20 @@ def content_constraint_analysis(
 		# Too many total citations
 		# Not enough characters' articles cited
 		# Too many characters' articles cited
-		# Exceeded hard word limit
+		# E: Exceeded hard word limit
 		if (lexicon.cfg.article.word_limit.hard is not None
 			and content_analysis.word_count > lexicon.cfg.article.word_limit.hard):
 			errors.append('Exceeded maximum word count '
 				f'({lexicon.cfg.article.word_limit.hard})')
-		# Exceeded soft word limit
+		# W: Exceeded soft word limit
 		elif (lexicon.cfg.article.word_limit.soft is not None
 			and content_analysis.word_count > lexicon.cfg.article.word_limit.soft):
 			warnings.append('Exceeded suggested maximum word count '
 				f'({lexicon.cfg.article.word_limit.soft})')
-		# Missing signature
+		# W: Missing signature
 		if content_analysis.signatures < 1:
 			warnings.append('Missing signature')
-		# Multiple signatures
+		# W: Multiple signatures
 		if content_analysis.signatures > 1:
 			warnings.append('Multiple signatures')
 		# Signature altered from default
