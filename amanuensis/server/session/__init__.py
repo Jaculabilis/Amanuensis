@@ -26,8 +26,8 @@ from amanuensis.server.helpers import (
 from .forms import (
 	LexiconCharacterForm,
 	LexiconReviewForm,
-	LexiconPublishTurnForm)
-from .settings import LexiconConfigForm
+	LexiconPublishTurnForm,
+	LexiconConfigForm)
 
 from .editor import load_editor, new_draft, update_draft
 
@@ -142,23 +142,22 @@ def character(name):
 @lexicon_param
 @editor_required
 def settings(name):
-	form = LexiconConfigForm()
-	form.set_options(g.lexicon)
+	form: LexiconConfigForm = LexiconConfigForm(g.lexicon)
 
-	# Load the config for the lexicon on load
 	if not form.is_submitted():
-		form.populate_from_lexicon(g.lexicon)
+		# GET
+		form.load(g.lexicon)
 		return render_template('session.settings.jinja', form=form)
 
-	if form.validate():
-		if not form.update_lexicon(g.lexicon):
-			flash("Error updating settings")
-			return render_template("lexicon.settings.jinja", form=form)
-		flash("Settings updated")
-		return redirect(url_for('session.session', name=name))
+	if not form.validate():
+		# POST with invalid data
+		flash('Validation error')
+		return render_template('session.settings.jinja', form=form)
 
-	flash("Validation error")
-	return render_template('session.settings.jinja', form=form)
+	# POST with valid data
+	form.save(g.lexicon)
+	flash('Settings updated')
+	return redirect(url_for('session.settings', name=name))
 
 
 @bp_session.route('/review/', methods=['GET', 'POST'])

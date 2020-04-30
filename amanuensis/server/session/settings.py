@@ -1,161 +1,277 @@
+from typing import cast
+
+from flask import current_app
 from flask_wtf import FlaskForm
 from wtforms import (
-	StringField, BooleanField, SubmitField, TextAreaField,
-	IntegerField, SelectField)
-from wtforms.validators import DataRequired, ValidationError, Optional
+	Field,
+	StringField,
+	BooleanField,
+	TextAreaField,
+	IntegerField,
+	SelectField)
+from wtforms.validators import DataRequired, Optional
 from wtforms.widgets.html5 import NumberInput
 
+from amanuensis.config import ReadOnlyOrderedDict, AttrOrderedDict
+from amanuensis.models import ModelFactory, UserModel
 from amanuensis.server.forms import User
 
 
-class LexiconConfigForm(FlaskForm):
-	"""/lexicon/<name>/session/settings/"""
-	# General
-	title = StringField('Title override', validators=[Optional()])
-	editor = SelectField('Editor', validators=[DataRequired(), User(True)])
-	prompt = TextAreaField('Prompt', validators=[DataRequired()])
-	# Turn
-	turnCurrent = IntegerField('Current turn', widget=NumberInput(), validators=[Optional()])
-	turnMax = IntegerField('Number of turns', widget=NumberInput(), validators=[DataRequired()])
-	# Join
-	joinPublic = BooleanField("Show game on public pages")
-	joinOpen = BooleanField("Allow players to join game")
-	joinPassword = StringField("Password to join game", validators=[Optional()])
-	joinMaxPlayers = IntegerField(
-		"Maximum number of players",
-		widget=NumberInput(),
-		validators=[DataRequired()])
-	joinCharsPerPlayer = IntegerField(
-		"Characters per player",
-		widget=NumberInput(),
-		validators=[DataRequired()])
-	# Publish
-	publishNotifyEditorOnReady = BooleanField(
-		"Notify the editor when a player marks an article as ready")
-	publishNotifyPlayerOnReject = BooleanField(
-		"Notify a player when their article is rejected by the editor")
-	publishNotifyPlayerOnAccept = BooleanField(
-		"Notify a player when their article is accepted by the editor")
-	publishDeadlines = StringField(
-		"Turn deadline, as a crontab specification", validators=[Optional()])
-	publishAsap = BooleanField(
-		"Publish the turn immediately when the last article is accepted")
-	publishQuorum = IntegerField(
-		"Quorum to publish incomplete turn", widget=NumberInput(), validators=[Optional()])
-	publishBlockOnReady = BooleanField(
-		"Block turn publish if any articles are awaiting editor review")
-	# Article
-	articleIndexList = TextAreaField("Index specifications")
-	articleIndexCapacity = IntegerField(
-		"Index capacity override", widget=NumberInput(), validators=[Optional()])
-	articleCitationAllowSelf = BooleanField(
-		"Allow players to cite themselves")
-	articleCitationMinExtant = IntegerField(
-		"Minimum number of extant articles to cite", widget=NumberInput(), validators=[Optional()])
-	articleCitationMaxExtant = IntegerField(
-		"Maximum number of extant articles to cite", widget=NumberInput(), validators=[Optional()])
-	articleCitationMinPhantom = IntegerField(
-		"Minimum number of phantom articles to cite", widget=NumberInput(), validators=[Optional()])
-	articleCitationMaxPhantom = IntegerField(
-		"Maximum number of phantom articles to cite", widget=NumberInput(), validators=[Optional()])
-	articleCitationMinTotal = IntegerField(
-		"Minimum number of articles to cite in total", widget=NumberInput(), validators=[Optional()])
-	articleCitationMaxTotal = IntegerField(
-		"Maximum number of articles to cite in total", widget=NumberInput(), validators=[Optional()])
-	articleCitationMinChars = IntegerField(
-		"Minimum number of characters to cite articles by",
-		widget=NumberInput(), validators=[Optional()])
-	articleCitationMaxChars = IntegerField(
-		"Maximum number of characters to cite articles by",
-		widget=NumberInput(), validators=[Optional()])
-	articleWordLimitSoft = IntegerField(
-		"Soft word limit", widget=NumberInput(), validators=[Optional()])
-	articleWordLimitHard = IntegerField(
-		"Hard word limit", widget=NumberInput(), validators=[Optional()])
-	articleAddendumAllowed = BooleanField("Allow addendum articles")
-	articleAddendumMax = IntegerField(
-		"Maximum number of addendum articles per character per turn",
-		widget=NumberInput(), validators=[Optional()])
-	# And finally, the submit button
-	submit = SubmitField("Submit")
+class SettingTranslator():
+	"""
+	Base class for the translation layer between internal config data
+	and user-friendly display in the settings form. By default the data
+	is returned as-is.
+	"""
+	def load(self, cfg_value):
+		return cfg_value
 
-	def validate_publishDeadlines(form, field):
-		if form.publishAsap.data:
-			raise ValidationError('Cannot specify deadline if immediate publishing is enabled')
+	def save(self, field_data):
+		return field_data
 
-	# TODO add validators that call into extant valid check methods
 
-	# def set_options(self, lexicon):
-	# 	self.editor.choices = list(map(lambda x: (x, x), map(
-	# 		lambda uid: UserModel.by(uid=uid).username,
-	# 		lexicon.join.joined)))
+class UsernameTranslator(SettingTranslator):
+	"""
+	Converts an internal user id to a public-facing username.
+	"""
+	def load(self, cfg_value):
+		model_factory: ModelFactory = current_app.config['model_factory']
+		user: UserModel = model_factory.user(cfg_value)
+		return user.cfg.username
 
-	# def populate_from_lexicon(self, lexicon):
-	# 	self.title.data = lexicon.cfg.title
-	# 	self.editor.data = ModelFactory(lexicon.ctx.root).user(lexicon.cfg.editor).cfg.username
-	# 	self.prompt.data = lexicon.prompt
-	# 	self.turnCurrent.data = lexicon.turn.current
-	# 	self.turnMax.data = lexicon.turn.max
-	# 	self.joinPublic.data = lexicon.join.public
-	# 	self.joinOpen.data = lexicon.join.open
-	# 	self.joinPassword.data = lexicon.join.password
-	# 	self.joinMaxPlayers.data = lexicon.join.max_players
-	# 	self.joinCharsPerPlayer.data = lexicon.join.chars_per_player
-	# 	self.publishNotifyEditorOnReady.data = lexicon.publish.notify.editor_on_ready
-	# 	self.publishNotifyPlayerOnReject.data = lexicon.publish.notify.player_on_reject
-	# 	self.publishNotifyPlayerOnAccept.data = lexicon.publish.notify.player_on_accept
-	# 	self.publishDeadlines.data = lexicon.publish.deadlines
-	# 	self.publishAsap.data = lexicon.publish.asap
-	# 	self.publishQuorum.data = lexicon.publish.quorum
-	# 	self.publishBlockOnReady.data = lexicon.publish.block_on_ready
-	# 	self.articleIndexList.data = lexicon.article.index.list
-	# 	self.articleIndexCapacity.data = lexicon.article.index.capacity
-	# 	self.articleCitationAllowSelf.data = lexicon.article.citation.allow_self
-	# 	self.articleCitationMinExtant.data = lexicon.article.citation.min_extant
-	# 	self.articleCitationMaxExtant.data = lexicon.article.citation.max_extant
-	# 	self.articleCitationMinPhantom.data = lexicon.article.citation.min_phantom
-	# 	self.articleCitationMaxPhantom.data = lexicon.article.citation.max_phantom
-	# 	self.articleCitationMinTotal.data = lexicon.article.citation.min_total
-	# 	self.articleCitationMaxTotal.data = lexicon.article.citation.max_total
-	# 	self.articleCitationMinChars.data = lexicon.article.citation.min_chars
-	# 	self.articleCitationMaxChars.data = lexicon.article.citation.max_chars
-	# 	self.articleWordLimitSoft.data = lexicon.article.word_limit.soft
-	# 	self.articleWordLimitHard.data = lexicon.article.word_limit.hard
-	# 	self.articleAddendumAllowed.data = lexicon.article.addendum.allowed
-	# 	self.articleAddendumMax.data = lexicon.article.addendum.max
+	def save(self, field_data):
+		model_factory: ModelFactory = current_app.config['model_factory']
+		user: UserModel = model_factory.try_user(field_data)
+		if user:
+			return user.uid
 
-	# def update_lexicon(self, lexicon):
-	# 	with lexicon.edit() as l:
-	# 		l.title = self.title.data
-	# 		l.editor = UserModel.by(name=self.editor.data).uid
-	# 		l.prompt = self.prompt.data
-	# 		l.turn.current = self.turnCurrent.data
-	# 		l.turn.max = self.turnMax.data
-	# 		l.join.public = self.joinPublic.data
-	# 		l.join.open = self.joinOpen.data
-	# 		l.join.password = self.joinPassword.data
-	# 		l.join.max_players = self.joinMaxPlayers.data
-	# 		l.join.chars_per_player = self.joinCharsPerPlayer.data
-	# 		l.publish.notify.editor_on_ready = self.publishNotifyEditorOnReady.data
-	# 		l.publish.notify.player_on_reject = self.publishNotifyPlayerOnReject.data
-	# 		l.publish.notify.player_on_accept = self.publishNotifyPlayerOnAccept.data
-	# 		l.publish.deadlines = self.publishDeadlines.data
-	# 		l.publish.asap = self.publishAsap.data
-	# 		l.publish.quorum = self.publishQuorum.data
-	# 		l.publish.block_on_ready = self.publishBlockOnReady.data
-	# 		l.article.index.list = self.articleIndexList.data
-	# 		l.article.index.capacity = self.articleIndexCapacity.data
-	# 		l.article.citation.allow_self = self.articleCitationAllowSelf.data
-	# 		l.article.citation.min_extant = self.articleCitationMinExtant.data
-	# 		l.article.citation.max_extant = self.articleCitationMaxExtant.data
-	# 		l.article.citation.min_phantom = self.articleCitationMinPhantom.data
-	# 		l.article.citation.max_phantom = self.articleCitationMaxPhantom.data
-	# 		l.article.citation.min_total = self.articleCitationMinTotal.data
-	# 		l.article.citation.max_total = self.articleCitationMaxTotal.data
-	# 		l.article.citation.min_chars = self.articleCitationMinChars.data
-	# 		l.article.citation.max_chars = self.articleCitationMaxChars.data
-	# 		l.article.word_limit.soft = self.articleWordLimitSoft.data
-	# 		l.article.word_limit.hard = self.articleWordLimitHard.data
-	# 		l.article.addendum.allowed = self.articleAddendumAllowed.data
-	# 		l.article.addendum.max = self.articleAddendumMax.data
-	# 	return True
+
+class Setting():
+	"""
+	Represents a relation between a node in a lexicon config and a
+	field in a public-facing form that exposes it to the editor for
+	modification.
+	"""
+	def __init__(
+		self,
+		cfg_key: str,
+		field: Field,
+		translator: SettingTranslator = SettingTranslator()):
+		"""
+		Creates a setting. Optionally, defines a nontrivial translation
+		between internal and public values.
+		"""
+		self.cfg_path = cfg_key.split('.')
+		self.field = field
+		self.translator = translator
+
+	def load(self, cfg: ReadOnlyOrderedDict, field: Field):
+		"""
+		Sets the field's value to the corresponding config node
+		"""
+		for key in self.cfg_path[:-1]:
+			cfg = cast(ReadOnlyOrderedDict, cfg.get(key))
+		data = cfg.get(self.cfg_path[-1])
+		field.data = self.translator.load(data)
+
+	def save(self, cfg: AttrOrderedDict, field: Field):
+		"""
+		Updates the editable config with this field's value
+		"""
+		for key in self.cfg_path[:-1]:
+			cfg = cast(AttrOrderedDict, cfg.get(key))
+		data = field.data
+		cfg[self.cfg_path[-1]] = self.translator.save(data)
+
+
+class Settings():
+	@staticmethod
+	def settings():
+		for name, setting in vars(Settings).items():
+			if name.startswith('s_'):
+				yield name, setting
+
+	s_title = Setting('title',
+		StringField('Title override', validators=[Optional()]))
+
+	s_editor = Setting('editor',
+		SelectField('Editor', validators=[DataRequired(), User(True)]),
+		translator=UsernameTranslator())
+
+	s_prompt = Setting('prompt',
+		TextAreaField('Prompt', validators=[DataRequired()]))
+
+	s_turnCurrent = Setting('turn.current',
+		IntegerField(
+			'Current turn',
+			widget=NumberInput(),
+			validators=[Optional()]))
+
+	s_turnMax = Setting('turn.max',
+		IntegerField(
+			'Number of turns',
+			widget=NumberInput(),
+			validators=[DataRequired()]))
+
+	s_joinPublic = Setting('join.public',
+		BooleanField('Show game on public pages'))
+
+	s_joinOpen = Setting('join.open',
+		BooleanField('Allow players to join game'))
+
+	s_joinPassword = Setting('join.password',
+		StringField('Password to join game', validators=[Optional()]))
+
+	s_joinMaxPlayers = Setting('join.max_players',
+		IntegerField(
+			'Maximum number of players',
+			widget=NumberInput(),
+			validators=[DataRequired()]))
+
+	s_joinCharsPerPlayer = Setting('join.chars_per_player',
+		IntegerField(
+			'Characters per player',
+			widget=NumberInput(),
+			validators=[DataRequired()]))
+
+	s_publishNotifyEditorOnReady = Setting('publish.notify_editor_on_ready',
+		BooleanField(
+			'Notify the editor when a player marks an article as ready'))
+
+	s_publishNotifyPlayerOnReject = Setting('publish.notify_player_on_reject',
+		BooleanField(
+			'Notify a player when their article is rejected by the editor'))
+
+	s_publishNotifyPlayerOnAccept = Setting('publish.notify_player_on_accept',
+		BooleanField(
+			'Notify a player when their article is accepted by the editor'))
+
+	s_publishDeadlines = Setting('publish.deadlines',
+		StringField(
+			'Turn deadline, as a crontab specification',
+			validators=[Optional()]))
+
+	s_publishAsap = Setting('publish.asap',
+		BooleanField(
+			'Publish the turn immediately when the last article is accepted'))
+
+	s_publishQuorum = Setting('publish.quorum',
+		IntegerField(
+			'Quorum to publish incomplete turn',
+			widget=NumberInput(),
+			validators=[Optional()]))
+
+	s_publishBlockOnReady = Setting('publish.block_on_ready',
+		BooleanField(
+			'Block turn publish if any articles are awaiting editor review'))
+
+	s_articleIndexList = Setting('article.index.list',
+		TextAreaField('Index specifications'))
+
+	s_articleIndexCapacity = Setting('article.index.capacity',
+		IntegerField(
+			'Index capacity override',
+			widget=NumberInput(),
+			validators=[Optional()]))
+
+	s_articleCitationAllowSelf = Setting('article.citation.allow_self',
+		BooleanField('Allow players to cite themselves'))
+
+	s_articleCitationMinExtant = Setting('article.citation.min_extant',
+		IntegerField(
+			'Minimum number of extant articles to cite',
+			widget=NumberInput(),
+			validators=[Optional()]))
+
+	s_articleCitationMaxExtant = Setting('article.citation.max_extant',
+		IntegerField(
+			'Maximum number of extant articles to cite',
+			widget=NumberInput(),
+			validators=[Optional()]))
+
+	s_articleCitationMinPhantom = Setting('article.citation.min_phantom',
+		IntegerField(
+			'Minimum number of phantom articles to cite',
+			widget=NumberInput(),
+			validators=[Optional()]))
+
+	s_articleCitationMaxPhantom = Setting('article.citation.max_phantom',
+		IntegerField(
+			'Maximum number of phantom articles to cite',
+			widget=NumberInput(),
+			validators=[Optional()]))
+
+	s_articleCitationMinTotal = Setting('article.citation.min_total',
+		IntegerField(
+			'Minimum number of articles to cite in total',
+			widget=NumberInput(),
+			validators=[Optional()]))
+
+	s_articleCitationMaxTotal = Setting('article.citation.max_total',
+		IntegerField(
+			'Maximum number of articles to cite in total',
+			widget=NumberInput(),
+			validators=[Optional()]))
+
+	s_articleCitationMinChars = Setting('article.citation.min_chars',
+		IntegerField(
+			'Minimum number of characters to cite articles by',
+			widget=NumberInput(),
+			validators=[Optional()]))
+
+	s_articleCitationMaxChars = Setting('article.citation.max_chars',
+		IntegerField(
+			'Maximum number of characters to cite articles by',
+			widget=NumberInput(),
+			validators=[Optional()]))
+
+	s_articleWordLimitSoft = Setting('article.word_limit.soft',
+		IntegerField(
+			'Soft word limit',
+			widget=NumberInput(),
+			validators=[Optional()]))
+
+	s_articleWordLimitHard = Setting('article.word_limit.hard',
+		IntegerField(
+			'Hard word limit',
+			widget=NumberInput(),
+			validators=[Optional()]))
+
+	s_articleAddendumAllowed = Setting('article.addendum.allowed',
+		BooleanField('Allow addendum articles'))
+
+	s_articleAddendumMax = Setting('article.addendum.max',
+		IntegerField(
+			'Maximum number of addendum articles per character per turn',
+			widget=NumberInput(),
+			validators=[Optional()]))
+
+
+class ConfigFormBase(FlaskForm):
+	def __init__(self, lexicon):
+		super().__init__()
+		editor_field = getattr(self, 'editor', None)
+		if editor_field:
+			model_factory: ModelFactory = current_app.config['model_factory']
+			editor_field.choices = list(map(
+				lambda s: (s, s),
+				map(
+					lambda uid: model_factory.user(uid).cfg.username,
+					lexicon.cfg.join.joined)))
+
+	def load(self, lexicon):
+		for k, v in Settings.settings():
+			field = getattr(self, k[2:], None)
+			if field:
+				v.load(lexicon.cfg, field)
+
+	def save(self, lexicon):
+		with lexicon.ctx.edit_config() as cfg:
+			for k, v in Settings.settings():
+				field = getattr(self, k[2:], None)
+				if field:
+					v.save(cfg, field)
+
+
+for k, v in Settings.settings():
+	setattr(ConfigFormBase, k[2:], v.field)

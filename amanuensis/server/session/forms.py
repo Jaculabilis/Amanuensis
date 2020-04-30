@@ -3,6 +3,8 @@ from wtforms import (
 	StringField, SubmitField, TextAreaField, RadioField)
 from wtforms.validators import DataRequired
 
+from .settings import ConfigFormBase
+
 
 class LexiconCharacterForm(FlaskForm):
 	"""/lexicon/<name>/session/character/"""
@@ -36,3 +38,8 @@ class LexiconReviewForm(FlaskForm):
 class LexiconPublishTurnForm(FlaskForm):
 	"""/lexicon/<name>/session/"""
 	submit = SubmitField('Publish turn')
+
+
+class LexiconConfigForm(ConfigFormBase):
+	"""/lexicon/<name>/session/settings/"""
+	submit = SubmitField('Save settings')
