@@ -152,26 +152,54 @@ def content_constraint_analysis(
 	return infos, warnings, errors
 
 
-def attempt_publish(lexicon: LexiconModel) -> None:
+def attempt_publish(lexicon: LexiconModel) -> bool:
 	"""
 	If the lexicon's publsh policy allows the current set of approved
 	articles to be published, publish them and rebuild all pages.
 	"""
-	# TODO Check against lexicon publish policy
+	# Load all drafts
+	draft_ctx = lexicon.ctx.draft
+	drafts = {}
+	for draft_fn in draft_ctx.ls():
+		with draft_ctx.read(draft_fn) as draft_obj:
+			drafts[draft_fn] = draft_obj
+
+	# Check for whether the current turn can be published according to current
+	# publish policy
+	characters = [
+		cid for cid, char in lexicon.cfg.character.items() if char.player]
+	print(characters)
+	has_approved = {cid: 0 for cid in characters}
+	has_ready = {cid: 0 for cid in characters}
+	for draft in drafts.values():
+		if draft.status.approved:
+			has_approved[draft.character] = 1
+		elif draft.status.ready:
+			has_ready[draft.character] = 1
+	# If quorum isn't defined, require all characters to have an article
+	quorum = lexicon.cfg.publish.quorum or len(characters)
+	if sum(has_approved.values()) < quorum:
+		print(sum(has_approved.values()))
+		print(quorum)
+		lexicon.log(f'Publish failed: no quorum')
+		return False
+	# If articles are up for review, check if this blocks publish
+	if lexicon.cfg.publish.block_on_ready and any(has_ready.values()):
+		lexicon.log(f'Publish failed: articles in review')
+		return False
 
 	# Get the approved drafts to publish
-	draft_ctx = lexicon.ctx.draft
-	to_publish = []
-	for draft_fn in draft_ctx.ls():
-		with draft_ctx.read(draft_fn) as draft:
-			if draft.status.approved:
-				to_publish.append(draft_fn)
+	to_publish = [
+		draft_fn for draft_fn, draft in drafts.items()
+		if draft.status.approved]
 
 	# Publish new articles
 	publish_drafts(lexicon, to_publish)
 
 	# Rebuild all pages
 	rebuild_pages(lexicon)
+
+	return True
 
 
 def publish_drafts(lexicon: LexiconModel, filenames: Iterable[str]) -> None:
@@ -185,7 +213,12 @@ def publish_drafts(lexicon: LexiconModel, filenames: Iterable[str]) -> None:
 		with draft_ctx.read(filename) as source:
 			with src_ctx.edit(filename, create=True) as dest:
 				dest.update(source)
+				dest.turn = lexicon.cfg.turn.current
 		draft_ctx.delete(filename)
+	# Increment the turn
+	lexicon.log(f'Published turn {lexicon.cfg.turn.current}')
+	with lexicon.ctx.edit_config() as cfg:
+		cfg.turn.current += 1
 
 
 def rebuild_pages(lexicon: LexiconModel) -> None:

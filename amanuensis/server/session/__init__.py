@@ -57,8 +57,11 @@ def session(name):
 			characters.append(char)
 	form = LexiconPublishTurnForm()
 	if form.validate_on_submit():
-		attempt_publish(g.lexicon)
-		return redirect(url_for('lexicon.contents', name=name))
+		if attempt_publish(g.lexicon):
+			return redirect(url_for('lexicon.contents', name=name))
+		else:
+			flash('Publish failed')
+			return redirect(url_for('session.session', name=name))
 	return render_template(
 		'session.root.jinja',
 		ready_articles=drafts,
@@ -157,7 +160,7 @@ def settings(name):
 	# POST with valid data
 	form.save(g.lexicon)
 	flash('Settings updated')
-	return redirect(url_for('session.settings', name=name))
+	return redirect(url_for('session.session', name=name))
 
 
 @bp_session.route('/review/', methods=['GET', 'POST'])
@@ -200,17 +203,21 @@ def review(name):
 				citations=citations)
 
 		# POST with valid data
-		if form.approved.data == LexiconReviewForm.APPROVED:
-			draft.status.ready = True
-			draft.status.approved = True
-			g.lexicon.log(f"Article '{draft.title}' approved ({draft.aid})")
-			if g.lexicon.cfg.publish.asap:
-				attempt_publish(g.lexicon)
-		else:
+		if form.approved.data == LexiconReviewForm.REJECTED:
 			draft.status.ready = False
 			draft.status.approved = False
 			g.lexicon.log(f"Article '{draft.title}' rejected ({draft.aid})")
-		return redirect(url_for('session.session', name=name))
+			return redirect(url_for('session.session', name=name))
+		else:
+			draft.status.ready = True
+			draft.status.approved = True
+			g.lexicon.log(f"Article '{draft.title}' approved ({draft.aid})")
+
+	# Draft was approved, check for asap publishing
+	if g.lexicon.cfg.publish.asap:
+		if attempt_publish(g.lexicon):
+			redirect(url_for('lexicon.contents', name=name))
+	return redirect(url_for('session.session', name=name))
 
 
 @bp_session.route('/editor/', methods=['GET'])

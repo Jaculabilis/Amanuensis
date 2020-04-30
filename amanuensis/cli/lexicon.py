@@ -318,4 +318,7 @@ def command_publish_turn(args):
 	from amanuensis.lexicon import attempt_publish
 
 	# Internal call
-	attempt_publish(args.lexicon)
+	result = attempt_publish(args.lexicon)
+
+	if not result:
+		logger.error('Publish failed, check lexicon log')

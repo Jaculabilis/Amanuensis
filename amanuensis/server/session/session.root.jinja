@@ -52,6 +52,9 @@
 {% for message in get_flashed_messages() %}
 <span style="color: #ff0000">{{ message }}</span><br>
 {% endfor %}
+{% if g.lexicon.status == ONGOING %}
+<p>Turn {{ g.lexicon.cfg.turn.current }}</p>
+{% endif %}
 <p>Player actions</p>
 <ul>
 	{% for char in characters %}
