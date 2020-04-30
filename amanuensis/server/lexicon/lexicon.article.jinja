@@ -15,12 +15,12 @@
 {% block citations %}
 <p>
 	{% for citation in article.cites %}
-	<a href="{{ citation|articlelink }}">{{ citation }}</a> /
+	<a href="{{ citation|articlelink }}">{{ citation }}</a>{% if not loop.last %} / {% endif %}
 	{% endfor %}
 </p>
 <p>
 	{% for citation in article.citedby %}
-	<a href="{{ citation|articlelink }}">{{ citation }}</a> /
+	<a href="{{ citation|articlelink }}">{{ citation }}</a>{% if not loop.last %} / {% endif %}
 	{% endfor %}
 </p>
 {% endblock %}
