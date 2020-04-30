@@ -18,7 +18,7 @@ Games can only be created by the administrator. When a game is created, its name
 
 The article writing workflow proceeds through the following states:
 
-* Active: When player creates a draft, it is initialized with this state.
+* Active: When a player creates a draft, it is initialized with this state.
   Players can view and edit their active drafts. Admins can view all active
   drafts. Active drafts occupy an index slot in the lexicon, but the title is
   elided.

@@ -260,17 +260,17 @@ class ConfigFormBase(FlaskForm):
 					lexicon.cfg.join.joined)))
 
 	def load(self, lexicon):
-		for k, v in Settings.settings():
-			field = getattr(self, k[2:], None)
+		for name, setting in Settings.settings():
+			field = getattr(self, name[2:], None)
 			if field:
-				v.load(lexicon.cfg, field)
+				setting.load(lexicon.cfg, field)
 
 	def save(self, lexicon):
 		with lexicon.ctx.edit_config() as cfg:
-			for k, v in Settings.settings():
-				field = getattr(self, k[2:], None)
+			for name, setting in Settings.settings():
+				field = getattr(self, name[2:], None)
 				if field:
-					v.save(cfg, field)
+					setting.save(cfg, field)
 
 
 for k, v in Settings.settings():
