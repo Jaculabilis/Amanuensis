@@ -1,4 +1,4 @@
-# Amanuensis
+# Amanuensis ![](amanuensis/resources/amanuensis.png)
 
 _amanuensis, n. One who copies or writes from the dictation of another._ -OED
 
