@@ -126,10 +126,10 @@ def content_constraint_analysis(
 	infos: list = []
 	warnings: list = []
 	errors: list = []
-	character = lexicon.cfg.character.get(cid)
+	character = lexicon.cfg.character.get(cid)# noqa
 	content_analysis: ConstraintAnalysis = (
 		parsed.render(ConstraintAnalysis(lexicon)))
-	with lexicon.ctx.read('info') as info:
+	with lexicon.ctx.read('info') as info:# noqa
 		# I: Word count
 		infos.append(f'Word count: {content_analysis.word_count}')
 		# Self-citation when forbidden
