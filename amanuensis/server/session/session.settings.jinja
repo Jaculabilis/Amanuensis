@@ -63,6 +63,9 @@
 		{{ number_setting(form.turnMax) }}
 		{{ form.articleIndexList.label }}:<br>
 		{{ form.articleIndexList(class_="fullwidth", rows=10) }}
+		{% for error in form.articleIndexList.errors %}
+		<span style="color: #ff0000">{{ error }}</span><br>
+		{% endfor %}
 		{{ number_setting(form.articleIndexCapacity) }}
 	</p>
 

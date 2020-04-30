@@ -1,3 +1,4 @@
+import re
 from typing import cast
 
 from flask import current_app
@@ -8,13 +9,20 @@ from wtforms import (
 	BooleanField,
 	TextAreaField,
 	IntegerField,
-	SelectField)
+	SelectField,
+	ValidationError)
 from wtforms.validators import DataRequired, Optional
 from wtforms.widgets.html5 import NumberInput
 
 from amanuensis.config import ReadOnlyOrderedDict, AttrOrderedDict
 from amanuensis.models import ModelFactory, UserModel
 from amanuensis.server.forms import User
+
+
+index_regex = re.compile(
+	r'(char|prefix|etc)'  # index type
+	r'(\[(-?\d+)\])?'     # index pri
+	r':(.+)')             # index pattern
 
 
 class SettingTranslator():
@@ -44,6 +52,32 @@ class UsernameTranslator(SettingTranslator):
 		user: UserModel = model_factory.try_user(field_data)
 		if user:
 			return user.uid
+
+
+class IndexListTranslator(SettingTranslator):
+	"""
+	Converts internal index representations into the index
+	specification format used in the editable list.
+	"""
+	def load(self, cfg_value):
+		index_list = []
+		for index in cfg_value:
+			if index.pri == 0:
+				index_list.append('{type}:{pattern}'.format(**index))
+			else:
+				index_list.append('{type}[{pri}]:{pattern}'.format(**index))
+		return '\n'.join(index_list)
+
+	def save(self, field_data):
+		index_list = []
+		for index in field_data.split('\n'):
+			match = index_regex.fullmatch(index)
+			itype, _, pri, pattern = match.groups()
+			index_list.append(dict(
+				type=itype,
+				pri=pri or 0,
+				pattern=pattern.strip()))
+		return index_list
 
 
 class Setting():
@@ -82,6 +116,14 @@ class Setting():
 			cfg = cast(AttrOrderedDict, cfg.get(key))
 		data = field.data
 		cfg[self.cfg_path[-1]] = self.translator.save(data)
+
+
+def IndexList(form, field):
+	if not field.data:
+		raise ValidationError('You must specify an index list.')
+	for index in field.data.split('\n'):
+		if not index_regex.fullmatch(index):
+			raise ValidationError(f'Bad index: "{index}"')
 
 
 class Settings():
@@ -166,7 +208,10 @@ class Settings():
 			'Block turn publish if any articles are awaiting editor review'))
 
 	s_articleIndexList = Setting('article.index.list',
-		TextAreaField('Index specifications'))
+		TextAreaField(
+			'Index specifications',
+			validators=[IndexList]),
+		translator=IndexListTranslator())
 
 	s_articleIndexCapacity = Setting('article.index.capacity',
 		IntegerField(
