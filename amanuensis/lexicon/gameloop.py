@@ -228,6 +228,7 @@ def sort_by_index_spec(articles, index_specs, key=None):
 		for index in index_eval_order:
 			if index_match(index, key(article)):
 				indexed[index.pattern].append(article)
+				break
 	return indexed
 
 
