@@ -8,9 +8,11 @@ from flask import (
 	Markup)
 from flask_login import login_required, current_user
 
-from amanuensis.lexicon import player_can_join_lexicon, add_player_to_lexicon
+from amanuensis.lexicon import (
+	player_can_join_lexicon,
+	add_player_to_lexicon,
+	sort_by_index_spec)
 from amanuensis.models import LexiconModel
-from amanuensis.parser import filesafe_title
 from amanuensis.server.helpers import (
 	lexicon_param,
 	player_required_if_not_public)
@@ -61,17 +63,14 @@ def join(name):
 @lexicon_param
 @player_required_if_not_public
 def contents(name):
-	articles = []
-	filenames = g.lexicon.ctx.article.ls()
-	for filename in filenames:
-		with g.lexicon.ctx.article.read(filename) as a:
-			articles.append({
-				'title': a.title,
-				'link': url_for('lexicon.article',
-					name=name,
-					title=filesafe_title(a.title)),
-			})
-	return render_template('lexicon.contents.jinja', articles=articles)
+	with g.lexicon.ctx.read('info') as info:
+		indexed = sort_by_index_spec(info, g.lexicon.cfg.article.index.list)
+		for articles in indexed.values():
+			for i in range(len(articles)):
+				articles[i] = {
+					'title': articles[i],
+					**info.get(articles[i])}
+		return render_template('lexicon.contents.jinja', indexed=indexed)
 
 
 @bp_lexicon.route('/article/<title>')

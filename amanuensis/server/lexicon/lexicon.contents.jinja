@@ -8,13 +8,18 @@
 <span style="color:#ff0000">{{ message }}</span><br>
 {% endfor %}
 
-{% if articles %}
+{% for index in indexed %}
+<b>{{ index }}</b>
+{% if indexed[index] %}
 <ul>
-{% for article in articles %}
-<li><a href="{{ article.link }}">{{ article.title }}</a></li>
+{% for article in indexed[index] %}
+<li><a href="{{ article.title|articlelink }}" class="{{ 'phantom' if not article.character else '' }}">
+	{{ article.title }}
+</a></li>
 {% endfor %}
 </ul>
 {% endif %}
+{% endfor %}
 
 {% endblock %}
 {% set template_content_blocks = [self.main()] %}

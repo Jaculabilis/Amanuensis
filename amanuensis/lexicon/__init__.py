@@ -8,6 +8,7 @@ from .gameloop import (
 	get_draft,
 	title_constraint_analysis,
 	content_constraint_analysis,
+	sort_by_index_spec,
 	attempt_publish)
 from .setup import (
 	player_can_join_lexicon,
@@ -23,6 +24,7 @@ __all__ = [member.__name__ for member in [
 	get_draft,
 	title_constraint_analysis,
 	content_constraint_analysis,
+	sort_by_index_spec,
 	attempt_publish,
 	player_can_join_lexicon,
 	add_player_to_lexicon,

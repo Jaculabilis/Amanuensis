@@ -2,6 +2,7 @@
 Submodule of functions for managing lexicon games during the core game
 loop of writing and publishing articles.
 """
+from collections import OrderedDict
 from typing import Iterable, Any, List, Optional, Tuple
 
 from amanuensis.config import ReadOnlyOrderedDict
@@ -161,6 +162,52 @@ def content_constraint_analysis(
 		pass  # warning
 
 	return infos, warnings, errors
+
+
+def index_match(index, title) -> bool:
+	if index.type == 'char':
+		return titlesort(title)[0].upper() in index.pattern.upper()
+	if index.type == 'prefix':
+		return title.startswith(index.pattern)
+	if index.type == 'etc':
+		return True
+	raise ValueError(f'Unknown index type: "{index.type}"')
+
+
+def sort_by_index_spec(articles, index_specs, key=None):
+	"""
+	Sorts a list under the appropriate index in the given index
+	specification list. If the list is not a list of titles, the key
+	function should map the contents to the indexable strings.
+	"""
+	if key is None:
+		def key(k):
+			return k
+	# Determine the index evaluation order vs list order
+	index_by_pri = {}
+	index_list_order = []
+	for index in index_specs:
+		if index.pri not in index_by_pri:
+			index_by_pri[index.pri] = []
+		index_by_pri[index.pri].append(index)
+		index_list_order.append(index)
+	index_eval_order = [
+		index
+		for pri in sorted(index_by_pri.keys(), reverse=True)
+		for index in index_by_pri[pri]]
+	print(str(articles)[:200])
+	articles_titlesorted = sorted(
+		articles,
+		key=lambda a: titlesort(key(a)))
+	print(str(articles_titlesorted)[:200])
+	indexed = OrderedDict()
+	for index in index_list_order:
+		indexed[index.pattern] = []
+	for article in articles_titlesorted:
+		for index in index_eval_order:
+			if index_match(index, key(article)):
+				indexed[index.pattern].append(article)
+	return indexed
 
 
 def attempt_publish(lexicon: LexiconModel) -> bool:
