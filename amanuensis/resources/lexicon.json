@@ -36,7 +36,48 @@
 	},
 	"article": {
 		"index": {
-			"list": null,
+			"list": [
+				{
+					"type": "char",
+					"pri": 0,
+					"pattern": "ABC"
+				},
+				{
+					"type": "char",
+					"pri": 0,
+					"pattern": "DEF"
+				},
+				{
+					"type": "char",
+					"pri": 0,
+					"pattern": "GHI"
+				},
+				{
+					"type": "char",
+					"pri": 0,
+					"pattern": "JKL"
+				},
+				{
+					"type": "char",
+					"pri": 0,
+					"pattern": "MNO"
+				},
+				{
+					"type": "char",
+					"pri": 0,
+					"pattern": "PQRS"
+				},
+				{
+					"type": "char",
+					"pri": 0,
+					"pattern": "TUV"
+				},
+				{
+					"type": "char",
+					"pri": 0,
+					"pattern": "WXYZ"
+				}
+			],
 			"capacity": null
 		},
 		"citation": {
