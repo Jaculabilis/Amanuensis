@@ -25,7 +25,8 @@ from amanuensis.server.helpers import (
 
 from .forms import (
 	LexiconCharacterForm,
-	LexiconReviewForm)
+	LexiconReviewForm,
+	LexiconPublishTurnForm)
 from .settings import LexiconConfigForm
 
 from .editor import load_editor, new_draft, update_draft
@@ -36,7 +37,7 @@ bp_session = Blueprint('session', __name__,
 	template_folder='.')
 
 
-@bp_session.route('/', methods=['GET'])
+@bp_session.route('/', methods=['GET', 'POST'])
 @lexicon_param
 @player_required
 def session(name):
@@ -54,11 +55,16 @@ def session(name):
 	for char in g.lexicon.cfg.character.values():
 		if char.player == current_user.uid:
 			characters.append(char)
+	form = LexiconPublishTurnForm()
+	if form.validate_on_submit():
+		attempt_publish(g.lexicon)
+		return redirect(url_for('lexicon.contents', name=name))
 	return render_template(
 		'session.root.jinja',
 		ready_articles=drafts,
 		approved_articles=approved,
-		characters=characters)
+		characters=characters,
+		publish_form=form)
 
 
 def edit_character(name, form, character):

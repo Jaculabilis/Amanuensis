@@ -36,6 +36,12 @@
 	</li>
 	{% endfor %}
 </ul>
+{% if publish_form %}
+<form id="publish-turn-form" action="" method="post" novalidate>
+	{{ publish_form.hidden_tag() }}
+	<p>{{ publish_form.submit() }}</p>
+</form>
+{% endif %}
 {% endblock %}
 {% set template_content_blocks = template_content_blocks + [self.bl_editor()] %}
 {% endif %}
