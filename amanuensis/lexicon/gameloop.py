@@ -121,6 +121,7 @@ def content_constraint_analysis(
 		pass
 		# A new citation matches a character's name
 		pass  # warning
+		# A new citation would create more articles than can be written
 		# Not enough extant citations
 		# Too many extant citations
 		# Not enough phantom citations
