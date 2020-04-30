@@ -36,11 +36,13 @@
 	</li>
 	{% endfor %}
 </ul>
+{% if g.lexicon.status == ONGOING %}
 {% if publish_form %}
 <form id="publish-turn-form" action="" method="post" novalidate>
 	{{ publish_form.hidden_tag() }}
 	<p>{{ publish_form.submit() }}</p>
 </form>
+{% endif %}
 {% endif %}
 {% endblock %}
 {% set template_content_blocks = template_content_blocks + [self.bl_editor()] %}
@@ -60,18 +62,20 @@
 	</li>
 	{% endfor %}
 	{%
-		if characters|count is lt(g.lexicon.cfg.join.chars_per_player)
-		and not g.lexicon.cfg.turn.current
+		if g.lexicon.status == PREGAME
+		and characters|count is lt(g.lexicon.cfg.join.chars_per_player)
 	%}
 	<li>
 		<a href="{{ url_for('session.character', name=g.lexicon.cfg.name) }}">Create a character</a>
 	</li>
 	{% endif %}
+	{% if g.lexicon.status == ONGOING %}
 	<li>
 		<a href="{{ url_for('session.editor', name=g.lexicon.cfg.name) }}">
 			Article editor
 		</a>
 	</li>
+	{% endif %}
 </ul>
 {% endblock %}
 {% set template_content_blocks = template_content_blocks + [self.main()] %}

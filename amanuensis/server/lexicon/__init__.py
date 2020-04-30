@@ -9,6 +9,7 @@ from flask import (
 from flask_login import login_required, current_user
 
 from amanuensis.lexicon import player_can_join_lexicon, add_player_to_lexicon
+from amanuensis.models import LexiconModel
 from amanuensis.parser import filesafe_title
 from amanuensis.server.helpers import (
 	lexicon_param,
@@ -26,6 +27,10 @@ bp_lexicon = Blueprint('lexicon', __name__,
 @lexicon_param
 @login_required
 def join(name):
+	if g.lexicon.status != LexiconModel.PREGAME:
+		flash("Can't join a game already in progress")
+		return redirect(url_for('home.home'))
+
 	if not g.lexicon.cfg.join.open:
 		flash("This game isn't open for joining")
 		return redirect(url_for('home.home'))

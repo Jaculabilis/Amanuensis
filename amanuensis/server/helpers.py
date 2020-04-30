@@ -8,7 +8,7 @@ from flask_login import current_user
 
 # Module imports
 from amanuensis.parser import filesafe_title
-from amanuensis.models import ModelFactory, UserModel
+from amanuensis.models import ModelFactory, UserModel, LexiconModel
 
 
 def register_custom_filters(app):
@@ -34,6 +34,13 @@ def register_custom_filters(app):
 			'lexicon.article',
 			name=g.lexicon.cfg.name,
 			title=filesafe_title(title))
+
+	@app.context_processor
+	def lexicon_status():
+		return dict(
+			PREGAME=LexiconModel.PREGAME,
+			ONGOING=LexiconModel.ONGOING,
+			COMPLETE=LexiconModel.COMPLETE)
 
 
 def lexicon_param(route):
