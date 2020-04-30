@@ -89,6 +89,9 @@ def title_constraint_analysis(
 		# E: This article has already been written and addendums are disabled
 		elif not lexicon.cfg.article.addendum.allowed:
 			errors.append('Article already exists')
+		# I: This article's index
+		index = get_index_for_title(lexicon, title)
+		infos.append(f'Article index: {index}')
 		# The article does not sort under the player's assigned index
 		pass
 		# The article's title is new, but its index is full
@@ -172,6 +175,26 @@ def index_match(index, title) -> bool:
 	if index.type == 'etc':
 		return True
 	raise ValueError(f'Unknown index type: "{index.type}"')
+
+
+def get_index_for_title(lexicon: LexiconModel, title: str):
+	"""
+	Returns the index pattern for the given title.
+	"""
+	index_specs = lexicon.cfg.article.index.list
+	index_by_pri: dict = {}
+	for index in index_specs:
+		if index.pri not in index_by_pri:
+			index_by_pri[index.pri] = []
+		index_by_pri[index.pri].append(index)
+	index_eval_order = [
+		index
+		for pri in sorted(index_by_pri.keys(), reverse=True)
+		for index in index_by_pri[pri]]
+	for index in index_eval_order:
+		if index_match(index, title):
+			return index.pattern
+	return "&c"
 
 
 def sort_by_index_spec(articles, index_specs, key=None):
