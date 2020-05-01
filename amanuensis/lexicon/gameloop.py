@@ -77,6 +77,11 @@ def title_constraint_analysis(
 	warnings: list = []
 	errors: list = []
 	with lexicon.ctx.read('info') as info:
+		turn = lexicon.cfg.turn.current
+		assignments = lexicon.cfg.turn.assignment.get(str(turn), [])
+		for char_id, index_pattern in assignments:
+			if char_id == cid:
+				infos.append(f'Assigned index: {index_pattern}')
 		# E: No title
 		if not title:
 			errors.append('Missing title')
@@ -101,8 +106,6 @@ def title_constraint_analysis(
 		index = get_index_for_title(lexicon, title)
 		infos.append(f'Article index: {index}')
 		# E: The article does not sort under the player's assigned index
-		turn = lexicon.cfg.turn.current
-		assignments = lexicon.cfg.turn.assignment.get(turn, [])
 		fits = None
 		for char_id, index_pattern in assignments:
 			if char_id == cid and fits is None:
