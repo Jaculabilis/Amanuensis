@@ -67,6 +67,7 @@ def get_draft(
 def title_constraint_analysis(
 	lexicon: LexiconModel,
 	player: UserModel,
+	cid: str,
 	title: str) -> Tuple[List[str], List[str], List[str]]:
 	"""
 	Checks article constraints for the lexicon against a proposed
@@ -86,30 +87,57 @@ def title_constraint_analysis(
 		# I: This article is a phantom
 		elif info[title].character is None:
 			infos.append('Phantom article')
+		# I: This article is an addendum
+		elif lexicon.cfg.article.addendum.allowed:
+			infos.append('Addendum article')
+			# E: And this player is already at the addendum limit
+			pass  # TODO
 		# E: This article has already been written and addendums are disabled
-		elif not lexicon.cfg.article.addendum.allowed:
+		else:
 			errors.append('Article already exists')
 		# I: This article's index
 		index = get_index_for_title(lexicon, title)
 		infos.append(f'Article index: {index}')
-		# The article does not sort under the player's assigned index
-		pass
+		# E: The article does not sort under the player's assigned index
+		turn = lexicon.cfg.turn.current
+		assignments = lexicon.cfg.turn.assignment.get(turn, [])
+		fits = None
+		for char_id, index_pattern in assignments:
+			if char_id == cid and fits is None:
+				fits = False
+			if char_id == cid and index_pattern == index:
+				fits = True
+		if fits is not None and not fits:
+			errors.append('Article is not under your assigned index')
 		# The article's title is new, but its index is full
-		pass
-		# The article's title is a phantom, but the player has cited it before
-		info
-		# Another player is writing an article with this title
-		pass  # warning
-		# Another player has an approved article with this title
-		pass
-		# An article with this title was already written and addendums are
-		# disabled
-		pass
-		# An article with this title was already written and this player has
-		# reached the maximum number of addendum articles
-		pass
-		# The article's title matches a character's name
-		pass  # warning
+		pass  # TODO
+		# E: The article's title is a phantom, but the player has cited it before
+		if title in info and not info[title].character:
+			for atitle, ainfo in info.items():
+				if ainfo.character == cid and title in ainfo.citations:
+					errors.append(f'Cited by your article: {atitle}')
+					break
+		# W: Another player is writing an article with this title
+		draft_ctx = lexicon.ctx.draft
+		drafts = []
+		for draft_fn in draft_ctx.ls():
+			with draft_ctx.read(draft_fn) as draft:
+				drafts.append(draft)
+		if len([
+			d for d in drafts
+			if not d.status.ready and d.title == title]) > 1:
+			warnings.append('Another player is writing an article with '
+				'this title')
+		# E: Another player has an approved article with this title
+		if len([
+			d for d in drafts
+			if d.status.approved and d.title == title]) > 1:
+			errors.append('Another player has already written this article')
+		# W: The article's title matches a character's name
+		for char in lexicon.cfg.character.values():
+			if len(char.name) > 10 and title == char.name:
+				warnings.append(f'"{title}" is the name of a character. '
+					'Are you sure you want to do that?')
 
 	return infos, warnings, errors
 

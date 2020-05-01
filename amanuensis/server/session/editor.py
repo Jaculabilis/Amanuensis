@@ -111,7 +111,7 @@ def update_draft(lexicon: LexiconModel, article_json):
 	preview = parsed.render(PreviewHtmlRenderer(lexicon))
 	# Constraint analysis
 	title_infos, title_warnings, title_errors = title_constraint_analysis(
-		lexicon, current_user, title)
+		lexicon, current_user, article.character, title)
 	content_infos, content_warnings, content_errors = content_constraint_analysis(
 		lexicon, current_user, article.character, parsed)
 	if any(title_errors) or any(content_errors):
