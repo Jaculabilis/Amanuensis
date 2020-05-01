@@ -67,6 +67,8 @@
 		<span style="color: #ff0000">{{ error }}</span><br>
 		{% endfor %}
 		{{ number_setting(form.articleIndexCapacity) }}
+		{{ form.turnAssignment.label }}:<br>
+		{{ form.turnAssignment(class_="fullwidth", rows=10) }}
 	</p>
 
 	<h3>Visibility and Joining</h3>

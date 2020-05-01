@@ -88,6 +88,17 @@ class IndexListTranslator(SettingTranslator):
 		return index_list
 
 
+class TmpAsgnTranslator(SettingTranslator):
+	def load(self, cfg_value):
+		import json
+		print(cfg_value)
+		return json.dumps(cfg_value)
+
+	def save(self, field_data):
+		import json
+		return json.loads(field_data)
+
+
 class Setting():
 	"""
 	Represents a relation between a node in a lexicon config and a
@@ -168,6 +179,10 @@ class Settings():
 			'Number of turns',
 			widget=NumberInput(),
 			validators=[DataRequired()]))
+
+	s_turnAssignment = Setting('turn.assignment',
+		TextAreaField('index assignment raw'),
+		translator=TmpAsgnTranslator())
 
 	s_joinPublic = Setting('join.public',
 		BooleanField('Show game on public pages'))
