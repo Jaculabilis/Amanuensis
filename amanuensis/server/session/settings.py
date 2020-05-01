@@ -70,6 +70,7 @@ class IndexListTranslator(SettingTranslator):
 
 	def save(self, field_data):
 		index_list = []
+		has_etc = False
 		for index in field_data.split('\n'):
 			match = index_regex.fullmatch(index)
 			itype, _, pri, pattern = match.groups()
@@ -77,6 +78,13 @@ class IndexListTranslator(SettingTranslator):
 				type=itype,
 				pri=pri or 0,
 				pattern=pattern.strip()))
+			if itype == 'etc':
+				has_etc = True
+		if not has_etc:
+			index_list.append(dict(
+				type='etc',
+				pri=0,
+				pattern='&c'))
 		return index_list
 
 
@@ -121,9 +129,15 @@ class Setting():
 def IndexList(form, field):
 	if not field.data:
 		raise ValidationError('You must specify an index list.')
+	etc_count = 0
 	for index in field.data.split('\n'):
-		if not index_regex.fullmatch(index):
+		match = index_regex.fullmatch(index)
+		if not match:
 			raise ValidationError(f'Bad index: "{index}"')
+		if match.group(1) == 'etc':
+			etc_count += 1
+	if etc_count > 1:
+		raise ValidationError("Can't have more than one etc index")
 
 
 class Settings():
