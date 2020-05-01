@@ -26,10 +26,19 @@
 	{% else %}href="{{ url_for('lexicon.stats', name=g.lexicon.cfg.name) }}"
 	{% endif %}>Statistics</a>{% endblock %}
 
+{% if current_user.uid in g.lexicon.cfg.join.joined %}
+	{# self.sb_logo(), #}
 {% set template_sidebar_rows = [
-	self.sb_logo(),
 	self.sb_home(),
 	self.sb_contents(),
 	self.sb_rules(),
 	self.sb_session(),
 	self.sb_stats()] %}
+{% else %}
+	{# self.sb_logo(), #}
+{% set template_sidebar_rows = [
+	self.sb_home(),
+	self.sb_contents(),
+	self.sb_rules(),
+	self.sb_stats()] %}
+{% endif %}
