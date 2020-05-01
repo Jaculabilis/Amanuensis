@@ -296,17 +296,24 @@ def sort_by_index_spec(articles, index_specs, key=None):
 		index
 		for pri in sorted(index_by_pri.keys(), reverse=True)
 		for index in index_by_pri[pri]]
+	# Titlesort articles in preparation for bucketing by index
 	articles_titlesorted = sorted(
 		articles,
 		key=lambda a: titlesort(key(a)))
+	# Use OrderedDict to maintain index list order
 	indexed = OrderedDict()
 	for index in index_list_order:
 		indexed[index.pattern] = []
+	# Sort articles into indexes
 	for article in articles_titlesorted:
 		for index in index_eval_order:
 			if index_match(index, key(article)):
 				indexed[index.pattern].append(article)
 				break
+	# Strip etc index if empty
+	for index in index_specs:
+		if index.type == 'etc' and not indexed[index.pattern]:
+			del indexed[index.pattern]
 	return indexed
 
 
