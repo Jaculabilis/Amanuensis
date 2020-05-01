@@ -84,6 +84,8 @@ def title_constraint_analysis(
 		# I: This article is new
 		if title not in info:
 			infos.append('New article')
+			# And new articles are forbidden
+			pass  # TODO follow the phantoms option
 		# I: This article is a phantom
 		elif info[title].character is None:
 			infos.append('Phantom article')
