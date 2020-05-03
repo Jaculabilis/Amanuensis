@@ -1,6 +1,8 @@
+import os
+
 from flask import Flask
 
-from amanuensis.config import RootConfigDirectoryContext
+from amanuensis.config import RootConfigDirectoryContext, ENV_CONFIG_DIR
 from amanuensis.models import ModelFactory
 from .auth import get_login_manager, bp_auth
 from .helpers import register_custom_filters
@@ -35,3 +37,10 @@ def get_app(root: RootConfigDirectoryContext) -> Flask:
 	app.register_blueprint(bp_session)
 
 	return app
+
+
+def default():
+	cwd = os.getcwd()
+	config_dir = os.environ.get(ENV_CONFIG_DIR, "amanuensis")
+	root = RootConfigDirectoryContext(os.path.join(cwd, config_dir))
+	return get_app(root)
