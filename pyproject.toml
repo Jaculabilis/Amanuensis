@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "amanuensis"
 version = "0.1.0"
-description = ""
+description = "An application for playing Lexicon, the encyclopedia RPG"
 authors = ["Tim Van Baak <tim.vanbaak@gmail.com>"]
 
 [tool.poetry.dependencies]

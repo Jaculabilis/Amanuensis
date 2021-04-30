@@ -1,3 +1,0 @@
-graft amanuensis/resources
-graft amanuensis/templates
-global-exclude *.pyc
