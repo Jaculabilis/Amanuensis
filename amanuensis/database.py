@@ -1,10 +1,38 @@
-from sqlalchemy import create_engine, MetaData, event
+from sqlalchemy import create_engine, MetaData, event, TypeDecorator, CHAR
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker
+import sqlite3
+import uuid
 
 
-engine = create_engine('sqlite:///:memory:')
+# Register GUID as a known type with sqlite
+sqlite3.register_converter('GUID', lambda h: uuid.UUID(hex=h))
+sqlite3.register_adapter(uuid.UUID, lambda u: u.hex)
+
+class Uuid(TypeDecorator):
+	"""
+	A uuid backed by a char(32) field in sqlite.
+	"""
+	impl = CHAR(32)
+
+	def process_bind_param(self, value, dialect):
+		if value is None:
+			return value
+		elif not isinstance(value, uuid.UUID):
+			return f'{uuid.UUID(value).int:32x}'
+		else:
+			return f'{value.int:32x}'
+
+	def process_result_value(self, value, dialect):
+		if value is None:
+			return value
+		elif not isinstance(value, uuid.UUID):
+			return uuid.UUID(value)
+		else:
+			return value
+
+engine = create_engine('sqlite:///:memory:', connect_args={'detect_types': sqlite3.PARSE_DECLTYPES})
 
 # Enable foreign key constraints
 @event.listens_for(engine, "connect")
