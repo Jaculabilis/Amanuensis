@@ -223,6 +223,10 @@ class Membership(ModelBase):
     # Timestamp the user joined the game
     joined = Column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
 
+    # Timestamp of the last time the user viewed the post feed
+    # This is NULL if the player has never viewed posts
+    last_post_seen = Column(DateTime, nullable=True)
+
     ###################
     # Player settings #
     ###################
