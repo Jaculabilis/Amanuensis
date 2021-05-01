@@ -561,7 +561,8 @@ class Post(ModelBase):
     lexicon_id = Column(Integer, ForeignKey('lexicon.id'), nullable=False)
 
     # The user who made the post
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    # This may be NULL if the post was made by Amanuensis
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=True)
 
     ################
     # Post content #
