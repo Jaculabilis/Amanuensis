@@ -64,6 +64,7 @@ class User(ModelBase):
     memberships = relationship('Membership', back_populates='user')
     characters = relationship('Character', back_populates='user')
     articles = relationship('Article', back_populates='user')
+    posts = relationship('Post', back_populates='user')
 
 
 class Lexicon(ModelBase):
@@ -192,6 +193,8 @@ class Lexicon(ModelBase):
     articles = relationship('Article', back_populates='lexicon')
     indexes = relationship('ArticleIndex', back_populates='lexicon')
     index_rules = relationship('ArticleIndexRule', back_populates='lexicon')
+    content_rules = relationship('ArticleContentRule', back_populates='lexicon')
+    posts = relationship('Post', back_populates='lexicon')
 
 
 class Membership(ModelBase):
@@ -441,6 +444,10 @@ class ArticleIndexRule(ModelBase):
     # The lexicon of this index rule
     lexicon_id = Column(Integer, ForeignKey('lexicon.id'), nullable=False)
 
+    ####################
+    # Index rule scope #
+    ####################
+
     # The character to whom this rule applies
     character_id = Column(Integer, ForeignKey('character.id'), nullable=False)
 
@@ -457,3 +464,114 @@ class ArticleIndexRule(ModelBase):
     lexicon = relationship('Lexicon', back_populates='index_rules')
     index = relationship('ArticleIndex', back_populates='index_rules')
     character = relationship('Character', back_populates='index_rules')
+
+
+class ArticleContentRuleType(enum.Enum):
+    """
+    The possible article content rules.
+    """
+    # Whether characters can cite themselves
+    ALLOW_SELF_CITE = 0
+    # Whether characters can write new articles instead of phantoms
+    ALLOW_NEW_ARTICLE = 1
+    # Required number of extant articles cited
+    CITE_EXTANT_MIN = 2
+    CITE_EXTANT_MAX = 3
+    # Required number of phantom articles cited
+    CITE_PHANTOM_MIN = 4
+    CITE_PHANTOM_MAX = 5
+    # Required number of new articles cited
+    CITE_NEW_MIN = 6
+    CITE_NEW_MAX = 7
+    # Required number of characters among authors of articles cited
+    CITE_CHARS_MIN = 8
+    CITE_CHARS_MAX = 9
+    # Required number of citations of any kind
+    CITE_TOTAL_MIN = 10
+    CITE_TOTAL_MAX = 11
+    # Warn player below this wordcount
+    WORD_MIN_SOFT = 12
+    # Require player to exceed this wordcount
+    WORD_MIN_HARD = 13
+    # Warn player above this wordcount
+    WORD_MAX_SOFT = 14
+    # Require player to be under this wordcount
+    WORD_MAX_HARD = 15
+
+
+class ArticleContentRule(ModelBase):
+    """
+    Represents a restriction on the content of an article for a turn.
+    """
+    __tablename__ = 'article_content_rule'
+
+    #####################
+    # Content rule info #
+    #####################
+
+    # Primary content rule id
+    id = Column(Integer, primary_key=True)
+
+    # The lexicon of this content rule
+    lexicon_id = Column(Integer, ForeignKey('lexicon.id'), nullable=False)
+
+    ######################
+    # Content rule scope #
+    ######################
+
+    # The turn in which this rule applies
+    turn = Column(Integer, nullable=False)
+
+    ###########################
+    # The content of the rule #
+    ###########################
+
+    # The content rule type that is being declared
+    rule_name = Column(Enum(ArticleContentRuleType), nullable=False)
+
+    # The new value for the rule
+    # If this is NULL, the rule is disabled or has the default value
+    rule_value = Column(Integer, nullable=True)
+
+    #############################
+    # Foreign key relationships #
+    #############################
+
+    lexicon = relationship('Lexicon', back_populates='content_rules')
+
+
+class Post(ModelBase):
+    """
+    Represents a post in the game feed.
+    """
+    __tablename__ = 'post'
+
+    #############
+    # Post info #
+    #############
+
+    # Primary post id
+    id = Column(Integer, primary_key=True)
+
+    # The lexicon in which the post was made
+    lexicon_id = Column(Integer, ForeignKey('lexicon.id'), nullable=False)
+
+    # The user who made the post
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+
+    ################
+    # Post content #
+    ################
+
+    # The timestamp the post was created
+    created = Column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
+
+    # The body of the post
+    body = Column(Text, nullable=False)
+
+    #############################
+    # Foreign key relationships #
+    #############################
+
+    user = relationship('User', back_populates='posts')
+    lexicon = relationship('Lexicon', back_populates='posts')
