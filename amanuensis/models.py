@@ -170,15 +170,18 @@ class Lexicon(ModelBase):
     # If this is NULL, there is no limit
     addendum_title_limit = Column(Integer, nullable=True)
 
-    #################
-    # Peer settings #
-    #################
+    ##########################
+    # Collaboration settings #
+    ##########################
 
     # Enable the social posting feature
     allow_post = Column(Boolean, nullable=False, default=True)
 
     # Show title stubs in the index when a new article is approved
-    show_stubs = Column(Boolean, nullable=False, default=False)
+    show_stubs = Column(Boolean, nullable=False, default=True)
+
+    # Show other players' progress for the current turn
+    show_peer_progress = Column(Boolean, nullable=False, default=True)
 
     #############################
     # Foreign key relationships #
