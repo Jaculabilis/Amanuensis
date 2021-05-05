@@ -456,7 +456,7 @@ class ArticleIndexRule(ModelBase):
     character_id = Column(Integer, ForeignKey('character.id'), nullable=False)
 
     # The index to which the character is restricted
-    index = Column(Integer, ForeignKey('index.id'), nullable=False)
+    index_id = Column(Integer, ForeignKey('article_index.id'), nullable=False)
 
     # The turn in which this rule applies
     turn = Column(Integer, nullable=False)
