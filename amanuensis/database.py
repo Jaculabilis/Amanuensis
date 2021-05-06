@@ -1,32 +1,7 @@
-from sqlalchemy import create_engine, MetaData, event, TypeDecorator, CHAR
+from sqlalchemy import create_engine, MetaData, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker
-import sqlite3
-import uuid
-
-
-class Uuid(TypeDecorator):
-    """
-    A uuid backed by a char(32) field in sqlite.
-    """
-    impl = CHAR(32)
-
-    def process_bind_param(self, value, dialect):
-        if value is None:
-            return value
-        elif not isinstance(value, uuid.UUID):
-            return f'{uuid.UUID(value).int:32x}'
-        else:
-            return f'{value.int:32x}'
-
-    def process_result_value(self, value, dialect):
-        if value is None:
-            return value
-        elif not isinstance(value, uuid.UUID):
-            return uuid.UUID(value)
-        else:
-            return value
 
 
 # Define naming conventions for generated constraints

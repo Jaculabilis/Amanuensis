@@ -2,6 +2,7 @@ import enum
 from sqlalchemy import (
     Boolean,
     Column,
+    CHAR,
     DateTime,
     Enum,
     ForeignKey,
@@ -10,11 +11,35 @@ from sqlalchemy import (
     Table,
     Text,
     text,
+    TypeDecorator,
 )
 from sqlalchemy.orm import relationship, backref
-from uuid import uuid4
+import uuid
 
-from .database import ModelBase, Uuid
+from .database import ModelBase
+
+
+class Uuid(TypeDecorator):
+    """
+    A uuid backed by a char(32) field in sqlite.
+    """
+    impl = CHAR(32)
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return value
+        elif not isinstance(value, uuid.UUID):
+            return f'{uuid.UUID(value).int:32x}'
+        else:
+            return f'{value.int:32x}'
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return value
+        elif not isinstance(value, uuid.UUID):
+            return uuid.UUID(value)
+        else:
+            return value
 
 
 class User(ModelBase):
@@ -269,7 +294,7 @@ class Character(ModelBase):
     id = Column(Integer, primary_key=True)
 
     # Public-facing character id
-    public_id = Column(Uuid, nullable=False, unique=True, default=uuid4)
+    public_id = Column(Uuid, nullable=False, unique=True, default=uuid.uuid4)
 
     # The lexicon to which this character belongs
     lexicon_id = Column(Integer, ForeignKey('lexicon.id'), nullable=False)
@@ -316,7 +341,7 @@ class Article(ModelBase):
     id = Column(Integer, primary_key=True)
 
     # Public-facing article id
-    public_id = Column(Uuid, nullable=False, unique=True, default=uuid4)
+    public_id = Column(Uuid, nullable=False, unique=True, default=uuid.uuid4)
 
     # The lexicon to which this article belongs
     lexicon_id = Column(Integer, ForeignKey('lexicon.id'), nullable=False)
