@@ -46,3 +46,6 @@ def test_create_user(db):
     assert new_user
     assert new_user.id is not None
     assert new_user.created is not None
+
+    with pytest.raises(ArgumentError):
+        duplicate = userq.create_user(db, **kwargs)

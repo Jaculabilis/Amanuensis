@@ -33,6 +33,10 @@ def create_user(
     if not display_name.strip():
         display_name = username
 
+    # Query the db to make sure the username isn't taken
+    if db.session.query(User.username == username).count() > 0:
+        raise ArgumentError('Username is already taken')
+
     new_user = User(
         username=username,
         password=password,
