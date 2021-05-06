@@ -1,3 +1,6 @@
+"""
+Database connection setup
+"""
 from sqlalchemy import create_engine, MetaData, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session

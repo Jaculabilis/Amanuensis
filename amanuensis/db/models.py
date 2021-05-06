@@ -1,3 +1,6 @@
+"""
+Data model SQL definitions
+"""
 import enum
 from sqlalchemy import (
     Boolean,
