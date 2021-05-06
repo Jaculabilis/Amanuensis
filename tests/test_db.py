@@ -1,8 +1,7 @@
 import pytest
 from sqlalchemy import func
 
-from amanuensis.database import DbContext
-from amanuensis.models import *
+from amanuensis.db import *
 
 
 @pytest.fixture
