@@ -64,6 +64,9 @@ class User(ModelBase):
     # Human-readable username as shown to other users
     display_name = Column(String, nullable=False)
 
+    # The user's email address
+    email = Column(String, nullable=False)
+
     # Whether the user can access site admin functions
     is_site_admin = Column(Boolean, nullable=False, server_default=text('FALSE'))
 
