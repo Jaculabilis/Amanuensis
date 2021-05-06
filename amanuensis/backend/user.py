@@ -5,6 +5,8 @@ User query interface
 import re
 import uuid
 
+from sqlalchemy import select, func
+
 from amanuensis.db import DbContext, User
 from amanuensis.errors import ArgumentError
 
@@ -30,11 +32,11 @@ def create_user(
     if not password:
         raise ArgumentError('Password must be provided')
     # If display name is not provided, use the username
-    if not display_name.strip():
+    if not display_name or not display_name.strip():
         display_name = username
 
     # Query the db to make sure the username isn't taken
-    if db.session.query(User.username == username).count() > 0:
+    if db.session.query(func.count(User.id)).filter(User.username == username).scalar() > 0:
         raise ArgumentError('Username is already taken')
 
     new_user = User(
