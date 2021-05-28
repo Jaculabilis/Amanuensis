@@ -148,7 +148,7 @@ class Lexicon(ModelBase):
     current_turn = Column(Integer, nullable=True)
 
     # The number of turns in the game
-    turn_count = Column(Integer, nullable=False)
+    turn_count = Column(Integer, nullable=False, default=8)
 
     ################################
     # Visibility and join settings #
