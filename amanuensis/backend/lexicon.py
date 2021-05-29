@@ -13,7 +13,7 @@ from amanuensis.errors import ArgumentError
 RE_ALPHANUM_DASH_UNDER = re.compile(r'^[A-Za-z0-9-_]*$')
 
 
-def create_lexicon(
+def create(
     db: DbContext,
     name: str,
     title: str,

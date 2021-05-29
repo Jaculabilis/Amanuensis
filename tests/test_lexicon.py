@@ -18,21 +18,21 @@ def test_create_lexicon(db):
     }
     # Test name constraints
     with pytest.raises(ArgumentError):
-        lexiq.create_lexicon(db, **{**kwargs, 'name': None})
+        lexiq.create(db, **{**kwargs, 'name': None})
     with pytest.raises(ArgumentError):
-        lexiq.create_lexicon(db, **{**kwargs, 'name': ''})
+        lexiq.create(db, **{**kwargs, 'name': ''})
     with pytest.raises(ArgumentError):
-        lexiq.create_lexicon(db, **{**kwargs, 'name': ' '})
+        lexiq.create(db, **{**kwargs, 'name': ' '})
     with pytest.raises(ArgumentError):
-        lexiq.create_lexicon(db, **{**kwargs, 'name': '..'})
+        lexiq.create(db, **{**kwargs, 'name': '..'})
     with pytest.raises(ArgumentError):
-        lexiq.create_lexicon(db, **{**kwargs, 'name': '\x00'})
+        lexiq.create(db, **{**kwargs, 'name': '\x00'})
     with pytest.raises(ArgumentError):
-        lexiq.create_lexicon(db, **{**kwargs, 'name': 'space in name'})
+        lexiq.create(db, **{**kwargs, 'name': 'space in name'})
 
     # Validate that creation populates fields, including timestamps
     before = datetime.datetime.utcnow() - datetime.timedelta(seconds=1)
-    new_lexicon = lexiq.create_lexicon(db, **kwargs)
+    new_lexicon = lexiq.create(db, **kwargs)
     after = datetime.datetime.utcnow() + datetime.timedelta(seconds=1)
     assert new_lexicon
     assert new_lexicon.id is not None
@@ -42,4 +42,4 @@ def test_create_lexicon(db):
 
     # No duplicate lexicon names
     with pytest.raises(ArgumentError):
-        duplicate = lexiq.create_lexicon(db, **kwargs)
+        duplicate = lexiq.create(db, **kwargs)

@@ -15,7 +15,7 @@ RE_NO_LETTERS =  re.compile(r'^[0-9-_]*$')
 RE_ALPHANUM_DASH_UNDER = re.compile(r'^[A-Za-z0-9-_]*$')
 
 
-def create_user(
+def create(
     db: DbContext,
     username: str,
     password: str,
