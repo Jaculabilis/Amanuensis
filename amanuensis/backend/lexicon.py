@@ -38,7 +38,10 @@ def create(
         raise ArgumentError('Lexicon prompt must be a string')
 
     # Query the db to make sure the lexicon name isn't taken
-    if db.session.query(func.count(Lexicon.id)).filter(Lexicon.name == name).scalar() > 0:
+    if db(
+        select(func.count(Lexicon.id))
+        .where(Lexicon.name == name)
+    ).scalar() > 0:
         raise ArgumentError('Lexicon name is already taken')
 
     new_lexicon = Lexicon(

@@ -51,7 +51,10 @@ def create(
         raise ArgumentError('Email must be a string')
 
     # Query the db to make sure the username isn't taken
-    if db.session.query(func.count(User.id)).filter(User.username == username).scalar() > 0:
+    if db(
+        select(func.count(User.id))
+        .where(User.username == username)
+    ).scalar() > 0:
         raise ArgumentError('Username is already taken')
 
     new_user = User(
