@@ -33,5 +33,10 @@ class DbContext():
         # Create a thread-safe session factory
         self.session = scoped_session(sessionmaker(bind=self.engine))
 
+    def __call__(self, *args, **kwargs):
+        """Provides shortcut access to session.execute."""
+        return self.session.execute(*args, **kwargs)
+
     def create_all(self):
+        """Initializes the database schema."""
         ModelBase.metadata.create_all(self.engine)
