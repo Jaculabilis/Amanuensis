@@ -1,21 +1,11 @@
 import pytest
 
-from amanuensis.db import *
-import amanuensis.backend.lexicon as lexiq
+from amanuensis.db import DbContext
 import amanuensis.backend.user as userq
 from amanuensis.errors import ArgumentError
 
-from .test_db import db
 
-
-@pytest.fixture
-def db():
-    db = DbContext('sqlite:///:memory:', debug=True)
-    db.create_all()
-    return db
-
-
-def test_create_user(db):
+def test_create_user(db: DbContext):
     """Test new user creation."""
     kwargs = {
         'username': 'username',

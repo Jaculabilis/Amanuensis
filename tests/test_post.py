@@ -1,32 +1,19 @@
 import pytest
 
-from amanuensis.db import *
-import amanuensis.backend.lexicon as lexiq
-import amanuensis.backend.user as userq
+from amanuensis.db import DbContext
 import amanuensis.backend.post as postq
-import amanuensis.backend.membership as memq
 
 from amanuensis.errors import ArgumentError
 
-from .test_db import db
 
-def test_create_post(db):
+def test_create_post(db: DbContext, lexicon_with_editor):
     """Test new post creation"""
-
-    # Make user and lexicon
-    new_user = userq.create(db, 'username', 'password', 'user', 'a@b.c', False)
-    assert new_user.id, 'Failed to create user'
-    new_lexicon = lexiq.create(db, 'Test', None, 'prompt')
-    assert new_lexicon.id, 'Failed to create lexicon'
-
-    # Add the user to the lexicon as an editor
-    mem = memq.create(db, new_user.id, new_lexicon.id, True)
-    assert mem, 'Failed to create membership'
+    lexicon, editor = lexicon_with_editor
 
     # argument dictionary for post object
     kwargs = {
-        'lexicon_id': new_lexicon.id,
-        'user_id': new_user.id,
+        'lexicon_id': lexicon.id,
+        'user_id': editor.id,
         'body': 'body'
     }
 

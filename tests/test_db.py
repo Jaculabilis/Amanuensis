@@ -1,17 +1,9 @@
-import pytest
 from sqlalchemy import func
 
 from amanuensis.db import *
 
 
-@pytest.fixture
-def db():
-    db = DbContext('sqlite:///:memory:', debug=True)
-    db.create_all()
-    return db
-
-
-def test_create(db):
+def test_create_db(db: DbContext):
     """Simple test that the database creates fine from scratch."""
     assert db.session.query(func.count(User.id)).scalar() == 0
     assert db.session.query(func.count(Lexicon.id)).scalar() == 0

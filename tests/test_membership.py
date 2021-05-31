@@ -1,17 +1,13 @@
-from amanuensis.db import *
-import amanuensis.backend.lexicon as lexiq
+from amanuensis.db import DbContext
 import amanuensis.backend.membership as memq
-import amanuensis.backend.user as userq
-
-from .test_db import db
 
 
-def test_create(db: DbContext):
+def test_create_membership(db: DbContext, make_user, make_lexicon):
     """Test joining a game."""
     # Set up a user and a lexicon
-    new_user = userq.create(db, 'username', 'password', 'user', 'a@b.c', False)
+    new_user = make_user()
     assert new_user.id, 'Failed to create user'
-    new_lexicon = lexiq.create(db, 'Test', None, 'prompt')
+    new_lexicon = make_lexicon()
     assert new_lexicon.id, 'Failed to create lexicon'
 
     # Add the user to the lexicon as an editor

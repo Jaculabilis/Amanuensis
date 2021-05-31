@@ -2,14 +2,12 @@ import datetime
 
 import pytest
 
-from amanuensis.db import *
+from amanuensis.db import DbContext
 import amanuensis.backend.lexicon as lexiq
 from amanuensis.errors import ArgumentError
 
-from .test_db import db
 
-
-def test_create_lexicon(db):
+def test_create_lexicon(db: DbContext):
     """Test new game creation."""
     kwargs = {
         'name': 'Test',
@@ -43,3 +41,4 @@ def test_create_lexicon(db):
     # No duplicate lexicon names
     with pytest.raises(ArgumentError):
         duplicate = lexiq.create(db, **kwargs)
+        assert duplicate
