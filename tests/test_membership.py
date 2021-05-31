@@ -1,4 +1,9 @@
-from amanuensis.db import DbContext
+import pytest
+
+from sqlalchemy import select
+
+from amanuensis.db import *
+from amanuensis.errors import ArgumentError
 import amanuensis.backend.membership as memq
 
 
@@ -15,10 +20,22 @@ def test_create_membership(db: DbContext, make_user, make_lexicon):
     assert mem, 'Failed to create membership'
 
     # Check that the user and lexicon are mutually visible in the ORM relationships
-    assert new_user.memberships, 'User memberships not updated'
-    assert new_lexicon.memberships, 'Lexicon memberships not updated'
-    assert new_user.memberships[0].lexicon_id == new_lexicon.id
-    assert new_lexicon.memberships[0].user_id == new_user.id
+    assert any(map(lambda mem: mem.lexicon == new_lexicon, new_user.memberships))
+    assert any(map(lambda mem: mem.user == new_user, new_lexicon.memberships))
 
     # Check that the editor flag was set properly
-    assert new_lexicon.memberships
+    editor = db(
+        select(User)
+        .join(User.memberships)
+        .join(Membership.lexicon)
+        .where(Lexicon.id == new_lexicon.id)
+        .where(Membership.is_editor == True)
+    ).scalar_one()
+    assert editor is not None
+    assert isinstance(editor, User)
+    assert editor.id == new_user.id
+
+    # Check that joining twice is not allowed
+    with pytest.raises(ArgumentError):
+        mem2 = memq.create(db, new_user.id, new_lexicon.id, False)
+        assert mem2

@@ -2,6 +2,8 @@
 Data model SQL definitions
 """
 import enum
+import uuid
+
 from sqlalchemy import (
     Boolean,
     Column,
@@ -17,7 +19,7 @@ from sqlalchemy import (
     TypeDecorator,
 )
 from sqlalchemy.orm import relationship, backref
-import uuid
+from sqlalchemy.sql.schema import UniqueConstraint
 
 from .database import ModelBase
 
@@ -233,6 +235,9 @@ class Membership(ModelBase):
     Represents a user's participation in a Lexicon game.
     """
     __tablename__ = 'membership'
+    __table_args__ = (
+        UniqueConstraint('user_id', 'lexicon_id'),
+    )
 
     ###################
     # Membership keys #
