@@ -12,7 +12,7 @@ import amanuensis.backend.user as userq
 @pytest.fixture
 def db():
     """Provides an initialized database in memory."""
-    db = DbContext('sqlite:///:memory:', debug=True)
+    db = DbContext('sqlite:///:memory:', debug=False)
     db.create_all()
     return db
 
