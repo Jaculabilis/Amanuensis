@@ -5,7 +5,7 @@ import amanuensis.backend.character as charq
 from amanuensis.errors import ArgumentError
 
 
-def test_create_character(db: DbContext, lexicon_with_editor, make_user):
+def test_create_character(db: DbContext, lexicon_with_editor, make):
     """Test creating a character."""
     lexicon, user = lexicon_with_editor
     kwargs = {
@@ -33,7 +33,7 @@ def test_create_character(db: DbContext, lexicon_with_editor, make_user):
     assert char.signature is not None
 
     # User must be in lexicon
-    new_user = make_user()
+    new_user = make.user()
     with pytest.raises(ArgumentError):
         charq.create(**{**kwargs, 'user_id': new_user.id})
 

@@ -4,6 +4,7 @@ pytest test fixtures
 import pytest
 
 from amanuensis.db import DbContext
+import amanuensis.backend.character as charq
 import amanuensis.backend.lexicon as lexiq
 import amanuensis.backend.membership as memq
 import amanuensis.backend.user as userq
@@ -62,12 +63,52 @@ def make_membership(db: DbContext):
 
 
 @pytest.fixture
-def lexicon_with_editor(make_user, make_lexicon, make_membership):
+def make_character(db: DbContext):
+    """Provides a factory function for creating characters, with valid default values."""
+    def character_factory(state={'nonce': 1}, **kwargs):
+        default_kwargs = {
+            'name': f'Character {state["nonce"]}',
+            'signature': None,
+        }
+        state['nonce'] += 1
+        updated_kwargs = {**default_kwargs, **kwargs}
+        return charq.create(db, **updated_kwargs)
+    return character_factory
+
+
+class TestFactory:
+    def __init__(self, db, **factories):
+        self.db = db
+        self.factories = factories
+
+    def __getattr__(self, name):
+        return self.factories[name]
+
+
+@pytest.fixture
+def make(
+    db: DbContext,
+    make_user,
+    make_lexicon,
+    make_membership,
+    make_character) -> TestFactory:
+    """Fixture that groups all factory fixtures together."""
+    return TestFactory(
+        db,
+        user=make_user,
+        lexicon=make_lexicon,
+        membership=make_membership,
+        character=make_character,
+    )
+
+
+@pytest.fixture
+def lexicon_with_editor(make):
     """Shortcut setup for a lexicon game with an editor."""
-    editor = make_user()
+    editor = make.user()
     assert editor
-    lexicon = make_lexicon()
+    lexicon = make.lexicon()
     assert lexicon
-    membership = make_membership(user_id=editor.id, lexicon_id=lexicon.id, is_editor=True)
+    membership = make.membership(user_id=editor.id, lexicon_id=lexicon.id, is_editor=True)
     assert membership
     return (lexicon, editor)

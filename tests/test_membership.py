@@ -7,12 +7,12 @@ from amanuensis.errors import ArgumentError
 import amanuensis.backend.membership as memq
 
 
-def test_create_membership(db: DbContext, make_user, make_lexicon):
+def test_create_membership(db: DbContext, make):
     """Test joining a game."""
     # Set up a user and a lexicon
-    new_user = make_user()
+    new_user = make.user()
     assert new_user.id, 'Failed to create user'
-    new_lexicon = make_lexicon()
+    new_lexicon = make.lexicon()
     assert new_lexicon.id, 'Failed to create lexicon'
 
     # Add the user to the lexicon as an editor
