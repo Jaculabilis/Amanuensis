@@ -16,7 +16,6 @@ pytest = "^5.2"
 black = "^21.5b2"
 
 [tool.black]
-skip-string-normalization = true
 extend-exclude = '''
 ^/amanuensis/cli/.*|
 ^/amanuensis/config/.*|

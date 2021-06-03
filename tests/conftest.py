@@ -13,7 +13,7 @@ import amanuensis.backend.user as userq
 @pytest.fixture
 def db():
     """Provides an initialized database in memory."""
-    db = DbContext('sqlite:///:memory:', debug=False)
+    db = DbContext("sqlite:///:memory:", debug=False)
     db.create_all()
     return db
 
@@ -22,15 +22,15 @@ def db():
 def make_user(db: DbContext):
     """Provides a factory function for creating users, with valid default values."""
 
-    def user_factory(state={'nonce': 1}, **kwargs):
+    def user_factory(state={"nonce": 1}, **kwargs):
         default_kwargs = {
-            'username': f'test_user_{state["nonce"]}',
-            'password': 'password',
-            'display_name': None,
-            'email': 'user@example.com',
-            'is_site_admin': False,
+            "username": f'test_user_{state["nonce"]}',
+            "password": "password",
+            "display_name": None,
+            "email": "user@example.com",
+            "is_site_admin": False,
         }
-        state['nonce'] += 1
+        state["nonce"] += 1
         updated_kwargs = {**default_kwargs, **kwargs}
         return userq.create(db, **updated_kwargs)
 
@@ -41,13 +41,13 @@ def make_user(db: DbContext):
 def make_lexicon(db: DbContext):
     """Provides a factory function for creating lexicons, with valid default values."""
 
-    def lexicon_factory(state={'nonce': 1}, **kwargs):
+    def lexicon_factory(state={"nonce": 1}, **kwargs):
         default_kwargs = {
-            'name': f'Test_{state["nonce"]}',
-            'title': None,
-            'prompt': f'Test Lexicon game {state["nonce"]}',
+            "name": f'Test_{state["nonce"]}',
+            "title": None,
+            "prompt": f'Test Lexicon game {state["nonce"]}',
         }
-        state['nonce'] += 1
+        state["nonce"] += 1
         updated_kwargs = {**default_kwargs, **kwargs}
         return lexiq.create(db, **updated_kwargs)
 
@@ -60,7 +60,7 @@ def make_membership(db: DbContext):
 
     def membership_factory(**kwargs):
         default_kwargs = {
-            'is_editor': False,
+            "is_editor": False,
         }
         updated_kwargs = {**default_kwargs, **kwargs}
         return memq.create(db, **updated_kwargs)
@@ -72,12 +72,12 @@ def make_membership(db: DbContext):
 def make_character(db: DbContext):
     """Provides a factory function for creating characters, with valid default values."""
 
-    def character_factory(state={'nonce': 1}, **kwargs):
+    def character_factory(state={"nonce": 1}, **kwargs):
         default_kwargs = {
-            'name': f'Character {state["nonce"]}',
-            'signature': None,
+            "name": f'Character {state["nonce"]}',
+            "signature": None,
         }
-        state['nonce'] += 1
+        state["nonce"] += 1
         updated_kwargs = {**default_kwargs, **kwargs}
         return charq.create(db, **updated_kwargs)
 

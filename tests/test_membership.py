@@ -11,13 +11,13 @@ def test_create_membership(db: DbContext, make):
     """Test joining a game."""
     # Set up a user and a lexicon
     new_user = make.user()
-    assert new_user.id, 'Failed to create user'
+    assert new_user.id, "Failed to create user"
     new_lexicon = make.lexicon()
-    assert new_lexicon.id, 'Failed to create lexicon'
+    assert new_lexicon.id, "Failed to create lexicon"
 
     # Add the user to the lexicon as an editor
     mem = memq.create(db, new_user.id, new_lexicon.id, True)
-    assert mem, 'Failed to create membership'
+    assert mem, "Failed to create membership"
 
     # Check that the user and lexicon are mutually visible in the ORM relationships
     assert any(map(lambda mem: mem.lexicon == new_lexicon, new_user.memberships))

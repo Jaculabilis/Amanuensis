@@ -35,9 +35,9 @@ class Uuid(TypeDecorator):
         if value is None:
             return value
         elif not isinstance(value, uuid.UUID):
-            return f'{uuid.UUID(value).int:32x}'
+            return f"{uuid.UUID(value).int:32x}"
         else:
-            return f'{value.int:32x}'
+            return f"{value.int:32x}"
 
     def process_result_value(self, value, dialect):
         if value is None:
@@ -53,7 +53,7 @@ class User(ModelBase):
     Represents a single user of Amanuensis.
     """
 
-    __tablename__ = 'user'
+    __tablename__ = "user"
 
     #############
     # User info #
@@ -75,14 +75,14 @@ class User(ModelBase):
     email = Column(String, nullable=False)
 
     # Whether the user can access site admin functions
-    is_site_admin = Column(Boolean, nullable=False, server_default=text('FALSE'))
+    is_site_admin = Column(Boolean, nullable=False, server_default=text("FALSE"))
 
     ####################
     # History tracking #
     ####################
 
     # The timestamp the user was created
-    created = Column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
+    created = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
 
     # The timestamp the user last logged in
     # This is NULL if the user has never logged in
@@ -96,10 +96,10 @@ class User(ModelBase):
     # Foreign key relationships #
     #############################
 
-    memberships = relationship('Membership', back_populates='user')
-    characters = relationship('Character', back_populates='user')
-    articles = relationship('Article', back_populates='user')
-    posts = relationship('Post', back_populates='user')
+    memberships = relationship("Membership", back_populates="user")
+    characters = relationship("Character", back_populates="user")
+    articles = relationship("Article", back_populates="user")
+    posts = relationship("Post", back_populates="user")
 
 
 class Lexicon(ModelBase):
@@ -107,7 +107,7 @@ class Lexicon(ModelBase):
     Represents a single game of Lexicon.
     """
 
-    __tablename__ = 'lexicon'
+    __tablename__ = "lexicon"
 
     #############
     # Game info #
@@ -131,11 +131,11 @@ class Lexicon(ModelBase):
     ####################
 
     # The timestamp the lexicon was created
-    created = Column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
+    created = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
 
     # The timestamp of the last change in game state
     last_updated = Column(
-        DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP')
+        DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP")
     )
 
     # The timestamp the first turn was started
@@ -226,13 +226,13 @@ class Lexicon(ModelBase):
     # Foreign key relationships #
     #############################
 
-    memberships = relationship('Membership', back_populates='lexicon')
-    characters = relationship('Character', back_populates='lexicon')
-    articles = relationship('Article', back_populates='lexicon')
-    indexes = relationship('ArticleIndex', back_populates='lexicon')
-    index_rules = relationship('ArticleIndexRule', back_populates='lexicon')
-    content_rules = relationship('ArticleContentRule', back_populates='lexicon')
-    posts = relationship('Post', back_populates='lexicon')
+    memberships = relationship("Membership", back_populates="lexicon")
+    characters = relationship("Character", back_populates="lexicon")
+    articles = relationship("Article", back_populates="lexicon")
+    indexes = relationship("ArticleIndex", back_populates="lexicon")
+    index_rules = relationship("ArticleIndexRule", back_populates="lexicon")
+    content_rules = relationship("ArticleContentRule", back_populates="lexicon")
+    posts = relationship("Post", back_populates="lexicon")
 
 
 class Membership(ModelBase):
@@ -240,8 +240,8 @@ class Membership(ModelBase):
     Represents a user's participation in a Lexicon game.
     """
 
-    __tablename__ = 'membership'
-    __table_args__ = (UniqueConstraint('user_id', 'lexicon_id'),)
+    __tablename__ = "membership"
+    __table_args__ = (UniqueConstraint("user_id", "lexicon_id"),)
 
     ###################
     # Membership keys #
@@ -251,17 +251,17 @@ class Membership(ModelBase):
     id = Column(Integer, primary_key=True)
 
     # The user who is a member of a lexicon
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
 
     # The lexicon of which the user is a member
-    lexicon_id = Column(Integer, ForeignKey('lexicon.id'), nullable=False)
+    lexicon_id = Column(Integer, ForeignKey("lexicon.id"), nullable=False)
 
     ####################
     # History tracking #
     ####################
 
     # Timestamp the user joined the game
-    joined = Column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
+    joined = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
 
     # Timestamp of the last time the user viewed the post feed
     # This is NULL if the player has never viewed posts
@@ -272,7 +272,7 @@ class Membership(ModelBase):
     ###################
 
     # Whether the user can access editor functions
-    is_editor = Column(Boolean, nullable=False, server_default=text('FALSE'))
+    is_editor = Column(Boolean, nullable=False, server_default=text("FALSE"))
 
     #########################
     # Notification settings #
@@ -291,8 +291,8 @@ class Membership(ModelBase):
     # Foreign key relationships #
     #############################
 
-    user = relationship('User', back_populates='memberships')
-    lexicon = relationship('Lexicon', back_populates='memberships')
+    user = relationship("User", back_populates="memberships")
+    lexicon = relationship("Lexicon", back_populates="memberships")
 
 
 class Character(ModelBase):
@@ -300,7 +300,7 @@ class Character(ModelBase):
     Represents a character played by a uaser in a Lexicon game.
     """
 
-    __tablename__ = 'character'
+    __tablename__ = "character"
 
     ##################
     # Character info #
@@ -313,10 +313,10 @@ class Character(ModelBase):
     public_id = Column(Uuid, nullable=False, unique=True, default=uuid.uuid4)
 
     # The lexicon to which this character belongs
-    lexicon_id = Column(Integer, ForeignKey('lexicon.id'), nullable=False)
+    lexicon_id = Column(Integer, ForeignKey("lexicon.id"), nullable=False)
 
     # The user to whom this character belongs
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
 
     # The character's name
     name = Column(String, nullable=False)
@@ -328,10 +328,10 @@ class Character(ModelBase):
     # Foreign key relationships #
     #############################
 
-    user = relationship('User', back_populates='characters')
-    lexicon = relationship('Lexicon', back_populates='characters')
-    articles = relationship('Article', back_populates='character')
-    index_rules = relationship('ArticleIndexRule', back_populates='character')
+    user = relationship("User", back_populates="characters")
+    lexicon = relationship("Lexicon", back_populates="characters")
+    articles = relationship("Article", back_populates="character")
+    index_rules = relationship("ArticleIndexRule", back_populates="character")
 
 
 class ArticleState(enum.Enum):
@@ -349,7 +349,7 @@ class Article(ModelBase):
     Represents a single article in a lexicon.
     """
 
-    __tablename__ = 'article'
+    __tablename__ = "article"
 
     ################
     # Article info #
@@ -362,17 +362,17 @@ class Article(ModelBase):
     public_id = Column(Uuid, nullable=False, unique=True, default=uuid.uuid4)
 
     # The lexicon to which this article belongs
-    lexicon_id = Column(Integer, ForeignKey('lexicon.id'), nullable=False)
+    lexicon_id = Column(Integer, ForeignKey("lexicon.id"), nullable=False)
 
     # The character who is the author of this article
     # If this is NULL, the article is written by Ersatz Scrivener
-    character_id = Column(Integer, ForeignKey('character.id'), nullable=True)
+    character_id = Column(Integer, ForeignKey("character.id"), nullable=True)
 
     # The user who owns this article
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
 
     # The article to which this is an addendum
-    addendum_to = Column(Integer, ForeignKey('article.id'), nullable=True)
+    addendum_to = Column(Integer, ForeignKey("article.id"), nullable=True)
 
     #################
     # Article state #
@@ -394,7 +394,7 @@ class Article(ModelBase):
 
     # Timestamp the content of the article was last updated
     last_updated = Column(
-        DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP')
+        DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP")
     )
 
     # Timestamp the article was last submitted
@@ -419,10 +419,10 @@ class Article(ModelBase):
     # Foreign key relationships #
     #############################
 
-    lexicon = relationship('Lexicon', back_populates='articles')
-    character = relationship('Character', back_populates='articles')
-    user = relationship('User', back_populates='articles')
-    addenda = relationship('Article', backref=backref('parent', remote_side=[id]))
+    lexicon = relationship("Lexicon", back_populates="articles")
+    character = relationship("Character", back_populates="articles")
+    user = relationship("User", back_populates="articles")
+    addenda = relationship("Article", backref=backref("parent", remote_side=[id]))
 
 
 class IndexType(enum.Enum):
@@ -441,7 +441,7 @@ class ArticleIndex(ModelBase):
     Represents an index definition.
     """
 
-    __tablename__ = 'article_index'
+    __tablename__ = "article_index"
 
     ##############
     # Index info #
@@ -451,7 +451,7 @@ class ArticleIndex(ModelBase):
     id = Column(Integer, primary_key=True)
 
     # The lexicon this index is in
-    lexicon_id = Column(Integer, ForeignKey('lexicon.id'), nullable=False)
+    lexicon_id = Column(Integer, ForeignKey("lexicon.id"), nullable=False)
 
     # The index type
     index_type = Column(Enum(IndexType), nullable=False)
@@ -473,8 +473,8 @@ class ArticleIndex(ModelBase):
     # Foreign key relationships #
     #############################
 
-    lexicon = relationship('Lexicon', back_populates='indexes')
-    index_rules = relationship('ArticleIndexRule', back_populates='index')
+    lexicon = relationship("Lexicon", back_populates="indexes")
+    index_rules = relationship("ArticleIndexRule", back_populates="index")
 
 
 class ArticleIndexRule(ModelBase):
@@ -484,7 +484,7 @@ class ArticleIndexRule(ModelBase):
     a rule. A character with no index rules may write in any index.
     """
 
-    __tablename__ = 'article_index_rule'
+    __tablename__ = "article_index_rule"
 
     ###################
     # Index rule info #
@@ -494,17 +494,17 @@ class ArticleIndexRule(ModelBase):
     id = Column(Integer, primary_key=True)
 
     # The lexicon of this index rule
-    lexicon_id = Column(Integer, ForeignKey('lexicon.id'), nullable=False)
+    lexicon_id = Column(Integer, ForeignKey("lexicon.id"), nullable=False)
 
     ####################
     # Index rule scope #
     ####################
 
     # The character to whom this rule applies
-    character_id = Column(Integer, ForeignKey('character.id'), nullable=False)
+    character_id = Column(Integer, ForeignKey("character.id"), nullable=False)
 
     # The index to which the character is restricted
-    index_id = Column(Integer, ForeignKey('article_index.id'), nullable=False)
+    index_id = Column(Integer, ForeignKey("article_index.id"), nullable=False)
 
     # The turn in which this rule applies
     turn = Column(Integer, nullable=False)
@@ -513,9 +513,9 @@ class ArticleIndexRule(ModelBase):
     # Foreign key relationships #
     #############################
 
-    lexicon = relationship('Lexicon', back_populates='index_rules')
-    index = relationship('ArticleIndex', back_populates='index_rules')
-    character = relationship('Character', back_populates='index_rules')
+    lexicon = relationship("Lexicon", back_populates="index_rules")
+    index = relationship("ArticleIndex", back_populates="index_rules")
+    character = relationship("Character", back_populates="index_rules")
 
 
 class ArticleContentRuleType(enum.Enum):
@@ -557,7 +557,7 @@ class ArticleContentRule(ModelBase):
     Represents a restriction on the content of an article for a turn.
     """
 
-    __tablename__ = 'article_content_rule'
+    __tablename__ = "article_content_rule"
 
     #####################
     # Content rule info #
@@ -567,7 +567,7 @@ class ArticleContentRule(ModelBase):
     id = Column(Integer, primary_key=True)
 
     # The lexicon of this content rule
-    lexicon_id = Column(Integer, ForeignKey('lexicon.id'), nullable=False)
+    lexicon_id = Column(Integer, ForeignKey("lexicon.id"), nullable=False)
 
     ######################
     # Content rule scope #
@@ -591,7 +591,7 @@ class ArticleContentRule(ModelBase):
     # Foreign key relationships #
     #############################
 
-    lexicon = relationship('Lexicon', back_populates='content_rules')
+    lexicon = relationship("Lexicon", back_populates="content_rules")
 
 
 class Post(ModelBase):
@@ -599,7 +599,7 @@ class Post(ModelBase):
     Represents a post in the game feed.
     """
 
-    __tablename__ = 'post'
+    __tablename__ = "post"
 
     #############
     # Post info #
@@ -609,18 +609,18 @@ class Post(ModelBase):
     id = Column(Integer, primary_key=True)
 
     # The lexicon in which the post was made
-    lexicon_id = Column(Integer, ForeignKey('lexicon.id'), nullable=False)
+    lexicon_id = Column(Integer, ForeignKey("lexicon.id"), nullable=False)
 
     # The user who made the post
     # This may be NULL if the post was made by Amanuensis
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=True)
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=True)
 
     ################
     # Post content #
     ################
 
     # The timestamp the post was created
-    created = Column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
+    created = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
 
     # The body of the post
     body = Column(Text, nullable=False)
@@ -629,5 +629,5 @@ class Post(ModelBase):
     # Foreign key relationships #
     #############################
 
-    user = relationship('User', back_populates='posts')
-    lexicon = relationship('Lexicon', back_populates='posts')
+    user = relationship("User", back_populates="posts")
+    lexicon = relationship("Lexicon", back_populates="posts")

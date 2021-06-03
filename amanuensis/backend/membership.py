@@ -14,11 +14,11 @@ def create(db: DbContext, user_id: int, lexicon_id: int, is_editor: bool) -> Mem
     """
     # Verify argument types are correct
     if not isinstance(user_id, int):
-        raise ArgumentError('user_id')
+        raise ArgumentError("user_id")
     if not isinstance(lexicon_id, int):
-        raise ArgumentError('lexicon_id')
+        raise ArgumentError("lexicon_id")
     if not isinstance(is_editor, bool):
-        raise ArgumentError('is_editor')
+        raise ArgumentError("is_editor")
 
     # Verify user has not already joined lexicon
     if (
@@ -29,7 +29,7 @@ def create(db: DbContext, user_id: int, lexicon_id: int, is_editor: bool) -> Mem
         ).scalar()
         > 0
     ):
-        raise ArgumentError('User is already a member of lexicon')
+        raise ArgumentError("User is already a member of lexicon")
 
     new_membership = Membership(
         user_id=user_id,

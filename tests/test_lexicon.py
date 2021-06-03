@@ -9,20 +9,20 @@ from amanuensis.errors import ArgumentError
 
 def test_create_lexicon(db: DbContext):
     """Test new game creation."""
-    kwargs = {'name': 'Test', 'title': None, 'prompt': 'A test Lexicon game'}
+    kwargs = {"name": "Test", "title": None, "prompt": "A test Lexicon game"}
     # Test name constraints
     with pytest.raises(ArgumentError):
-        lexiq.create(db, **{**kwargs, 'name': None})
+        lexiq.create(db, **{**kwargs, "name": None})
     with pytest.raises(ArgumentError):
-        lexiq.create(db, **{**kwargs, 'name': ''})
+        lexiq.create(db, **{**kwargs, "name": ""})
     with pytest.raises(ArgumentError):
-        lexiq.create(db, **{**kwargs, 'name': ' '})
+        lexiq.create(db, **{**kwargs, "name": " "})
     with pytest.raises(ArgumentError):
-        lexiq.create(db, **{**kwargs, 'name': '..'})
+        lexiq.create(db, **{**kwargs, "name": ".."})
     with pytest.raises(ArgumentError):
-        lexiq.create(db, **{**kwargs, 'name': '\x00'})
+        lexiq.create(db, **{**kwargs, "name": "\x00"})
     with pytest.raises(ArgumentError):
-        lexiq.create(db, **{**kwargs, 'name': 'space in name'})
+        lexiq.create(db, **{**kwargs, "name": "space in name"})
 
     # Validate that creation populates fields, including timestamps
     before = datetime.datetime.utcnow() - datetime.timedelta(seconds=1)
