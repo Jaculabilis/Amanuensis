@@ -1,3 +1,4 @@
+from amanuensis.db.models import Lexicon
 import datetime
 
 import pytest
@@ -9,24 +10,37 @@ from amanuensis.errors import ArgumentError
 
 def test_create_lexicon(db: DbContext):
     """Test new game creation."""
-    kwargs = {"name": "Test", "title": None, "prompt": "A test Lexicon game"}
+    defaults: dict = {
+        "db": db,
+        "name": "Test",
+        "title": None,
+        "prompt": "A test Lexicon game",
+    }
+    kwargs: dict
+
     # Test name constraints
     with pytest.raises(ArgumentError):
-        lexiq.create(db, **{**kwargs, "name": None})
+        kwargs = {**defaults, "name": None}
+        lexiq.create(**kwargs)
     with pytest.raises(ArgumentError):
-        lexiq.create(db, **{**kwargs, "name": ""})
+        kwargs = {**defaults, "name": ""}
+        lexiq.create(**kwargs)
     with pytest.raises(ArgumentError):
-        lexiq.create(db, **{**kwargs, "name": " "})
+        kwargs = {**defaults, "name": " "}
+        lexiq.create(**kwargs)
     with pytest.raises(ArgumentError):
-        lexiq.create(db, **{**kwargs, "name": ".."})
+        kwargs = {**defaults, "name": ".."}
+        lexiq.create(**kwargs)
     with pytest.raises(ArgumentError):
-        lexiq.create(db, **{**kwargs, "name": "\x00"})
+        kwargs = {**defaults, "name": "\x00"}
+        lexiq.create(**kwargs)
     with pytest.raises(ArgumentError):
-        lexiq.create(db, **{**kwargs, "name": "space in name"})
+        kwargs = {**defaults, "name": "space in name"}
+        lexiq.create(**kwargs)
 
     # Validate that creation populates fields, including timestamps
     before = datetime.datetime.utcnow() - datetime.timedelta(seconds=1)
-    new_lexicon = lexiq.create(db, **kwargs)
+    new_lexicon: Lexicon = lexiq.create(**defaults)
     after = datetime.datetime.utcnow() + datetime.timedelta(seconds=1)
     assert new_lexicon
     assert new_lexicon.id is not None
@@ -36,5 +50,4 @@ def test_create_lexicon(db: DbContext):
 
     # No duplicate lexicon names
     with pytest.raises(ArgumentError):
-        duplicate = lexiq.create(db, **kwargs)
-        assert duplicate
+        lexiq.create(**defaults)

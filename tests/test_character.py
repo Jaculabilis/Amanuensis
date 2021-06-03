@@ -7,35 +7,44 @@ from amanuensis.errors import ArgumentError
 
 def test_create_character(db: DbContext, lexicon_with_editor, make):
     """Test creating a character."""
+    lexicon: Lexicon
+    user: User
     lexicon, user = lexicon_with_editor
-    kwargs = {
+    defaults: dict = {
         "db": db,
         "user_id": user.id,
         "lexicon_id": lexicon.id,
         "name": "Character Name",
         "signature": "Signature",
     }
+    kwargs: dict
 
     # Bad argument types
     with pytest.raises(ArgumentError):
-        charq.create(**{**kwargs, "name": b"bytestring"})
+        kwargs = {**defaults, "name": b"bytestring"}
+        charq.create(**kwargs)
     with pytest.raises(ArgumentError):
-        charq.create(**{**kwargs, "name": None})
+        kwargs = {**defaults, "name": None}
+        charq.create(**kwargs)
     with pytest.raises(ArgumentError):
-        charq.create(**{**kwargs, "signature": b"bytestring"})
+        kwargs = {**defaults, "signature": b"bytestring"}
+        charq.create(**kwargs)
 
     # Bad character name
     with pytest.raises(ArgumentError):
-        charq.create(**{**kwargs, "name": " "})
+        kwargs = {**defaults, "name": " "}
+        charq.create(**kwargs)
 
     # Signature is auto-populated
-    char = charq.create(**{**kwargs, "signature": None})
+    kwargs = {**defaults, "signature": None}
+    char = charq.create(**kwargs)
     assert char.signature is not None
 
     # User must be in lexicon
-    new_user = make.user()
+    new_user: User = make.user()
     with pytest.raises(ArgumentError):
-        charq.create(**{**kwargs, "user_id": new_user.id})
+        kwargs = {**defaults, "user_id": new_user.id}
+        charq.create(**kwargs)
 
 
 def test_character_limits(db: DbContext, lexicon_with_editor):
@@ -47,12 +56,14 @@ def test_character_limits(db: DbContext, lexicon_with_editor):
     # Set character limit to one and create a character
     lexicon.character_limit = 1
     db.session.commit()
-    char1 = charq.create(db, lexicon.id, user.id, "Test Character 1", signature=None)
+    char1: Character = charq.create(
+        db, lexicon.id, user.id, "Test Character 1", signature=None
+    )
     assert char1.id, "Failed to create character 1"
 
     # Creating a second character should fail
     with pytest.raises(ArgumentError):
-        char2 = charq.create(
+        char2: Character = charq.create(
             db, lexicon.id, user.id, "Test Character 2", signature=None
         )
         assert char2
@@ -65,7 +76,7 @@ def test_character_limits(db: DbContext, lexicon_with_editor):
 
     # Creating a third character should fail
     with pytest.raises(ArgumentError):
-        char3 = charq.create(
+        char3: Character = charq.create(
             db, lexicon.id, user.id, "Test Character 3", signature=None
         )
         assert char3

@@ -10,13 +10,13 @@ import amanuensis.backend.membership as memq
 def test_create_membership(db: DbContext, make):
     """Test joining a game."""
     # Set up a user and a lexicon
-    new_user = make.user()
+    new_user: User = make.user()
     assert new_user.id, "Failed to create user"
-    new_lexicon = make.lexicon()
+    new_lexicon: Lexicon = make.lexicon()
     assert new_lexicon.id, "Failed to create lexicon"
 
     # Add the user to the lexicon as an editor
-    mem = memq.create(db, new_user.id, new_lexicon.id, True)
+    mem: Membership = memq.create(db, new_user.id, new_lexicon.id, True)
     assert mem, "Failed to create membership"
 
     # Check that the user and lexicon are mutually visible in the ORM relationships
@@ -24,7 +24,7 @@ def test_create_membership(db: DbContext, make):
     assert any(map(lambda mem: mem.user == new_user, new_lexicon.memberships))
 
     # Check that the editor flag was set properly
-    editor = db(
+    editor: User = db(
         select(User)
         .join(User.memberships)
         .join(Membership.lexicon)
@@ -37,5 +37,4 @@ def test_create_membership(db: DbContext, make):
 
     # Check that joining twice is not allowed
     with pytest.raises(ArgumentError):
-        mem2 = memq.create(db, new_user.id, new_lexicon.id, False)
-        assert mem2
+        memq.create(db, new_user.id, new_lexicon.id, False)

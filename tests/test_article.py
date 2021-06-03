@@ -1,6 +1,7 @@
 import pytest
 
 from amanuensis.db import DbContext
+from amanuensis.db.models import Character, Lexicon, User
 import amanuensis.backend.article as artiq
 
 from amanuensis.errors import ArgumentError
@@ -9,18 +10,18 @@ from amanuensis.errors import ArgumentError
 def test_create_article(db: DbContext, make):
     """Test new article creation"""
     # Create two users in a shared lexicon
-    user1 = make.user()
-    user2 = make.user()
-    lexicon1 = make.lexicon()
+    user1: User = make.user()
+    user2: User = make.user()
+    lexicon1: Lexicon = make.lexicon()
     make.membership(user_id=user1.id, lexicon_id=lexicon1.id)
     make.membership(user_id=user2.id, lexicon_id=lexicon1.id)
-    char1_1 = make.character(lexicon_id=lexicon1.id, user_id=user1.id)
-    char1_2 = make.character(lexicon_id=lexicon1.id, user_id=user2.id)
+    char1_1: Character = make.character(lexicon_id=lexicon1.id, user_id=user1.id)
+    char1_2: Character = make.character(lexicon_id=lexicon1.id, user_id=user2.id)
 
     # Create a lexicon that only one user is in
-    lexicon2 = make.lexicon()
+    lexicon2: Lexicon = make.lexicon()
     make.membership(user_id=user2.id, lexicon_id=lexicon2.id)
-    char2_2 = make.character(lexicon_id=lexicon2.id, user_id=user2.id)
+    char2_2: Character = make.character(lexicon_id=lexicon2.id, user_id=user2.id)
 
     # User cannot create article for another user's character
     with pytest.raises(ArgumentError):

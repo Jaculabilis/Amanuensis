@@ -2,6 +2,8 @@
 Character query interface
 """
 
+from typing import Optional
+
 from sqlalchemy import select, func
 
 from amanuensis.db import *
@@ -9,7 +11,11 @@ from amanuensis.errors import ArgumentError
 
 
 def create(
-    db: DbContext, lexicon_id: int, user_id: int, name: str, signature: str
+    db: DbContext,
+    lexicon_id: int,
+    user_id: int,
+    name: str,
+    signature: Optional[str],
 ) -> Character:
     """
     Create a new character for a user.

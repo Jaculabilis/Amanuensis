@@ -8,7 +8,12 @@ from amanuensis.db import DbContext, Membership
 from amanuensis.errors import ArgumentError
 
 
-def create(db: DbContext, user_id: int, lexicon_id: int, is_editor: bool) -> Membership:
+def create(
+    db: DbContext,
+    user_id: int,
+    lexicon_id: int,
+    is_editor: bool,
+) -> Membership:
     """
     Create a new user membership in a lexicon.
     """

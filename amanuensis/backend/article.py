@@ -2,13 +2,20 @@
 Article query interface
 """
 
+from typing import Optional
+
 from sqlalchemy import select
 
 from amanuensis.db import *
 from amanuensis.errors import ArgumentError
 
 
-def create(db: DbContext, lexicon_id: int, user_id: int, character_id: int) -> Article:
+def create(
+    db: DbContext,
+    lexicon_id: int,
+    user_id: int,
+    character_id: Optional[int],
+) -> Article:
     """
     Create a new article in a lexicon.
     """

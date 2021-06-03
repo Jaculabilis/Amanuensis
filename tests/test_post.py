@@ -11,34 +11,47 @@ def test_create_post(db: DbContext, lexicon_with_editor):
     lexicon, editor = lexicon_with_editor
 
     # argument dictionary for post object
-    kwargs = {"lexicon_id": lexicon.id, "user_id": editor.id, "body": "body"}
+    defaults: dict = {
+        "db": db,
+        "lexicon_id": lexicon.id,
+        "user_id": editor.id,
+        "body": "body",
+    }
+    kwargs: dict
 
     # ids are integers
     with pytest.raises(ArgumentError):
-        postq.create(db, **{**kwargs, "user_id": "zero"})
+        kwargs = {**defaults, "user_id": "zero"}
+        postq.create(**kwargs)
     with pytest.raises(ArgumentError):
-        postq.create(db, **{**kwargs, "lexicon_id": "zero"})
+        kwargs = {**defaults, "lexicon_id": "zero"}
+        postq.create(**kwargs)
 
     # empty arguments don't work
     with pytest.raises(ArgumentError):
-        postq.create(db, **{**kwargs, "lexicon_id": ""})
+        kwargs = {**defaults, "lexicon_id": ""}
+        postq.create(**kwargs)
     with pytest.raises(ArgumentError):
-        postq.create(db, **{**kwargs, "user_id": ""})
+        kwargs = {**defaults, "user_id": ""}
+        postq.create(**kwargs)
     with pytest.raises(ArgumentError):
-        postq.create(db, **{**kwargs, "body": ""})
+        kwargs = {**defaults, "body": ""}
+        postq.create(**kwargs)
 
     # post with only whitespace doesn't work
     with pytest.raises(ArgumentError):
-        postq.create(db, **{**kwargs, "body": "    "})
+        kwargs = {**defaults, "body": "    "}
+        postq.create(**kwargs)
 
     # post creation works and populates fields
-    new_post = postq.create(db, **kwargs)
+    new_post = postq.create(**defaults)
     assert new_post
     assert new_post.lexicon_id is not None
     assert new_post.user_id is not None
     assert new_post.body is not None
 
     # post creation works when user is None
-    new_post = postq.create(db, **{**kwargs, "user_id": None})
+    kwargs = {**defaults, "user_id": None}
+    new_post = postq.create(**kwargs)
     assert new_post
     assert new_post.user_id is None

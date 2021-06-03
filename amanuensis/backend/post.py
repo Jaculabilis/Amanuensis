@@ -10,7 +10,12 @@ from amanuensis.db import DbContext, Post
 from amanuensis.errors import ArgumentError
 
 
-def create(db: DbContext, lexicon_id: int, user_id: int, body: str) -> Post:
+def create(
+    db: DbContext,
+    lexicon_id: int,
+    user_id: int,
+    body: str,
+) -> Post:
     """
     Create a new post
     """
