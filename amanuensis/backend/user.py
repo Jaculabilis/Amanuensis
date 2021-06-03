@@ -11,7 +11,7 @@ from amanuensis.db import DbContext, User
 from amanuensis.errors import ArgumentError
 
 
-RE_NO_LETTERS =  re.compile(r'^[0-9-_]*$')
+RE_NO_LETTERS = re.compile(r'^[0-9-_]*$')
 RE_ALPHANUM_DASH_UNDER = re.compile(r'^[A-Za-z0-9-_]*$')
 
 
@@ -21,7 +21,8 @@ def create(
     password: str,
     display_name: str,
     email: str,
-    is_site_admin: bool) -> User:
+    is_site_admin: bool,
+) -> User:
     """
     Create a new user.
     """
@@ -33,7 +34,9 @@ def create(
     if RE_NO_LETTERS.match(username):
         raise ArgumentError('Username must contain a letter')
     if not RE_ALPHANUM_DASH_UNDER.match(username):
-        raise ArgumentError('Username may only contain alphanumerics, dash, and underscore')
+        raise ArgumentError(
+            'Username may only contain alphanumerics, dash, and underscore'
+        )
 
     # Verify password
     if not isinstance(password, str):
@@ -51,10 +54,7 @@ def create(
         raise ArgumentError('Email must be a string')
 
     # Query the db to make sure the username isn't taken
-    if db(
-        select(func.count(User.id))
-        .where(User.username == username)
-    ).scalar() > 0:
+    if db(select(func.count(User.id)).where(User.username == username)).scalar() > 0:
         raise ArgumentError('Username is already taken')
 
     new_user = User(

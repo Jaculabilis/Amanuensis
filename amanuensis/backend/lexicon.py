@@ -13,11 +13,7 @@ from amanuensis.errors import ArgumentError
 RE_ALPHANUM_DASH_UNDER = re.compile(r'^[A-Za-z0-9-_]*$')
 
 
-def create(
-    db: DbContext,
-    name: str,
-    title: str,
-    prompt: str) -> Lexicon:
+def create(db: DbContext, name: str, title: str, prompt: str) -> Lexicon:
     """
     Create a new lexicon.
     """
@@ -27,7 +23,9 @@ def create(
     if not name.strip():
         raise ArgumentError('Lexicon name must not be blank')
     if not RE_ALPHANUM_DASH_UNDER.match(name):
-        raise ArgumentError('Lexicon name may only contain alphanumerics, dash, and underscore')
+        raise ArgumentError(
+            'Lexicon name may only contain alphanumerics, dash, and underscore'
+        )
 
     # Verify title
     if title is not None and not isinstance(name, str):
@@ -38,10 +36,7 @@ def create(
         raise ArgumentError('Lexicon prompt must be a string')
 
     # Query the db to make sure the lexicon name isn't taken
-    if db(
-        select(func.count(Lexicon.id))
-        .where(Lexicon.name == name)
-    ).scalar() > 0:
+    if db(select(func.count(Lexicon.id)).where(Lexicon.name == name)).scalar() > 0:
         raise ArgumentError('Lexicon name is already taken')
 
     new_lexicon = Lexicon(

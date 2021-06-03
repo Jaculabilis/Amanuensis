@@ -9,11 +9,8 @@ from amanuensis.errors import ArgumentError
 
 
 def create(
-    db: DbContext,
-    lexicon_id: int,
-    user_id: int,
-    name: str,
-    signature: str) -> Character:
+    db: DbContext, lexicon_id: int, user_id: int, name: str, signature: str
+) -> Character:
     """
     Create a new character for a user.
     """
@@ -50,7 +47,10 @@ def create(
         .where(Character.lexicon_id == lexicon_id)
         .where(Character.user_id == user_id)
     ).scalar()
-    if mem.lexicon.character_limit is not None and num_user_chars >= mem.lexicon.character_limit:
+    if (
+        mem.lexicon.character_limit is not None
+        and num_user_chars >= mem.lexicon.character_limit
+    ):
         raise ArgumentError('User is at character limit')
 
     new_character = Character(

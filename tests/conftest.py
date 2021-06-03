@@ -21,6 +21,7 @@ def db():
 @pytest.fixture
 def make_user(db: DbContext):
     """Provides a factory function for creating users, with valid default values."""
+
     def user_factory(state={'nonce': 1}, **kwargs):
         default_kwargs = {
             'username': f'test_user_{state["nonce"]}',
@@ -32,39 +33,45 @@ def make_user(db: DbContext):
         state['nonce'] += 1
         updated_kwargs = {**default_kwargs, **kwargs}
         return userq.create(db, **updated_kwargs)
+
     return user_factory
 
 
 @pytest.fixture
 def make_lexicon(db: DbContext):
     """Provides a factory function for creating lexicons, with valid default values."""
+
     def lexicon_factory(state={'nonce': 1}, **kwargs):
         default_kwargs = {
             'name': f'Test_{state["nonce"]}',
             'title': None,
-            'prompt': f'Test Lexicon game {state["nonce"]}'
+            'prompt': f'Test Lexicon game {state["nonce"]}',
         }
         state['nonce'] += 1
         updated_kwargs = {**default_kwargs, **kwargs}
         return lexiq.create(db, **updated_kwargs)
+
     return lexicon_factory
 
 
 @pytest.fixture
 def make_membership(db: DbContext):
     """Provides a factory function for creating memberships, with valid default values."""
+
     def membership_factory(**kwargs):
         default_kwargs = {
             'is_editor': False,
         }
         updated_kwargs = {**default_kwargs, **kwargs}
         return memq.create(db, **updated_kwargs)
+
     return membership_factory
 
 
 @pytest.fixture
 def make_character(db: DbContext):
     """Provides a factory function for creating characters, with valid default values."""
+
     def character_factory(state={'nonce': 1}, **kwargs):
         default_kwargs = {
             'name': f'Character {state["nonce"]}',
@@ -73,6 +80,7 @@ def make_character(db: DbContext):
         state['nonce'] += 1
         updated_kwargs = {**default_kwargs, **kwargs}
         return charq.create(db, **updated_kwargs)
+
     return character_factory
 
 
@@ -87,11 +95,8 @@ class TestFactory:
 
 @pytest.fixture
 def make(
-    db: DbContext,
-    make_user,
-    make_lexicon,
-    make_membership,
-    make_character) -> TestFactory:
+    db: DbContext, make_user, make_lexicon, make_membership, make_character
+) -> TestFactory:
     """Fixture that groups all factory fixtures together."""
     return TestFactory(
         db,
@@ -109,6 +114,8 @@ def lexicon_with_editor(make):
     assert editor
     lexicon = make.lexicon()
     assert lexicon
-    membership = make.membership(user_id=editor.id, lexicon_id=lexicon.id, is_editor=True)
+    membership = make.membership(
+        user_id=editor.id, lexicon_id=lexicon.id, is_editor=True
+    )
     assert membership
     return (lexicon, editor)

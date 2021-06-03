@@ -2,6 +2,7 @@
 Submodule of custom exception types
 """
 
+
 class AmanuensisError(Exception):
     """Base class for exceptions in amanuensis"""
 

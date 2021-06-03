@@ -8,11 +8,7 @@ from amanuensis.db import *
 from amanuensis.errors import ArgumentError
 
 
-def create(
-    db: DbContext,
-    lexicon_id: int,
-    user_id: int,
-    character_id: int) -> Article:
+def create(db: DbContext, lexicon_id: int, user_id: int, character_id: int) -> Article:
     """
     Create a new article in a lexicon.
     """
@@ -37,8 +33,7 @@ def create(
     # and the character belongs to the lexicon
     if character_id is not None:
         character: Character = db(
-            select(Character)
-            .where(Character.id == character_id)
+            select(Character).where(Character.id == character_id)
         ).scalar_one_or_none()
         if not character:
             raise ArgumentError('Character does not exist')

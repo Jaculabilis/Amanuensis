@@ -9,11 +9,8 @@ from sqlalchemy import select, func
 from amanuensis.db import DbContext, Post
 from amanuensis.errors import ArgumentError
 
-def create(
-    db: DbContext,
-    lexicon_id: int,
-    user_id: int,
-    body: str) -> Post:
+
+def create(db: DbContext, lexicon_id: int, user_id: int, body: str) -> Post:
     """
     Create a new post
     """
@@ -32,11 +29,7 @@ def create(
     if not body.strip():
         raise ArgumentError('Post body cannot be empty.')
 
-    new_post = Post(
-        lexicon_id=lexicon_id,
-        user_id=user_id,
-        body=body
-    )
+    new_post = Post(lexicon_id=lexicon_id, user_id=user_id, body=body)
     db.session.add(new_post)
     db.session.commit()
     return new_post

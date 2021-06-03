@@ -52,7 +52,9 @@ def test_character_limits(db: DbContext, lexicon_with_editor):
 
     # Creating a second character should fail
     with pytest.raises(ArgumentError):
-        char2 = charq.create(db, lexicon.id, user.id, 'Test Character 2', signature=None)
+        char2 = charq.create(
+            db, lexicon.id, user.id, 'Test Character 2', signature=None
+        )
         assert char2
 
     # Raising the limit to 2 should allow a second character
@@ -63,7 +65,9 @@ def test_character_limits(db: DbContext, lexicon_with_editor):
 
     # Creating a third character should fail
     with pytest.raises(ArgumentError):
-        char3 = charq.create(db, lexicon.id, user.id, 'Test Character 3', signature=None)
+        char3 = charq.create(
+            db, lexicon.id, user.id, 'Test Character 3', signature=None
+        )
         assert char3
 
     # Setting the limit to null should allow a third character

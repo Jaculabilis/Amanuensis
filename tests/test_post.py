@@ -11,11 +11,7 @@ def test_create_post(db: DbContext, lexicon_with_editor):
     lexicon, editor = lexicon_with_editor
 
     # argument dictionary for post object
-    kwargs = {
-        'lexicon_id': lexicon.id,
-        'user_id': editor.id,
-        'body': 'body'
-    }
+    kwargs = {'lexicon_id': lexicon.id, 'user_id': editor.id, 'body': 'body'}
 
     # ids are integers
     with pytest.raises(ArgumentError):

@@ -12,14 +12,16 @@ def test_create_user(db: DbContext):
         'password': 'password',
         'display_name': 'User Name',
         'email': 'user@example.com',
-        'is_site_admin': False
+        'is_site_admin': False,
     }
 
     # Test length constraints
     with pytest.raises(ArgumentError):
         userq.create(db, **{**kwargs, 'username': 'me'})
     with pytest.raises(ArgumentError):
-        userq.create(db, **{**kwargs, 'username': 'the right honorable user-name, esquire'})
+        userq.create(
+            db, **{**kwargs, 'username': 'the right honorable user-name, esquire'}
+        )
     # Test allowed characters
     with pytest.raises(ArgumentError):
         userq.create(db, **{**kwargs, 'username': 'user name'})

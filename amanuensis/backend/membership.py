@@ -8,11 +8,7 @@ from amanuensis.db import DbContext, Membership
 from amanuensis.errors import ArgumentError
 
 
-def create(
-    db: DbContext,
-    user_id: int,
-    lexicon_id: int,
-    is_editor: bool) -> Membership:
+def create(db: DbContext, user_id: int, lexicon_id: int, is_editor: bool) -> Membership:
     """
     Create a new user membership in a lexicon.
     """
@@ -25,11 +21,14 @@ def create(
         raise ArgumentError('is_editor')
 
     # Verify user has not already joined lexicon
-    if db(
-        select(func.count(Membership.id))
-        .where(Membership.user_id == user_id)
-        .where(Membership.lexicon_id == lexicon_id)
-    ).scalar() > 0:
+    if (
+        db(
+            select(func.count(Membership.id))
+            .where(Membership.user_id == user_id)
+            .where(Membership.lexicon_id == lexicon_id)
+        ).scalar()
+        > 0
+    ):
         raise ArgumentError('User is already a member of lexicon')
 
     new_membership = Membership(

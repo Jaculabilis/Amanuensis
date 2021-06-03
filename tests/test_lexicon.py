@@ -9,11 +9,7 @@ from amanuensis.errors import ArgumentError
 
 def test_create_lexicon(db: DbContext):
     """Test new game creation."""
-    kwargs = {
-        'name': 'Test',
-        'title': None,
-        'prompt': 'A test Lexicon game'
-    }
+    kwargs = {'name': 'Test', 'title': None, 'prompt': 'A test Lexicon game'}
     # Test name constraints
     with pytest.raises(ArgumentError):
         lexiq.create(db, **{**kwargs, 'name': None})

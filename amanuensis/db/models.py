@@ -28,6 +28,7 @@ class Uuid(TypeDecorator):
     """
     A uuid backed by a char(32) field in sqlite.
     """
+
     impl = CHAR(32)
 
     def process_bind_param(self, value, dialect):
@@ -51,6 +52,7 @@ class User(ModelBase):
     """
     Represents a single user of Amanuensis.
     """
+
     __tablename__ = 'user'
 
     #############
@@ -104,6 +106,7 @@ class Lexicon(ModelBase):
     """
     Represents a single game of Lexicon.
     """
+
     __tablename__ = 'lexicon'
 
     #############
@@ -131,7 +134,9 @@ class Lexicon(ModelBase):
     created = Column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
 
     # The timestamp of the last change in game state
-    last_updated = Column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
+    last_updated = Column(
+        DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP')
+    )
 
     # The timestamp the first turn was started
     # This is NULL until the game starts
@@ -234,10 +239,9 @@ class Membership(ModelBase):
     """
     Represents a user's participation in a Lexicon game.
     """
+
     __tablename__ = 'membership'
-    __table_args__ = (
-        UniqueConstraint('user_id', 'lexicon_id'),
-    )
+    __table_args__ = (UniqueConstraint('user_id', 'lexicon_id'),)
 
     ###################
     # Membership keys #
@@ -295,6 +299,7 @@ class Character(ModelBase):
     """
     Represents a character played by a uaser in a Lexicon game.
     """
+
     __tablename__ = 'character'
 
     ##################
@@ -333,6 +338,7 @@ class ArticleState(enum.Enum):
     """
     The step of the editorial process an article is in.
     """
+
     DRAFT = 0
     SUBMITTED = 1
     APPROVED = 2
@@ -342,6 +348,7 @@ class Article(ModelBase):
     """
     Represents a single article in a lexicon.
     """
+
     __tablename__ = 'article'
 
     ################
@@ -386,7 +393,9 @@ class Article(ModelBase):
     ####################
 
     # Timestamp the content of the article was last updated
-    last_updated = Column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
+    last_updated = Column(
+        DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP')
+    )
 
     # Timestamp the article was last submitted
     # This is NULL until the article is submitted
@@ -420,6 +429,7 @@ class IndexType(enum.Enum):
     """
     The title-matching behavior of an article index.
     """
+
     CHAR = 0
     RANGE = 1
     PREFIX = 2
@@ -430,6 +440,7 @@ class ArticleIndex(ModelBase):
     """
     Represents an index definition.
     """
+
     __tablename__ = 'article_index'
 
     ##############
@@ -472,6 +483,7 @@ class ArticleIndexRule(ModelBase):
     A character with multiple index rules may write in any index that satisfies
     a rule. A character with no index rules may write in any index.
     """
+
     __tablename__ = 'article_index_rule'
 
     ###################
@@ -510,6 +522,7 @@ class ArticleContentRuleType(enum.Enum):
     """
     The possible article content rules.
     """
+
     # Whether characters can cite themselves
     ALLOW_SELF_CITE = 0
     # Whether characters can write new articles instead of phantoms
@@ -543,6 +556,7 @@ class ArticleContentRule(ModelBase):
     """
     Represents a restriction on the content of an article for a turn.
     """
+
     __tablename__ = 'article_content_rule'
 
     #####################
@@ -584,6 +598,7 @@ class Post(ModelBase):
     """
     Represents a post in the game feed.
     """
+
     __tablename__ = 'post'
 
     #############
