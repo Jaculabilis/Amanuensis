@@ -5,7 +5,6 @@ from amanuensis.config import RootConfigDirectoryContext
 from amanuensis.lexicon import create_lexicon, load_all_lexicons
 from amanuensis.models import UserModel, ModelFactory
 from amanuensis.server.helpers import admin_required
-from amanuensis.user import load_all_users
 
 from .forms import LexiconCreateForm
 
@@ -36,7 +35,7 @@ def home():
 @admin_required
 def admin():
 	root: RootConfigDirectoryContext = current_app.config['root']
-	users = list(load_all_users(root))
+	users = []
 	lexicons = list(load_all_lexicons(root))
 	return render_template('home.admin.jinja', users=users, lexicons=lexicons)
 
