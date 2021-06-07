@@ -5,6 +5,7 @@ Membership query interface
 from sqlalchemy import select, func
 
 from amanuensis.db import DbContext, Membership
+from amanuensis.db.models import Lexicon
 from amanuensis.errors import ArgumentError
 
 
@@ -35,6 +36,27 @@ def create(
         > 0
     ):
         raise ArgumentError("User is already a member of lexicon")
+
+    # get reference to lexicon for next few checks
+    lex: Lexicon = db(
+        select(Lexicon)
+        .where(Lexicon.id == lexicon_id)
+    ).scalar_one_or_none()
+
+    # Verify lexicon is joinable; current no Lexicons are joinable so this is commented out
+    if not lex.joinable:
+        raise ArgumentError("Can't join: Lexicon is not joinable")
+
+    # Verify lexicon is not full
+    if lex.player_limit:
+        if (
+        db(
+            select(func.count())
+            .where(Membership.lexicon_id == lexicon_id)
+        ).scalar()
+        >= lex.player_limit
+        ):
+            raise ArgumentError("Can't join: Lexicon is full")
 
     new_membership = Membership(
         user_id=user_id,

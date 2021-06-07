@@ -49,7 +49,9 @@ def make_lexicon(db: DbContext):
         }
         state["nonce"] += 1
         updated_kwargs = {**default_kwargs, **kwargs}
-        return lexiq.create(db, **updated_kwargs)
+        lex = lexiq.create(db, **updated_kwargs)
+        lex.joinable = True
+        return lex
 
     return lexicon_factory
 
