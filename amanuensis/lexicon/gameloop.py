@@ -9,11 +9,48 @@ from amanuensis.config import ReadOnlyOrderedDict
 from amanuensis.models import LexiconModel, UserModel
 from amanuensis.parser import (
 	parse_raw_markdown,
-	GetCitations,
 	HtmlRenderer,
 	titlesort,
-	filesafe_title,
-	ConstraintAnalysis)
+	filesafe_title)
+from amanuensis.parser.core import RenderableVisitor
+
+
+class GetCitations(RenderableVisitor):
+	def __init__(self):
+		self.citations = []
+
+	def ParsedArticle(self, span):
+		span.recurse(self)
+		return self.citations
+
+	def CitationSpan(self, span):
+		self.citations.append(span.cite_target)
+		return self
+
+
+class ConstraintAnalysis(RenderableVisitor):
+	def __init__(self, lexicon: LexiconModel):
+		self.info: List[str] = []
+		self.warning: List[str] = []
+		self.error: List[str] = []
+
+		self.word_count: int = 0
+		self.citations: list = []
+		self.signatures: int = 0
+
+	def TextSpan(self, span):
+		self.word_count += len(re.split(r'\s+', span.innertext.strip()))
+		return self
+
+	def SignatureParagraph(self, span):
+		self.signatures += 1
+		span.recurse(self)
+		return self
+
+	def CitationSpan(self, span):
+		self.citations.append(span.cite_target)
+		span.recurse(self)
+		return self
 
 
 def get_player_characters(
