@@ -17,8 +17,56 @@ from amanuensis.lexicon import (
 from amanuensis.models import LexiconModel
 from amanuensis.parser import (
 	normalize_title,
-	parse_raw_markdown,
-	PreviewHtmlRenderer)
+	parse_raw_markdown)
+from amanuensis.parser.core import RenderableVisitor
+
+
+class PreviewHtmlRenderer(RenderableVisitor):
+	def __init__(self, lexicon):
+		with lexicon.ctx.read('info') as info:
+			self.article_map = {
+				title: article.character
+				for title, article in info.items()
+			}
+		self.citations = []
+		self.contents = ""
+
+	def TextSpan(self, span):
+		return span.innertext
+
+	def LineBreak(self, span):
+		return '<br>'
+
+	def ParsedArticle(self, span):
+		self.contents = '\n'.join(span.recurse(self))
+		return self
+
+	def BodyParagraph(self, span):
+		return f'<p>{"".join(span.recurse(self))}</p>'
+
+	def SignatureParagraph(self, span):
+		return (
+			'<hr><span class="signature"><p>'
+			f'{"".join(span.recurse(self))}'
+			'</p></span>'
+		)
+
+	def BoldSpan(self, span):
+		return f'<b>{"".join(span.recurse(self))}</b>'
+
+	def ItalicSpan(self, span):
+		return f'<i>{"".join(span.recurse(self))}</i>'
+
+	def CitationSpan(self, span):
+		if span.cite_target in self.article_map:
+			if self.article_map.get(span.cite_target):
+				link_class = '[extant]'
+			else:
+				link_class = '[phantom]'
+		else:
+			link_class = '[new]'
+		self.citations.append(f'{span.cite_target} {link_class}')
+		return f'<u>{"".join(span.recurse(self))}</u>[{len(self.citations)}]'
 
 
 def load_editor(lexicon: LexiconModel, aid: str):

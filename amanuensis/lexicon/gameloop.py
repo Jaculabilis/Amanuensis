@@ -9,7 +9,6 @@ from amanuensis.config import ReadOnlyOrderedDict
 from amanuensis.models import LexiconModel, UserModel
 from amanuensis.parser import (
 	parse_raw_markdown,
-	HtmlRenderer,
 	titlesort,
 	filesafe_title)
 from amanuensis.parser.core import RenderableVisitor
@@ -51,6 +50,53 @@ class ConstraintAnalysis(RenderableVisitor):
 		self.citations.append(span.cite_target)
 		span.recurse(self)
 		return self
+
+
+class HtmlRenderer(RenderableVisitor):
+	"""
+	Renders an article token tree into published article HTML.
+	"""
+	def __init__(self, lexicon_name: str, written_articles: Iterable[str]):
+		self.lexicon_name: str = lexicon_name
+		self.written_articles: Iterable[str] = written_articles
+
+	def TextSpan(self, span):
+		return span.innertext
+
+	def LineBreak(self, span):
+		return '<br>'
+
+	def ParsedArticle(self, span):
+		return '\n'.join(span.recurse(self))
+
+	def BodyParagraph(self, span):
+		return f'<p>{"".join(span.recurse(self))}</p>'
+
+	def SignatureParagraph(self, span):
+		return (
+			'<hr><span class="signature"><p>'
+			f'{"".join(span.recurse(self))}'
+			'</p></span>'
+		)
+
+	def BoldSpan(self, span):
+		return f'<b>{"".join(span.recurse(self))}</b>'
+
+	def ItalicSpan(self, span):
+		return f'<i>{"".join(span.recurse(self))}</i>'
+
+	def CitationSpan(self, span):
+		if span.cite_target in self.written_articles:
+			link_class = ''
+		else:
+			link_class = ' class="phantom"'
+		# link = url_for(
+		# 	'lexicon.article',
+		# 	name=self.lexicon_name,
+		# 	title=filesafe_title(span.cite_target))
+		link = (f'/lexicon/{self.lexicon_name}'
+			+ f'/article/{filesafe_title(span.cite_target)}')
+		return f'<a href="{link}"{link_class}>{"".join(span.recurse(self))}</a>'
 
 
 def get_player_characters(

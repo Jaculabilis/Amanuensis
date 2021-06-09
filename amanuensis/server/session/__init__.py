@@ -15,9 +15,7 @@ from amanuensis.lexicon import (
 	create_character_in_lexicon,
 	get_draft)
 from amanuensis.models import LexiconModel
-from amanuensis.parser import (
-	parse_raw_markdown,
-	PreviewHtmlRenderer)
+from amanuensis.parser import parse_raw_markdown
 from amanuensis.server.helpers import (
 	lexicon_param,
 	player_required,
@@ -29,7 +27,7 @@ from .forms import (
 	LexiconPublishTurnForm,
 	LexiconConfigForm)
 
-from .editor import load_editor, new_draft, update_draft
+from .editor import load_editor, new_draft, update_draft, PreviewHtmlRenderer
 
 
 bp_session = Blueprint('session', __name__,

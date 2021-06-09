@@ -13,7 +13,7 @@
 # from amanuensis.config.loader import AttrOrderedDict
 # from amanuensis.errors import ArgumentError
 # from amanuensis.lexicon import LexiconModel
-# from amanuensis.parser import parse_raw_markdown, GetCitations, HtmlRenderer, filesafe_title, titlesort
+# from amanuensis.parser import parse_raw_markdown, filesafe_title, titlesort
 # from amanuensis.resources import get_stream
 
 
