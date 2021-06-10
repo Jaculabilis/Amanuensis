@@ -38,14 +38,14 @@ class TextSpan(Renderable):
     def __init__(self, innertext: str):
         self.innertext = innertext
 
-    def __str__(self):
-        return f"[{self.innertext}]"
+    def __repr__(self):
+        return f"<{self.innertext}>"
 
 
 class LineBreak(Renderable):
     """A line break within a paragraph."""
 
-    def __str__(self):
+    def __repr__(self):
         return "<break>"
 
 
@@ -55,10 +55,10 @@ class SpanContainer(Renderable):
     def __init__(self, spans: Spans):
         self.spans: Spans = spans
 
-    def __str__(self):
+    def __repr__(self):
         return (
-            f"[{type(self).__name__} "
-            + f'{" ".join([str(span) for span in self.spans])}]'
+            f"<{type(self).__name__} "
+            + f'{" ".join([repr(span) for span in self.spans])}>'
         )
 
     def recurse(self, renderer: "RenderableVisitor"):
@@ -94,9 +94,9 @@ class CitationSpan(SpanContainer):
         # abnormal title strings lying around causing trouble.
         self.cite_target: str = normalize_title(cite_target)
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         return (
-            f'{{{" ".join([str(span) for span in self.spans])}'
+            f'{{{" ".join([repr(span) for span in self.spans])}'
             + f":{self.cite_target}}}"
         )
 
