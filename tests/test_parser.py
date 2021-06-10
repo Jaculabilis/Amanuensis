@@ -153,6 +153,32 @@ def test_simple_single_parse_pairs():
     assert_text(spans, ["In the ", ["beginning"], " was ", ["the"], " Word"])
 
 
+def test_simple_parse_pairs_with_break():
+    """Test pair marks with breaks"""
+    text: str
+    spans: Spans
+
+    text = r"**glory\\" + "\nhammer**"
+    spans = parse_paired_formatting(text)
+    assert_types(spans, [[BoldSpan, TextSpan]])
+    assert_text(spans, [["glory\\\\\nhammer"]])
+
+    text = r"//glory\\" + "\nhammer//"
+    spans = parse_paired_formatting(text)
+    assert_types(spans, [[ItalicSpan, TextSpan]])
+    assert_text(spans, [["glory\\\\\nhammer"]])
+
+    text = r"**glory\\" + "\n**hammer**"
+    spans = parse_paired_formatting(text)
+    assert_types(spans, [[BoldSpan, TextSpan], TextSpan])
+    assert_text(spans, [["glory\\\\\n"], "hammer**"])
+
+    text = r"//glory\\" + "\n//hammer//"
+    spans = parse_paired_formatting(text)
+    assert_types(spans, [[ItalicSpan, TextSpan], TextSpan])
+    assert_text(spans, [["glory\\\\\n"], "hammer//"])
+
+
 def test_simple_nested_parse_pairs():
     """Test parsing for nesting bold and italic"""
     text: str
