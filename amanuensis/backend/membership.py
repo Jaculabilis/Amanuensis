@@ -39,22 +39,20 @@ def create(
 
     # get reference to lexicon for next few checks
     lex: Lexicon = db(
-        select(Lexicon)
-        .where(Lexicon.id == lexicon_id)
+        select(Lexicon).where(Lexicon.id == lexicon_id)
     ).scalar_one_or_none()
+    if not lex:
+        raise ArgumentError("could not find lexicon")
 
-    # Verify lexicon is joinable; current no Lexicons are joinable so this is commented out
+    # Verify lexicon is joinable
     if not lex.joinable:
         raise ArgumentError("Can't join: Lexicon is not joinable")
 
     # Verify lexicon is not full
-    if lex.player_limit:
+    if lex.player_limit is not None:
         if (
-        db(
-            select(func.count())
-            .where(Membership.lexicon_id == lexicon_id)
-        ).scalar()
-        >= lex.player_limit
+            db(select(func.count()).where(Membership.lexicon_id == lexicon_id)).scalar()
+            >= lex.player_limit
         ):
             raise ArgumentError("Can't join: Lexicon is full")
 

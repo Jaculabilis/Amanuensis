@@ -51,6 +51,7 @@ def make_lexicon(db: DbContext):
         updated_kwargs = {**default_kwargs, **kwargs}
         lex = lexiq.create(db, **updated_kwargs)
         lex.joinable = True
+        db.session.commit()
         return lex
 
     return lexicon_factory

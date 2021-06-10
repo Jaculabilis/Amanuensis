@@ -4,9 +4,10 @@ Post query interface
 
 import re
 
-from sqlalchemy import select, func
+from sqlalchemy import select
 
 from amanuensis.db import DbContext, Post
+from amanuensis.db.models import Lexicon
 from amanuensis.errors import ArgumentError
 
 
@@ -33,6 +34,14 @@ def create(
         raise ArgumentError("Post body must be a string.")
     if not body.strip():
         raise ArgumentError("Post body cannot be empty.")
+
+    # Check that the lexicon allows posting
+    if not (
+        db(select(Lexicon).where(Lexicon.id == lexicon_id))
+        .scalar_one_or_none()
+        .allow_post
+    ):
+        raise ArgumentError("Lexicon does not allow posting.")
 
     new_post = Post(lexicon_id=lexicon_id, user_id=user_id, body=body)
     db.session.add(new_post)
