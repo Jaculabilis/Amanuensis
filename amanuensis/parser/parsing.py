@@ -121,8 +121,9 @@ def parse_citation(
         spans_after = parse_paired_formatting(text[cite_close + 2 :])
         # Parse inner text and skip parsing for this format pair
         text_inner = text[cite_open + 2 : cite_close]
-        # For citations specifically, we may need to split off a citation
-        # target from the alias text
+        # For citations specifically, try to split off a citation target.
+        # If there's no citation target to split, use the same text as the
+        # citation text and the target.
         inner_split = text_inner.split("|", 1)
         text_inner_actual, cite_target = inner_split[0], inner_split[-1]
         spans_inner = parse_paired_formatting(

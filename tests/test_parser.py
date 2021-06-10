@@ -107,7 +107,7 @@ def test_parse_breaks():
     assert_text(spans, [text])
 
 
-def test_simple_single_parse_pairs():
+def test_parse_pairs_single():
     """Test parsing for bold and italic marks"""
     text: str
     spans: Spans
@@ -153,7 +153,7 @@ def test_simple_single_parse_pairs():
     assert_text(spans, ["In the ", ["beginning"], " was ", ["the"], " Word"])
 
 
-def test_simple_parse_pairs_with_break():
+def test_parse_pairs_break():
     """Test pair marks with breaks"""
     text: str
     spans: Spans
@@ -179,7 +179,7 @@ def test_simple_parse_pairs_with_break():
     assert_text(spans, [["glory\\\\\n"], "hammer//"])
 
 
-def test_simple_nested_parse_pairs():
+def test_parse_pairs_nested():
     """Test parsing for nesting bold and italic"""
     text: str
     spans: Spans
@@ -200,3 +200,120 @@ def test_simple_nested_parse_pairs():
     spans = parse_paired_formatting(text)
     assert_types(spans, [[BoldSpan, TextSpan], TextSpan])
     assert_text(spans, [["Hello//world"], "//"])
+
+
+def test_normalize_title():
+    """Test the title normalization used by the citation parser"""
+    nt = normalize_title
+    assert nt("hello") == "Hello"
+    assert nt("  world  ") == "World"
+    assert nt("Waiting for           Godot") == "Waiting for Godot"
+    assert nt("lowercase letters") == "Lowercase letters"
+
+
+def test_parse_citation_single():
+    """Test parsing citations, which have internal formatting"""
+    text: str
+    spans: Spans
+
+    # Simple test cases
+    text = "[[hello]]"
+    spans = parse_paired_formatting(text)
+    assert_types(spans, [[CitationSpan, TextSpan]])
+    assert_text(spans, [["hello"]])
+    citation: CitationSpan = spans[0]
+    assert citation.cite_target == "Hello"
+
+    text = "[[hello|world]]"
+    spans = parse_paired_formatting(text)
+    assert_types(spans, [[CitationSpan, TextSpan]])
+    assert_text(spans, [["hello"]])
+    citation: CitationSpan = spans[0]
+    assert citation.cite_target == "World"
+
+    text = "[[hello||world]]"
+    spans = parse_paired_formatting(text)
+    assert_types(spans, [[CitationSpan, TextSpan]])
+    assert_text(spans, [["hello"]])
+    citation: CitationSpan = spans[0]
+    assert citation.cite_target == "|world"
+
+    text = "[[  hello  |  world  ]]"
+    spans = parse_paired_formatting(text)
+    assert_types(spans, [[CitationSpan, TextSpan]])
+    assert_text(spans, [["  hello  "]])
+    citation: CitationSpan = spans[0]
+    assert citation.cite_target == "World"
+
+    text = "[[faith|hope|love]]"
+    spans = parse_paired_formatting(text)
+    assert_types(spans, [[CitationSpan, TextSpan]])
+    assert_text(spans, [["faith"]])
+    citation: CitationSpan = spans[0]
+    assert citation.cite_target == "Hope|love"
+
+    text = "[[ [[|]] ]]"
+    spans = parse_paired_formatting(text)
+    assert_types(spans, [[CitationSpan, TextSpan], TextSpan])
+    assert_text(spans, [[" [["], " ]]"])
+    citation: CitationSpan = spans[0]
+    assert citation.cite_target == ""
+
+
+def test_parse_citation_break():
+    """Test citations with breaks"""
+    text: str
+    spans: Spans
+
+    text = "[[hello\\\\\nworld]]"
+    spans = parse_paired_formatting(text)
+    assert_types(spans, [[CitationSpan, TextSpan]])
+    assert_text(spans, [["hello\\\\\nworld"]])
+    citation: CitationSpan = spans[0]
+    assert citation.cite_target == "Hello\\\\ world"
+
+    text = "[[one|two\\\\\nthree]]"
+    spans = parse_paired_formatting(text)
+    assert_types(spans, [[CitationSpan, TextSpan]])
+    assert_text(spans, [["one"]])
+    citation: CitationSpan = spans[0]
+    assert citation.cite_target == "Two\\\\ three"
+
+
+def test_parse_citation_nested():
+    """Test nesting with citations"""
+    text: str
+    spans: Spans
+
+    text = "[[**hello world**]]"
+    spans = parse_paired_formatting(text)
+    assert_types(spans, [[CitationSpan, [BoldSpan, TextSpan]]])
+    assert_text(spans, [[["hello world"]]])
+    citation: CitationSpan = spans[0]
+    assert citation.cite_target == "**hello world**"
+
+    text = "[[**hello|world**]]"
+    spans = parse_paired_formatting(text)
+    assert_types(spans, [[CitationSpan, TextSpan]])
+    assert_text(spans, [["**hello"]])
+    citation: CitationSpan = spans[0]
+    assert citation.cite_target == "World**"
+
+    text = "**[[hello world]]**"
+    spans = parse_paired_formatting(text)
+    assert_types(spans, [[BoldSpan, [CitationSpan, TextSpan]]])
+    assert_text(spans, [[["hello world"]]])
+    citation: CitationSpan = spans[0].spans[0]
+    assert citation.cite_target == "Hello world"
+
+    text = "**[[hello world**]]"
+    spans = parse_paired_formatting(text)
+    assert_types(spans, [[BoldSpan, TextSpan], TextSpan])
+    assert_text(spans, [["[[hello world"], "]]"])
+
+    text = "[[**hello world]]**"
+    spans = parse_paired_formatting(text)
+    assert_types(spans, [[CitationSpan, TextSpan], TextSpan])
+    assert_text(spans, [["**hello world"], "**"])
+    citation: CitationSpan = spans[0]
+    assert citation.cite_target == "**hello world"
