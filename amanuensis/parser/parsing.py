@@ -65,12 +65,8 @@ def parse_paired_formatting(
     handlers[next_cite] = lambda: parse_citation(
         text, in_bold=in_bold, in_italic=in_italic
     )
-    handlers[next_bold] = lambda: parse_bold(
-        text, in_cite=in_cite, in_italic=in_italic
-    )
-    handlers[next_italic] = lambda: parse_italic(
-        text, in_cite=in_cite, in_bold=in_bold
-    )
+    handlers[next_bold] = lambda: parse_bold(text, in_cite=in_cite, in_italic=in_italic)
+    handlers[next_italic] = lambda: parse_italic(text, in_cite=in_cite, in_bold=in_bold)
     # Map the next parsing step at -1. If we're currently inside a formatting
     # mark pair, skip parsing line breaks, which are not allowed inside paired
     # marks.

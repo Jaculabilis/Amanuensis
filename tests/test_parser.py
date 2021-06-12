@@ -25,18 +25,18 @@ from amanuensis.parser.parsing import (
 
 def assert_types(spans: Spans, types: Sequence, loc=None):
     """
-    Asserts that  a span list has the types specified.
+    Asserts that a span list has the types specified.
     Each element in `types` should be either a span type or a list. The first
     element of the list is the container type and the remaining elements are the
     content types.
     """
-    assert len(spans) == len(
-        types
-    ), f"Unexpected type sequence length at loc {loc if loc else 'root'}"
-    i = -1
-    for span, span_type in zip(spans, types):
-        i += 1
+    for i in range(max(len(spans), len(types))):
         i_loc = f"{loc}.{i}" if loc else f"{i}"
+        # Check lengths are equal
+        assert i < len(spans), f"Span list unexpectedly short at {i_loc}"
+        assert i < len(types), f"Type list unexpectedly short at {i_loc}"
+        # Check types are equal
+        span, span_type = spans[i], types[i]
         if isinstance(span_type, list):
             assert isinstance(
                 span, SpanContainer
@@ -317,3 +317,66 @@ def test_parse_citation_nested():
     assert_text(spans, [["**hello world"], "**"])
     citation: CitationSpan = spans[0]
     assert citation.cite_target == "**hello world"
+
+
+def test_parse_paragraphs():
+    """Test parsing paragraphs"""
+    para: str
+    span: SpanContainer
+
+    # Body paragraph
+    para = "\tIn the beginning was the Word."
+    span = parse_paragraph(para)
+    assert_types([span], [[BodyParagraph, TextSpan]])
+    assert_text([span], [["In the beginning was the Word."]])
+
+    # Signature paragraph
+    para = "~Ersatz Scrivener, scholar extraordinaire"
+    span = parse_paragraph(para)
+    assert_types([span], [[SignatureParagraph, TextSpan]])
+    assert_text([span], [["Ersatz Scrivener, scholar extraordinaire"]])
+
+
+def test_parse_article():
+    """Test the full article parser"""
+    article: str = (
+        "Writing a **unit test** requires having test //content//.\n\n"
+        "This content, of course, must be [[created|Writing test collateral]].\n\n"
+        "~Bucky, unit test writer"
+    )
+    parsed: ParsedArticle = parse_raw_markdown(article)
+
+    assert_types(
+        [parsed],
+        [
+            [
+                ParsedArticle,
+                [
+                    BodyParagraph,
+                    TextSpan,
+                    [BoldSpan, TextSpan],
+                    TextSpan,
+                    [ItalicSpan, TextSpan],
+                    TextSpan,
+                ],
+                [BodyParagraph, TextSpan, [CitationSpan, TextSpan], TextSpan],
+                [SignatureParagraph, TextSpan],
+            ]
+        ],
+    )
+    assert_text(
+        [parsed],
+        [
+            [
+                [
+                    "Writing a ",
+                    ["unit test"],
+                    " requires having test ",
+                    ["content"],
+                    ".",
+                ],
+                ["This content, of course, must be ", ["created"], "."],
+                ["Bucky, unit test writer"],
+            ]
+        ],
+    )
