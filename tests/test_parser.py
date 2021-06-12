@@ -342,7 +342,7 @@ def test_parse_article():
     article: str = (
         "Writing a **unit test** requires having test //content//.\n\n"
         "This content, of course, must be [[created|Writing test collateral]].\n\n"
-        "~Bucky, unit test writer"
+        "~Bucky\\\\\nUnit test writer"
     )
     parsed: ParsedArticle = parse_raw_markdown(article)
 
@@ -360,7 +360,7 @@ def test_parse_article():
                     TextSpan,
                 ],
                 [BodyParagraph, TextSpan, [CitationSpan, TextSpan], TextSpan],
-                [SignatureParagraph, TextSpan],
+                [SignatureParagraph, TextSpan, LineBreak, TextSpan],
             ]
         ],
     )
@@ -376,7 +376,88 @@ def test_parse_article():
                     ".",
                 ],
                 ["This content, of course, must be ", ["created"], "."],
-                ["Bucky, unit test writer"],
+                ["Bucky", None, "Unit test writer"],
             ]
         ],
     )
+
+
+def test_visitor():
+    """Test that a visitor dispatches to hooks correctly"""
+
+    class TestVisitor(RenderableVisitor):
+        def __init__(self):
+            self.visited = []
+
+        def TextSpan(self, span: TextSpan):
+            assert isinstance(span, TextSpan)
+            self.visited.append(span)
+
+        def LineBreak(self, span: LineBreak):
+            assert isinstance(span, LineBreak)
+            self.visited.append(span)
+
+        def ParsedArticle(self, span: ParsedArticle):
+            assert isinstance(span, ParsedArticle)
+            self.visited.append(span)
+            span.recurse(self)
+
+        def BodyParagraph(self, span: BodyParagraph):
+            assert isinstance(span, BodyParagraph)
+            self.visited.append(span)
+            span.recurse(self)
+
+        def SignatureParagraph(self, span: SignatureParagraph):
+            assert isinstance(span, SignatureParagraph)
+            self.visited.append(span)
+            span.recurse(self)
+
+        def BoldSpan(self, span: BoldSpan):
+            assert isinstance(span, BoldSpan)
+            self.visited.append(span)
+            span.recurse(self)
+
+        def ItalicSpan(self, span: ItalicSpan):
+            assert isinstance(span, ItalicSpan)
+            self.visited.append(span)
+            span.recurse(self)
+
+        def CitationSpan(self, span: CitationSpan):
+            assert isinstance(span, CitationSpan)
+            self.visited.append(span)
+            span.recurse(self)
+
+    article: str = (
+        "Writing a **unit test** requires having test //content//.\n\n"
+        "This content, of course, must be [[created|Writing test collateral]].\n\n"
+        "~Bucky\\\\\nUnit test writer"
+    )
+    parsed: ParsedArticle = parse_raw_markdown(article)
+
+    visitor = TestVisitor()
+    # All the typecheck asserts pass
+    parsed.render(visitor)
+    # The test article should parse into these spans and visit in this (arbitrary) order
+    type_order = [
+        ParsedArticle,
+        BodyParagraph,
+        TextSpan,
+        BoldSpan,
+        TextSpan,
+        TextSpan,
+        ItalicSpan,
+        TextSpan,
+        TextSpan,
+        BodyParagraph,
+        TextSpan,
+        CitationSpan,
+        TextSpan,
+        TextSpan,
+        SignatureParagraph,
+        TextSpan,
+        LineBreak,
+        TextSpan,
+    ]
+    assert len(visitor.visited) == len(type_order)
+    for span, type in zip(visitor.visited, type_order):
+        assert isinstance(span, type)
