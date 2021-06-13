@@ -3,8 +3,12 @@ Database connection setup
 """
 from sqlalchemy import create_engine, MetaData, event
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import scoped_session
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import scoped_session, sessionmaker
+
+try:
+    from greenlet import getcurrent as get_ident
+except ImportError:
+    from threading import get_ident
 
 
 # Define naming conventions for generated constraints
@@ -34,7 +38,9 @@ class DbContext:
             cursor.close()
 
         # Create a thread-safe session factory
-        self.session = scoped_session(sessionmaker(bind=self.engine))
+        self.session = scoped_session(
+            sessionmaker(bind=self.engine), scopefunc=get_ident
+        )
 
     def __call__(self, *args, **kwargs):
         """Provides shortcut access to session.execute."""
