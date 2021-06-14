@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from typing import Optional
 import os
 
@@ -9,8 +10,8 @@ class AmanuensisConfig:
     # config values defined on the config object itself.
     CONFIG_FILE: Optional[str] = None
     STATIC_ROOT: Optional[str] = "static"
-    SECRET_KEY: Optional[str] = None
-    DATABASE_URI: Optional[str] = None
+    SECRET_KEY: Optional[str] = "secret"
+    DATABASE_URI: Optional[str] = "sqlite:///:memory:"
     TESTING: bool = False
 
 
@@ -24,3 +25,21 @@ class EnvironmentConfig(AmanuensisConfig):
         "AMANUENSIS_DATABASE_URI", AmanuensisConfig.DATABASE_URI
     )
     TESTING = os.environ.get("AMANUENSIS_TESTING", "").lower() in ("true", "1")
+
+
+class CommandLineConfig(AmanuensisConfig):
+    """Loads config values from command line arguments."""
+    def __init__(self) -> None:
+        parser = ArgumentParser()
+        parser.add_argument("--config-file", default=AmanuensisConfig.CONFIG_FILE)
+        parser.add_argument("--static-root", default=AmanuensisConfig.STATIC_ROOT)
+        parser.add_argument("--secret-key", default=AmanuensisConfig.SECRET_KEY)
+        parser.add_argument("--database-uri", default=AmanuensisConfig.DATABASE_URI)
+        parser.add_argument("--debug", action="store_true")
+        args = parser.parse_args()
+
+        self.CONFIG_FILE = args.config_file
+        self.STATIC_ROOT = args.static_root
+        self.SECRET_KEY = args.secret_key
+        self.DATABASE_URI = args.database_uri
+        self.TESTING = args.debug

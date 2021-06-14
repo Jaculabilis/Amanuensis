@@ -2,7 +2,7 @@ import json
 
 from flask import Flask, g
 
-from amanuensis.config import AmanuensisConfig
+from amanuensis.config import AmanuensisConfig, CommandLineConfig
 from amanuensis.db import DbContext
 
 
@@ -54,3 +54,9 @@ def get_app(
     app.route("/")(test)
 
     return app
+
+
+def run():
+    """Run the server, populating the config from the command line."""
+    config = CommandLineConfig()
+    get_app(config).run(debug=config.TESTING)
