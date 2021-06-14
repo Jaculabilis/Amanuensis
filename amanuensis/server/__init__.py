@@ -1,46 +1,56 @@
-import os
+import json
 
-from flask import Flask
+from flask import Flask, g
 
-from amanuensis.config import RootConfigDirectoryContext, ENV_CONFIG_DIR
-from amanuensis.models import ModelFactory
-from .auth import get_login_manager, bp_auth
-from .helpers import register_custom_filters
-from .home import bp_home
-from .lexicon import bp_lexicon
-from .session import bp_session
+from amanuensis.config import AmanuensisConfig
+from amanuensis.db import DbContext
 
 
-def get_app(root: RootConfigDirectoryContext) -> Flask:
-	# Flask app init
-	with root.read_config() as cfg:
-		app = Flask(
-			__name__,
-			template_folder='.',
-			static_folder=cfg.static_root
-		)
-		app.secret_key = bytes.fromhex(cfg.secret_key)
-	app.config['root'] = root
-	app.config['model_factory'] = ModelFactory(root)
-	app.jinja_options['trim_blocks'] = True
-	app.jinja_options['lstrip_blocks'] = True
-	register_custom_filters(app)
+def get_app(
+    config: AmanuensisConfig,
+    db: DbContext = None,
+) -> Flask:
+    """Application factory"""
+    # Create the Flask object
+    app = Flask(__name__, template_folder=".", static_folder=config.STATIC_ROOT)
 
-	# Flask-Login init
-	login_manager = get_login_manager(root)
-	login_manager.init_app(app)
+    # Load keys from the config object
+    app.config.from_object(config)
 
-	# Blueprint inits
-	app.register_blueprint(bp_auth)
-	app.register_blueprint(bp_home)
-	app.register_blueprint(bp_lexicon)
-	app.register_blueprint(bp_session)
+    # If a config file is now specified, also load keys from there
+    if app.config.get("CONFIG_FILE", None):
+        app.config.from_file(app.config["CONFIG_FILE"], json.load)
 
-	return app
+    # Assert that all required config values are now set
+    for config_key in ("SECRET_KEY", "DATABASE_URI"):
+        if not app.config.get(config_key):
+            raise Exception(f"{config_key} must be defined")
 
+    # Create the database context, if one wasn't already given
+    if db is None:
+        db = DbContext(app.config["DATABASE_URI"])
 
-def default():
-	cwd = os.getcwd()
-	config_dir = os.environ.get(ENV_CONFIG_DIR, "amanuensis")
-	root = RootConfigDirectoryContext(os.path.join(cwd, config_dir))
-	return get_app(root)
+    # Make the database connection available to requests via g
+    def db_setup():
+        g.db = db
+    app.before_request(db_setup)
+
+    # Tear down the session on request teardown
+    def db_teardown(response_or_exc):
+        db.session.remove()
+    app.teardown_appcontext(db_teardown)
+
+    # Configure jinja options
+    app.jinja_options.update(trim_blocks=True, lstrip_blocks=True)
+
+    # Set up Flask-Login
+    # TODO
+
+    # Register blueprints
+    # TODO
+
+    def test():
+        return "Hello, world!"
+    app.route("/")(test)
+
+    return app
