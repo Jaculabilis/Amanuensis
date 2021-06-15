@@ -17,6 +17,7 @@ black = "^21.5b2"
 mypy = "^0.812"
 
 [tool.poetry.scripts]
+amanuensis-cli = "amanuensis.cli:main"
 amanuensis-server = "amanuensis.server:run"
 
 [tool.black]
