@@ -3,6 +3,8 @@ import logging
 import logging.config
 
 import amanuensis.cli.admin
+import amanuensis.cli.lexicon
+import amanuensis.cli.user
 
 
 LOGGING_CONFIG = {
@@ -87,6 +89,8 @@ def main():
     # Add commands from cli submodules
     subparsers = parser.add_subparsers(metavar="COMMAND")
     add_subcommand(subparsers, amanuensis.cli.admin)
+    add_subcommand(subparsers, amanuensis.cli.lexicon)
+    add_subcommand(subparsers, amanuensis.cli.user)
 
     # Parse args and execute the desired action
     args = parser.parse_args()
