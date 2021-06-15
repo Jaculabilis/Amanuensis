@@ -1,72 +1,50 @@
-#
-# The cli module must not import other parts of the application at the module
-# level. This is because most other modules depend on the config module. The
-# config module may depend on __main__'s commandline parsing to locate config
-# files, and __main__'s commandline parsing requires importing (but not
-# executing) the functions in the cli module. Thus, cli functions must only
-# import the config module inside the various command methods, which are only
-# run after commandline parsing has already occurred.
-#
+from argparse import ArgumentParser
 
 
-def server_commands(commands={}):
-	if commands:
-		return commands
-	import amanuensis.cli.server
-	for name, func in vars(amanuensis.cli.server).items():
-		if name.startswith("command_"):
-			name = name[8:].replace("_", "-")
-			commands[name] = func
-	return commands
+def add_subcommand(subparsers, module) -> None:
+    """Add a cli submodule's commands as a subparser."""
+    # Get the command information from the module
+    command_name: str = getattr(module, "COMMAND_NAME")
+    command_help: str = getattr(module, "COMMAND_HELP")
+    if not command_name and command_help:
+        return
+
+    # Add the subparser for the command and set a default action
+    command_parser: ArgumentParser = subparsers.add_parser(
+        command_name, help=command_help
+    )
+    command_parser.set_defaults(func=lambda args: command_parser.print_usage())
+
+    # Add all subcommands in the command module
+    subcommands = command_parser.add_subparsers(metavar="SUBCOMMAND")
+    for name, obj in vars(module).items():
+        if name.startswith("command_"):
+            # Hyphenate subcommand names
+            sc_name: str = name[8:].replace("_", "-")
+            # Only the first line of the subcommand function docstring is used
+            sc_help = ((obj.__doc__ or "").strip() or "\n").splitlines()[0]
+
+            # Add the command and any arguments defined by its decorators
+            subcommand: ArgumentParser = subcommands.add_parser(
+                sc_name, help=sc_help, description=obj.__doc__
+            )
+            subcommand.set_defaults(func=obj)
+            for args, kwargs in obj.__dict__.get("add_argument", []):
+                subcommand.add_argument(*args, **kwargs)
 
 
-def lexicon_commands(commands={}):
-	if commands:
-		return commands
-	import amanuensis.cli.lexicon
-	for name, func in vars(amanuensis.cli.lexicon).items():
-		if name.startswith("command_"):
-			name = name[8:].replace("_", "-")
-			commands["lexicon-" + name] = func
-	return commands
+def main():
+    """CLI entry point"""
+    # Set up the top-level parser
+    parser = ArgumentParser()
+    parser.set_defaults(
+        parser=parser,
+        func=lambda args: parser.print_usage(),
+    )
 
+    # Add commands from cli submodules
+    subparsers = parser.add_subparsers(metavar="COMMAND")
 
-def user_commands(commands={}):
-	if commands:
-		return commands
-	import amanuensis.cli.user
-	for name, func in vars(amanuensis.cli.user).items():
-		if name.startswith("command_"):
-			name = name[8:].replace("_", "-")
-			commands["user-" + name] = func
-	return commands
-
-
-def get_commands():
-	return {**server_commands(), **lexicon_commands(), **user_commands()}
-
-
-def cmd_desc(func):
-	return ((func.__doc__ or "").strip() or '\n').splitlines()[0]
-
-
-def describe_commands():
-	longest = max(map(len, server_commands().keys()))
-	server_desc = "General commands:\n{}\n".format("\n".join([
-		" {1:<{0}} : {2}".format(longest, name, cmd_desc(func))
-		for name, func in server_commands().items()
-	]))
-
-	longest = max(map(len, lexicon_commands().keys()))
-	lexicon_desc = "Lexicon commands:\n{}\n".format("\n".join([
-		" {1:<{0}} : {2}".format(longest, name, cmd_desc(func))
-		for name, func in lexicon_commands().items()
-	]))
-
-	longest = max(map(len, user_commands().keys()))
-	user_desc = "User commands:\n{}\n".format("\n".join([
-		" {1:<{0}} : {2}".format(longest, name, cmd_desc(func))
-		for name, func in user_commands().items()
-	]))
-
-	return "\n".join([server_desc, lexicon_desc, user_desc])
+    # Parse args and execute the desired action
+    args = parser.parse_args()
+    args.func(args)
