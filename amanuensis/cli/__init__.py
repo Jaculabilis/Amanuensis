@@ -1,4 +1,34 @@
 from argparse import ArgumentParser
+import logging
+import logging.config
+
+
+LOGGING_CONFIG = {
+    "version": 1,
+    "formatters": {
+        "fmt_basic": {
+            "validate": True,
+            "format": "%(message)s",
+        },
+        "fmt_detailed": {
+            "validate": True,
+            "format": "%(asctime)s %(levelname)s %(message)s"
+        },
+    },
+    "handlers": {
+        "hnd_stderr": {
+            "class": "logging.StreamHandler",
+            "level": "INFO",
+            "formatter": "fmt_basic",
+        },
+    },
+    "loggers": {
+        __name__: {
+            "level": "DEBUG",
+            "handlers": ["hnd_stderr"]
+        }
+    },
+}
 
 
 def add_subcommand(subparsers, module) -> None:
@@ -33,6 +63,15 @@ def add_subcommand(subparsers, module) -> None:
                 subcommand.add_argument(*args, **kwargs)
 
 
+def init_logger(args):
+    """Set up logging based on verbosity args"""
+    if (args.verbose):
+        handler = LOGGING_CONFIG["handlers"]["hnd_stderr"]
+        handler["formatter"] = "fmt_detailed"
+        handler["level"] = "DEBUG"
+    logging.config.dictConfig(LOGGING_CONFIG)
+
+
 def main():
     """CLI entry point"""
     # Set up the top-level parser
@@ -41,10 +80,12 @@ def main():
         parser=parser,
         func=lambda args: parser.print_usage(),
     )
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
 
     # Add commands from cli submodules
     subparsers = parser.add_subparsers(metavar="COMMAND")
 
     # Parse args and execute the desired action
     args = parser.parse_args()
+    init_logger(args)
     args.func(args)
