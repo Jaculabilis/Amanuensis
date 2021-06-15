@@ -16,7 +16,7 @@ LOGGING_CONFIG = {
         },
         "fmt_detailed": {
             "validate": True,
-            "format": "%(asctime)s %(levelname)s %(message)s"
+            "format": "%(asctime)s %(levelname)s %(message)s",
         },
     },
     "handlers": {
@@ -29,8 +29,8 @@ LOGGING_CONFIG = {
     "loggers": {
         __name__: {
             "level": "DEBUG",
-            "handlers": ["hnd_stderr"]
-        }
+            "handlers": ["hnd_stderr"],
+        },
     },
 }
 
@@ -69,7 +69,7 @@ def add_subcommand(subparsers, module) -> None:
 
 def init_logger(args):
     """Set up logging based on verbosity args"""
-    if (args.verbose):
+    if args.verbose:
         handler = LOGGING_CONFIG["handlers"]["hnd_stderr"]
         handler["formatter"] = "fmt_detailed"
         handler["level"] = "DEBUG"

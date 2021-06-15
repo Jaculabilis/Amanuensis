@@ -14,7 +14,9 @@ COMMAND_HELP = "Interact with Amanuensis."
 LOG = logging.getLogger(__name__)
 
 
-@add_argument("path", metavar="DB_PATH", help="Path to where the database should be created")
+@add_argument(
+    "path", metavar="DB_PATH", help="Path to where the database should be created"
+)
 @add_argument("--force", "-f", action="store_true", help="Overwrite existing database")
 @add_argument("--verbose", "-v", action="store_true", help="Enable db echo")
 def command_init_db(args) -> int:

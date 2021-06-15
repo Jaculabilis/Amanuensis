@@ -29,6 +29,7 @@ class EnvironmentConfig(AmanuensisConfig):
 
 class CommandLineConfig(AmanuensisConfig):
     """Loads config values from command line arguments."""
+
     def __init__(self) -> None:
         parser = ArgumentParser()
         parser.add_argument("--config-file", default=AmanuensisConfig.CONFIG_FILE)
