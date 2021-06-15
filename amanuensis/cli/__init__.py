@@ -2,6 +2,8 @@ from argparse import ArgumentParser
 import logging
 import logging.config
 
+import amanuensis.cli.admin
+
 
 LOGGING_CONFIG = {
     "version": 1,
@@ -84,6 +86,7 @@ def main():
 
     # Add commands from cli submodules
     subparsers = parser.add_subparsers(metavar="COMMAND")
+    add_subcommand(subparsers, amanuensis.cli.admin)
 
     # Parse args and execute the desired action
     args = parser.parse_args()
