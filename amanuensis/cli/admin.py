@@ -14,23 +14,17 @@ COMMAND_HELP = "Interact with Amanuensis."
 LOG = logging.getLogger(__name__)
 
 
-@add_argument(
-    "path", metavar="DB_PATH", help="Path to where the database should be created"
-)
-@add_argument("--force", "-f", action="store_true", help="Overwrite existing database")
-@add_argument("--verbose", "-v", action="store_true", help="Enable db echo")
+@add_argument("--drop", "-d", action="store_true", help="Overwrite existing database")
 def command_init_db(args) -> int:
     """
     Initialize the Amanuensis database.
     """
-    # Check if force is required
-    if not args.force and os.path.exists(args.path):
-        args.parser.error(f"{args.path} already exists and --force was not specified")
+    if args.drop:
+        open(args.db_path, mode="w").close()
 
     # Initialize the database
-    LOG.info(f"Creating database at {args.path}")
-    db = DbContext(path=args.path, echo=args.verbose)
-    db.create_all()
+    LOG.info(f"Creating database at {args.db_path}")
+    args.get_db().create_all()
 
     LOG.info("Done")
     return 0

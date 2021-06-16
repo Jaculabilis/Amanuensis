@@ -1,10 +1,13 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 import logging
 import logging.config
+import os
+from typing import Callable
 
 import amanuensis.cli.admin
 import amanuensis.cli.lexicon
 import amanuensis.cli.user
+from amanuensis.db import DbContext
 
 
 LOGGING_CONFIG = {
@@ -76,6 +79,18 @@ def init_logger(args):
     logging.config.dictConfig(LOGGING_CONFIG)
 
 
+def get_db_factory(parser: ArgumentParser, args: Namespace) -> Callable[[], DbContext]:
+    """Factory function for lazy-loading the database in subcommands."""
+
+    def get_db() -> DbContext:
+        """Lazy loader for the database connection."""
+        if not os.path.exists(args.db_path):
+            parser.error(f"No database found at {args.db_path}")
+        return DbContext(path=args.db_path, echo=args.verbose)
+
+    return get_db
+
+
 def main():
     """CLI entry point"""
     # Set up the top-level parser
@@ -83,8 +98,12 @@ def main():
     parser.set_defaults(
         parser=parser,
         func=lambda args: parser.print_usage(),
+        get_db=None,
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
+    parser.add_argument(
+        "--db", dest="db_path", default="db.sqlite", help="Path to Amanuensis database"
+    )
 
     # Add commands from cli submodules
     subparsers = parser.add_subparsers(metavar="COMMAND")
@@ -92,7 +111,10 @@ def main():
     add_subcommand(subparsers, amanuensis.cli.lexicon)
     add_subcommand(subparsers, amanuensis.cli.user)
 
-    # Parse args and execute the desired action
+    # Parse args and perform top-level arg processing
     args = parser.parse_args()
     init_logger(args)
+    args.get_db = get_db_factory(parser, args)
+
+    # Execute the desired action
     args.func(args)
