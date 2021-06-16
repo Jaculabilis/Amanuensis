@@ -3,7 +3,7 @@ User query interface
 """
 
 import re
-from typing import Sequence
+from typing import Optional, Sequence
 
 from sqlalchemy import select, func
 
@@ -72,3 +72,12 @@ def create(
 def get_all_users(db: DbContext) -> Sequence[User]:
     """Get all users."""
     return db(select(User)).scalars()
+
+
+def get_user_by_username(db: DbContext, username: str) -> Optional[User]:
+    """
+    Get a user by the user's username.
+    Returns None if no user was found.
+    """
+    user: User = db(select(User).where(User.username == username)).scalar_one_or_none()
+    return user

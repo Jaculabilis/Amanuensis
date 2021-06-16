@@ -79,13 +79,13 @@ def init_logger(args):
     logging.config.dictConfig(LOGGING_CONFIG)
 
 
-def get_db_factory(parser: ArgumentParser, args: Namespace) -> Callable[[], DbContext]:
+def get_db_factory(args: Namespace) -> Callable[[], DbContext]:
     """Factory function for lazy-loading the database in subcommands."""
 
     def get_db() -> DbContext:
         """Lazy loader for the database connection."""
         if not os.path.exists(args.db_path):
-            parser.error(f"No database found at {args.db_path}")
+            args.parser.error(f"No database found at {args.db_path}")
         return DbContext(path=args.db_path, echo=args.verbose)
 
     return get_db
@@ -114,7 +114,7 @@ def main():
     # Parse args and perform top-level arg processing
     args = parser.parse_args()
     init_logger(args)
-    args.get_db = get_db_factory(parser, args)
+    args.get_db = get_db_factory(args)
 
     # Execute the desired action
     args.func(args)
