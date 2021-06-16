@@ -66,7 +66,7 @@ def add_subcommand(subparsers, module) -> None:
                 sc_name, help=sc_help, description=obj.__doc__
             )
             subcommand.set_defaults(func=obj)
-            for args, kwargs in obj.__dict__.get("add_argument", []):
+            for args, kwargs in reversed(obj.__dict__.get("add_argument", [])):
                 subcommand.add_argument(*args, **kwargs)
 
 

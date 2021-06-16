@@ -19,7 +19,8 @@ LOG = logging.getLogger(__name__)
 def command_create(args) -> int:
     """Create a user."""
     db: DbContext = args.get_db()
-    userq.create(db, args.username, args.password, args.username, args.email, False)
+    userq.create(db, args.username, "password", args.username, args.email, False)
+    userq.password_set(db, args.username, args.password)
     return 0
 
 
@@ -71,8 +72,13 @@ def command_list(args):
     raise NotImplementedError()
 
 
-def command_passwd(args):
+@add_argument("username")
+@add_argument("password")
+def command_passwd(args) -> int:
     """
     Set a user's password.
     """
-    raise NotImplementedError()
+    db: DbContext = args.get_db()
+    userq.password_set(db, args.username, args.password)
+    LOG.info(f"Updated password for {args.username}")
+    return 0

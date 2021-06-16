@@ -5,7 +5,8 @@ User query interface
 import re
 from typing import Optional, Sequence
 
-from sqlalchemy import select, func
+from sqlalchemy import select, func, update
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from amanuensis.db import DbContext, User
 from amanuensis.errors import ArgumentError
@@ -81,3 +82,19 @@ def get_user_by_username(db: DbContext, username: str) -> Optional[User]:
     """
     user: User = db(select(User).where(User.username == username)).scalar_one_or_none()
     return user
+
+
+def password_set(db: DbContext, username: str, new_password: str) -> None:
+    """Set a user's password."""
+    password_hash = generate_password_hash(new_password)
+    db(update(User).where(User.username == username).values(password=password_hash))
+    db.session.commit()
+
+
+def password_check(db: DbContext, username: str, password: str) -> bool:
+    """Check if a password is correct."""
+    user_password_hash: str = db(
+        select(User.password).where(User.username == username)
+    ).scalar_one()
+    return check_password_hash(user_password_hash, password)
+
