@@ -30,7 +30,7 @@ def get_app(
 
     # Create the database context, if one wasn't already given
     if db is None:
-        db = DbContext(app.config["DATABASE_URI"])
+        db = DbContext(uri=app.config["DATABASE_URI"])
 
     # Make the database connection available to requests via g
     def db_setup():

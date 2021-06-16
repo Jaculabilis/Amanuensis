@@ -28,9 +28,8 @@ def command_init_db(args) -> int:
         args.parser.error(f"{args.path} already exists and --force was not specified")
 
     # Initialize the database
-    db_uri = f"sqlite:///{os.path.abspath(args.path)}"
-    LOG.info(f"Creating database at {db_uri}")
-    db = DbContext(db_uri, debug=args.verbose)
+    LOG.info(f"Creating database at {args.path}")
+    db = DbContext(path=args.path, echo=args.verbose)
     db.create_all()
 
     LOG.info("Done")

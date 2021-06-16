@@ -15,7 +15,7 @@ from amanuensis.server import get_app
 @pytest.fixture
 def db() -> DbContext:
     """Provides an initialized database in memory."""
-    db = DbContext("sqlite:///:memory:", debug=False)
+    db = DbContext(uri="sqlite:///:memory:", echo=False)
     db.create_all()
     return db
 

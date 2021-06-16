@@ -1,6 +1,8 @@
 """
 Database connection setup
 """
+import os
+
 from sqlalchemy import create_engine, MetaData, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -27,9 +29,20 @@ ModelBase = declarative_base(metadata=metadata)
 
 
 class DbContext:
-    def __init__(self, db_uri, debug=False):
+    """Class encapsulating connections to the database."""
+
+    def __init__(self, path=None, uri=None, echo=False):
+        """
+        Create a database context.
+        Exactly one of `path` and `uri` should be specified.
+        """
+
+        if path and uri:
+            raise ValueError("Only one of path and uri may be specified")
+        db_uri = uri if uri else f"sqlite:///{os.path.abspath(path)}"
+
         # Create an engine and enable foreign key constraints in sqlite
-        self.engine = create_engine(db_uri, echo=debug)
+        self.engine = create_engine(db_uri, echo=echo)
 
         @event.listens_for(self.engine, "connect")
         def set_sqlite_pragma(dbapi_connection, connection_record):
