@@ -1,76 +1,79 @@
 import logging
-import time
+from typing import Optional
 
 from flask import (
-	Blueprint,
-	render_template,
-	redirect,
-	url_for,
-	flash,
-	current_app)
+    Blueprint,
+    flash,
+    g,
+    redirect,
+    render_template,
+    url_for,
+)
 from flask_login import (
-	login_user,
-	logout_user,
-	login_required,
-	LoginManager)
+    AnonymousUserMixin,
+    login_user,
+    logout_user,
+    login_required,
+    LoginManager,
+)
 
-from amanuensis.config import RootConfigDirectoryContext
-from amanuensis.models import ModelFactory, AnonymousUserModel
+import amanuensis.backend.user as userq
+from amanuensis.db import User
 
 from .forms import LoginForm
 
-logger = logging.getLogger(__name__)
+
+LOG = logging.getLogger(__name__)
+
+bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder=".")
 
 
-def get_login_manager(root: RootConfigDirectoryContext) -> LoginManager:
-	"""
-	Creates a login manager
-	"""
-	login_manager = LoginManager()
-	login_manager.login_view = 'auth.login'
-	login_manager.anonymous_user = AnonymousUserModel
+def get_login_manager() -> LoginManager:
+    """Login manager factory"""
+    login_manager = LoginManager()
+    login_manager.login_view = "auth.login"
+    login_manager.anonymous_user = AnonymousUserMixin
 
-	@login_manager.user_loader
-	def load_user(uid):
-		return current_app.config['model_factory'].user(str(uid))
+    def load_user(user_id_str: str) -> Optional[User]:
+        try:
+            user_id = int(user_id_str)
+        except:
+            return None
+        return userq.get_user_by_id(g.db, user_id)
 
-	return login_manager
+    login_manager.user_loader(load_user)
 
-
-bp_auth = Blueprint('auth', __name__,
-	url_prefix='/auth',
-	template_folder='.')
+    return login_manager
 
 
-@bp_auth.route('/login/', methods=['GET', 'POST'])
+@bp.route("/login/", methods=["GET", "POST"])
 def login():
-	model_factory: ModelFactory = current_app.config['model_factory']
-	form = LoginForm()
+    form = LoginForm()
 
-	if not form.validate_on_submit():
-		# Either the request was GET and we should render the form,
-		# or the request was POST and validation failed.
-		return render_template('auth.login.jinja', form=form)
+    if not form.validate_on_submit():
+        # Either the request was GET and we should render the form,
+        # or the request was POST and validation failed.
+        return render_template("auth.login.jinja", form=form)
 
-	# POST with valid data
-	username = form.username.data
-	user = model_factory.try_user(username)
-	if not user or not user.check_password(form.password.data):
-		# Bad creds
-		flash("Login not recognized")
-		return redirect(url_for('auth.login'))
+    # POST with valid data
+    username: str = form.username.data
+    password: str = form.password.data
+    user: User = userq.get_user_by_username(g.db, username)
+    if not user or not userq.password_check(g.db, username, password):
+        # Bad creds
+        flash("Login not recognized")
+        return redirect(url_for("auth.login"))
 
-	# Login credentials were correct
-	remember_me = form.remember.data
-	login_user(user, remember=remember_me)
-	with user.ctx.edit_config() as cfg:
-		cfg.last_login = int(time.time())
-	logger.info('Logged in user "{0.username}" ({0.uid})'.format(user.cfg))
-	return redirect(url_for('home.home'))
+    # Login credentials were correct
+    remember_me: bool = form.remember.data
+    login_user(user, remember=remember_me)
+    userq.update_logged_in(g.db, username)
+    LOG.info("Logged in user {0.username} ({0.id})".format(user))
+    return redirect(url_for("home.admin"))
 
 
-@bp_auth.route("/logout/", methods=['GET'])
+@bp.get("/logout/")
 @login_required
 def logout():
-	logout_user()
-	return redirect(url_for('home.home'))
+    logout_user()
+    return redirect(url_for("home.admin"))

@@ -9,12 +9,12 @@
         [{{ lexicon.status.capitalize() }}]
     </p>
     <p><i>{{ lexicon.prompt }}</i></p>
-    {# {% if current_user.is_authenticated %} #}
+    {% if current_user.is_authenticated %}
     <p>
         {# TODO #}
         {# {%
             if current_user.uid in lexicon.cfg.join.joined
-            or current_user.cfg.is_admin
+            or current_user.is_site_admin
         %} #}
         Editor: {#{ lexicon.cfg.editor|user_attr('username') }#} /
         Players:
@@ -31,7 +31,7 @@
         {# {% endif %} #}
         {# {% endif %} #}
     </p>
-    {# {% endif %} #}
+    {% endif %}
 </div>
 {% endmacro %}
 

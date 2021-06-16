@@ -5,7 +5,8 @@ from flask import Flask, g
 
 from amanuensis.config import AmanuensisConfig, CommandLineConfig
 from amanuensis.db import DbContext
-import amanuensis.server.home
+import amanuensis.server.auth as auth
+import amanuensis.server.home as home
 
 
 def get_app(
@@ -48,10 +49,11 @@ def get_app(
     app.jinja_options.update(trim_blocks=True, lstrip_blocks=True)
 
     # Set up Flask-Login
-    # TODO
+    auth.get_login_manager().init_app(app)
 
     # Register blueprints
-    app.register_blueprint(amanuensis.server.home.bp)
+    app.register_blueprint(auth.bp)
+    app.register_blueprint(home.bp)
 
     def test():
         return "Hello, world!"

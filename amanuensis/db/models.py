@@ -100,6 +100,25 @@ class User(ModelBase):
     articles = relationship("Article", back_populates="user")
     posts = relationship("Post", back_populates="user")
 
+    #########################
+    # Flask-Login interface #
+    #########################
+
+    @property
+    def is_authenticated(self: "User") -> bool:
+        return True
+
+    @property
+    def is_active(self: "User") -> bool:
+        return True
+
+    @property
+    def is_anonymous(self: "User") -> bool:
+        return False
+
+    def get_id(self: "User") -> str:
+        return str(self.id)
+
 
 class Lexicon(ModelBase):
     """

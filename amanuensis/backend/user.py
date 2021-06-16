@@ -2,6 +2,7 @@
 User query interface
 """
 
+import datetime
 import re
 from typing import Optional, Sequence
 
@@ -75,6 +76,15 @@ def get_all_users(db: DbContext) -> Sequence[User]:
     return db(select(User)).scalars()
 
 
+def get_user_by_id(db: DbContext, user_id: int) -> Optional[User]:
+    """
+    Get a user by the user's id.
+    Returns None if no user was found.
+    """
+    user: User = db(select(User).where(User.id == user_id)).scalar_one_or_none()
+    return user
+
+
 def get_user_by_username(db: DbContext, username: str) -> Optional[User]:
     """
     Get a user by the user's username.
@@ -98,3 +108,12 @@ def password_check(db: DbContext, username: str, password: str) -> bool:
     ).scalar_one()
     return check_password_hash(user_password_hash, password)
 
+
+def update_logged_in(db: DbContext, username: str) -> None:
+    """Bump the value of the last_login column for a user."""
+    db(
+        update(User)
+        .where(User.username == username)
+        .values(last_login=datetime.datetime.utcnow())
+    )
+    db.session.commit()
