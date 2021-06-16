@@ -21,13 +21,6 @@ def register_custom_filters(app):
 		val = getattr(user.cfg, attr)
 		return val
 
-	@app.template_filter("asdate")
-	def timestamp_to_readable(ts, formatstr="%Y-%m-%d %H:%M:%S"):
-		if ts is None:
-			return "null"
-		dt = datetime.fromtimestamp(ts)
-		return dt.strftime(formatstr)
-
 	@app.template_filter("articlelink")
 	def article_link(title):
 		return url_for(

@@ -114,6 +114,6 @@ def update_logged_in(db: DbContext, username: str) -> None:
     db(
         update(User)
         .where(User.username == username)
-        .values(last_login=datetime.datetime.utcnow())
+        .values(last_login=datetime.datetime.now(datetime.timezone.utc))
     )
     db.session.commit()

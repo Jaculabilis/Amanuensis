@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import json
 import os
 
@@ -47,6 +48,15 @@ def get_app(
 
     # Configure jinja options
     app.jinja_options.update(trim_blocks=True, lstrip_blocks=True)
+
+    def date_format(dt: datetime, formatstr="%Y-%m-%d %H:%M:%S%z") -> str:
+        if dt is None:
+            return "never"
+        # Cast db time to UTC, then convert to local timezone
+        adjusted = dt.replace(tzinfo=timezone.utc).astimezone()
+        return adjusted.strftime(formatstr)
+
+    app.template_filter("date")(date_format)
 
     # Set up Flask-Login
     auth.get_login_manager().init_app(app)
