@@ -9,7 +9,7 @@ class AmanuensisConfig:
     # If CONFIG_FILE is defined, the config file it points to may override
     # config values defined on the config object itself.
     CONFIG_FILE: Optional[str] = None
-    STATIC_ROOT: Optional[str] = "static"
+    STATIC_ROOT: Optional[str] = "../resources"
     SECRET_KEY: Optional[str] = "secret"
     DATABASE_URI: Optional[str] = "sqlite:///:memory:"
     TESTING: bool = False

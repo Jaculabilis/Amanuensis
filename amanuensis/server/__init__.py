@@ -1,4 +1,5 @@
 import json
+import os
 
 from flask import Flask, g
 
@@ -18,8 +19,8 @@ def get_app(
     app.config.from_object(config)
 
     # If a config file is now specified, also load keys from there
-    if app.config.get("CONFIG_FILE", None):
-        app.config.from_file(app.config["CONFIG_FILE"], json.load)
+    if config_path := app.config.get("CONFIG_FILE", None):
+        app.config.from_file(os.path.abspath(config_path), json.load)
 
     # Assert that all required config values are now set
     for config_key in ("SECRET_KEY", "DATABASE_URI"):
@@ -59,4 +60,5 @@ def get_app(
 def run():
     """Run the server, populating the config from the command line."""
     config = CommandLineConfig()
-    get_app(config).run(debug=config.TESTING)
+    app = get_app(config)
+    app.run(debug=app.testing)
