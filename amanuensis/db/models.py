@@ -13,7 +13,6 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
-    Table,
     Text,
     text,
     TypeDecorator,
@@ -233,6 +232,14 @@ class Lexicon(ModelBase):
     index_rules = relationship("ArticleIndexRule", back_populates="lexicon")
     content_rules = relationship("ArticleContentRule", back_populates="lexicon")
     posts = relationship("Post", back_populates="lexicon")
+
+    #######################
+    # Derived information #
+    #######################
+
+    @property
+    def full_title(self: "Lexicon") -> str:
+        return self.title if self.title else f"Lexicon {self.name}"
 
 
 class Membership(ModelBase):

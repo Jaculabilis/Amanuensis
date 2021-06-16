@@ -5,6 +5,7 @@ from flask import Flask, g
 
 from amanuensis.config import AmanuensisConfig, CommandLineConfig
 from amanuensis.db import DbContext
+import amanuensis.server.home
 
 
 def get_app(
@@ -34,11 +35,13 @@ def get_app(
     # Make the database connection available to requests via g
     def db_setup():
         g.db = db
+
     app.before_request(db_setup)
 
     # Tear down the session on request teardown
     def db_teardown(response_or_exc):
         db.session.remove()
+
     app.teardown_appcontext(db_teardown)
 
     # Configure jinja options
@@ -48,10 +51,11 @@ def get_app(
     # TODO
 
     # Register blueprints
-    # TODO
+    app.register_blueprint(amanuensis.server.home.bp)
 
     def test():
         return "Hello, world!"
+
     app.route("/")(test)
 
     return app

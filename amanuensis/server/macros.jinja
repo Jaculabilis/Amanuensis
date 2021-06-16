@@ -1,45 +1,47 @@
 {% macro dashboard_lexicon_item(lexicon) %}
-<div class="dashboard-lexicon-item dashboard-lexicon-{{ lexicon.status }}">
-	<p>
-		<span class="dashboard-lexicon-item-title">
-			<a href="{{ url_for('lexicon.contents', name=lexicon.cfg.name) }}">
-				Lexicon {{ lexicon.cfg.name }}</a>
-		</span>
-		[{{ lexicon.status.capitalize() }}]
-	</p>
-	<p><i>{{ lexicon.cfg.prompt }}</i></p>
-	{% if current_user.is_authenticated %}
-	<p>
-		{%
-			if current_user.uid in lexicon.cfg.join.joined
-			or current_user.cfg.is_admin
-		%}
-		Editor: {{ lexicon.cfg.editor|user_attr('username') }} /
-		Players:
-		{% for uid in lexicon.cfg.join.joined %}
-		{{ uid|user_attr('username') }}{% if not loop.last %}, {% endif %}
-		{% endfor %}
-		({{ lexicon.cfg.join.joined|count }}/{{ lexicon.cfg.join.max_players }})
-		{% else %}
-		Players: {{ lexicon.cfg.join.joined|count }}/{{ lexicon.cfg.join.max_players }}
-		{% if lexicon.cfg.join.public and lexicon.cfg.join.open %}
-		/ <a href="{{ url_for('lexicon.join', name=lexicon.cfg.name) }}">
-			Join game
-		</a>
-		{% endif %}
-		{% endif %}
-	</p>
-	{% endif %}
+{% set status = "completed" if lexicon.completed else "ongoing" if lexicon.started else "unstarted" %}
+<div class="dashboard-lexicon-item dashboard-lexicon-{{ status }}">
+    <p>
+        <span class="dashboard-lexicon-item-title">
+            <a href="#{#{ url_for('lexicon.contents', name=lexicon.cfg.name) }#}">
+                {{ lexicon.full_title }}</a>
+        </span>
+        [{{ lexicon.status.capitalize() }}]
+    </p>
+    <p><i>{{ lexicon.prompt }}</i></p>
+    {# {% if current_user.is_authenticated %} #}
+    <p>
+        {# TODO #}
+        {# {%
+            if current_user.uid in lexicon.cfg.join.joined
+            or current_user.cfg.is_admin
+        %} #}
+        Editor: {#{ lexicon.cfg.editor|user_attr('username') }#} /
+        Players:
+        {# {% for uid in lexicon.cfg.join.joined %} #}
+        {# {{ uid|user_attr('username') }}{% if not loop.last %}, {% endif %} #}
+        {# {% endfor %} #}
+        {# ({{ lexicon.cfg.join.joined|count }}/{{ lexicon.cfg.join.max_players }}) #}
+        {# {% else %} #}
+        {# Players: {{ lexicon.cfg.join.joined|count }}/{{ lexicon.cfg.join.max_players }} #}
+        {# {% if lexicon.cfg.join.public and lexicon.cfg.join.open %} #}
+        {# / <a href="{{ url_for('lexicon.join', name=lexicon.cfg.name) }}"> #}
+            {# Join game #}
+        {# </a> #}
+        {# {% endif %} #}
+        {# {% endif %} #}
+    </p>
+    {# {% endif %} #}
 </div>
 {% endmacro %}
 
 {% macro dashboard_user_item(user) %}
 <div class="dashboard-lexicon-item">
-	<p>
-		<b>{{ user.cfg.username }}</b>
-		{% if user.cfg.username != user.cfg.displayname %} / {{ user.cfg.displayname }}{% endif %}
-		({{user.uid}})
-	</p>
-	<p>Last activity: {{ user.cfg.last_activity|asdate }} &mdash; Last login: {{ user.cfg.last_login|asdate }}</p>
+    <p>
+        <b>{{ user.username }}</b>
+        {% if user.username != user.display_name %} / {{ user.display_name }}{% endif %}
+        (id #{{user.id}})
+    </p>
+    <p>Last activity: {{ user.last_activity }} &mdash; Last login: {{ user.last_login }}</p>
 </div>
 {% endmacro %}

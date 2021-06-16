@@ -1,12 +1,12 @@
 {% extends "page.jinja" %}
 {% block sidebar %}
 <div id="sidebar">
-	{% if not template_sidebar_rows %}{% set template_sidebar_rows = [] %}{% endif %}
-	{% if not sidebar_rows %}{% set sidebar_rows = [] %}{% endif %}
-	<table>
-		{% for row in template_sidebar_rows + sidebar_rows %}
-		<tr><td>{{ row|safe }}</td></tr>{% endfor %}
-	</table>
+    {% if not template_sidebar_rows %}{% set template_sidebar_rows = [] %}{% endif %}
+    {% if not sidebar_rows %}{% set sidebar_rows = [] %}{% endif %}
+    <table>
+        {% for row in template_sidebar_rows + sidebar_rows %}
+        <tr><td>{{ row|safe }}</td></tr>{% endfor %}
+    </table>
 </div>
 {% endblock %}
 {% block content_class %}content-2col{% endblock %}

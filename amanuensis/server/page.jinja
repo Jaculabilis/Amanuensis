@@ -1,33 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8"/>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>{% block title %}{% endblock %}</title>
-	<link rel="icon" type="image/png" href="{{ url_for('static', filename='amanuensis.png') }}">
-	<link rel="stylesheet" href="{{ url_for("static", filename="page.css") }}">
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='amanuensis.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
 </head>
 <body>
-	<div id="wrapper">
-		<div id="header">
-			<div id="login-status" {% block login_status_attr %}{% endblock %}>
-				{% if current_user.is_authenticated %}
-				<b>{{ current_user.cfg.username -}}</b>
-				(<a href="{{ url_for('auth.logout') }}">Logout</a>)
-				{% else %}
-				<a href="{{ url_for('auth.login') }}">Login</a>
-				{% endif %}
-			</div>
-			{% block header %}{% endblock %}
-		</div>
-		{% block sidebar %}{% endblock %}
-		<div id="content" class="{% block content_class %}{% endblock %}">
-			{% if not template_content_blocks %}{% set template_content_blocks = [] %}{% endif %}
-			{% if not content_blocks %}{% set content_blocks = [] %}{% endif %}
-			{% for content_block in template_content_blocks + content_blocks %}<div class="contentblock">
-				{{ content_block|safe }}</div>
-			{% endfor %}
-		</div>
-	</div>
+    <div id="wrapper">
+        <div id="header">
+            <div id="login-status" {% block login_status_attr %}{% endblock %}>
+                {# TODO #}
+                {# {% if current_user.is_authenticated %}
+                <b>{{ current_user.cfg.username -}}</b>
+                (<a href="{{ url_for('auth.logout') }}">Logout</a>)
+                {% else %} #}
+                <a href="#{#{ url_for('auth.login') }#}">Login</a>
+                {# {% endif %} #}
+            </div>
+            {% block header %}{% endblock %}
+        </div>
+        {% block sidebar %}{% endblock %}
+        <div id="content" class="{% block content_class %}{% endblock %}">
+            {% if not template_content_blocks %}{% set template_content_blocks = [] %}{% endif %}
+            {% if not content_blocks %}{% set content_blocks = [] %}{% endif %}
+            {% for content_block in template_content_blocks + content_blocks %}<div class="contentblock">
+                {{ content_block|safe }}</div>
+            {% endfor %}
+        </div>
+    </div>
 </body>
 </html>
