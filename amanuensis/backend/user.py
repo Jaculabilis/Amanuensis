@@ -3,7 +3,7 @@ User query interface
 """
 
 import re
-import uuid
+from typing import Sequence
 
 from sqlalchemy import select, func
 
@@ -67,3 +67,8 @@ def create(
     db.session.add(new_user)
     db.session.commit()
     return new_user
+
+
+def get_all_users(db: DbContext) -> Sequence[User]:
+    """Get all users."""
+    return db(select(User)).scalars()

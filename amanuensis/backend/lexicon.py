@@ -3,6 +3,7 @@ Lexicon query interface
 """
 
 import re
+from typing import Sequence
 
 from sqlalchemy import select, func
 
@@ -52,3 +53,8 @@ def create(
     db.session.add(new_lexicon)
     db.session.commit()
     return new_lexicon
+
+
+def get_all_lexicons(db: DbContext) -> Sequence[Lexicon]:
+    """Get all lexicons."""
+    return db(select(Lexicon)).scalars()
