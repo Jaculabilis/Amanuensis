@@ -1,22 +1,35 @@
 """
 pytest test fixtures
 """
+import os
 import pytest
+import tempfile
 
-from amanuensis.db import DbContext
+from sqlalchemy.orm.session import close_all_sessions
+
 import amanuensis.backend.character as charq
 import amanuensis.backend.lexicon as lexiq
 import amanuensis.backend.membership as memq
 import amanuensis.backend.user as userq
 from amanuensis.config import AmanuensisConfig
+from amanuensis.db import DbContext
 from amanuensis.server import get_app
 
 
 @pytest.fixture
-def db() -> DbContext:
-    """Provides an initialized database in memory."""
-    db = DbContext(uri="sqlite:///:memory:", echo=False)
+def db(request) -> DbContext:
+    """Provides a fully-initialized ephemeral database."""
+    db_fd, db_path = tempfile.mkstemp()
+    db = DbContext(path=db_path, echo=False)
     db.create_all()
+
+    def db_teardown():
+        close_all_sessions()
+        os.close(db_fd)
+        os.unlink(db_path)
+
+    request.addfinalizer(db_teardown)
+
     return db
 
 
@@ -128,12 +141,10 @@ def lexicon_with_editor(make):
 
 class TestConfig(AmanuensisConfig):
     TESTING = True
-    SECRET_KEY = "secret key"
-    DATABASE_URI = "sqlite:///:memory:"
+    SECRET_KEY = os.urandom(32).hex()
 
 
 @pytest.fixture
-def app(db):
+def app(db: DbContext):
     """Provides an application running on top of the test database."""
-    server_app = get_app(TestConfig, db)
-    return server_app
+    return get_app(TestConfig(), db)

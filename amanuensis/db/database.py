@@ -39,10 +39,10 @@ class DbContext:
 
         if path and uri:
             raise ValueError("Only one of path and uri may be specified")
-        db_uri = uri if uri else f"sqlite:///{os.path.abspath(path)}"
+        self.db_uri = uri if uri else f"sqlite:///{os.path.abspath(path)}"
 
         # Create an engine and enable foreign key constraints in sqlite
-        self.engine = create_engine(db_uri, echo=echo)
+        self.engine = create_engine(self.db_uri, echo=echo)
 
         @event.listens_for(self.engine, "connect")
         def set_sqlite_pragma(dbapi_connection, connection_record):
