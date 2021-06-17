@@ -55,6 +55,6 @@ def create(
     return new_lexicon
 
 
-def get_all_lexicons(db: DbContext) -> Sequence[Lexicon]:
+def get_all(db: DbContext) -> Sequence[Lexicon]:
     """Get all lexicons."""
     return db(select(Lexicon)).scalars()

@@ -21,6 +21,7 @@ def command_create(args) -> int:
     db: DbContext = args.get_db()
     userq.create(db, args.username, "password", args.username, args.email, False)
     userq.password_set(db, args.username, args.password)
+    LOG.info(f"Created user {args.username}")
     return 0
 
 
@@ -28,7 +29,7 @@ def command_create(args) -> int:
 def command_promote(args) -> int:
     """Make a user a site admin."""
     db: DbContext = args.get_db()
-    user: Optional[User] = userq.get_user_by_username(db, args.username)
+    user: Optional[User] = userq.from_username(db, args.username)
     if user is None:
         args.parser.error("User not found")
         return -1
@@ -45,7 +46,7 @@ def command_promote(args) -> int:
 def command_demote(args):
     """Revoke a user's site admin status."""
     db: DbContext = args.get_db()
-    user: Optional[User] = userq.get_user_by_username(db, args.username)
+    user: Optional[User] = userq.from_username(db, args.username)
     if user is None:
         args.parser.error("User not found")
         return -1

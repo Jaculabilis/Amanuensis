@@ -21,7 +21,7 @@ def create(
     db: DbContext,
     username: str,
     password: str,
-    display_name: str,
+    display_name: Optional[str],
     email: str,
     is_site_admin: bool,
 ) -> User:
@@ -71,12 +71,7 @@ def create(
     return new_user
 
 
-def get_all_users(db: DbContext) -> Sequence[User]:
-    """Get all users."""
-    return db(select(User)).scalars()
-
-
-def get_user_by_id(db: DbContext, user_id: int) -> Optional[User]:
+def from_id(db: DbContext, user_id: int) -> Optional[User]:
     """
     Get a user by the user's id.
     Returns None if no user was found.
@@ -85,13 +80,18 @@ def get_user_by_id(db: DbContext, user_id: int) -> Optional[User]:
     return user
 
 
-def get_user_by_username(db: DbContext, username: str) -> Optional[User]:
+def from_username(db: DbContext, username: str) -> Optional[User]:
     """
     Get a user by the user's username.
     Returns None if no user was found.
     """
     user: User = db(select(User).where(User.username == username)).scalar_one_or_none()
     return user
+
+
+def get_all(db: DbContext) -> Sequence[User]:
+    """Get all users."""
+    return db(select(User)).scalars()
 
 
 def password_set(db: DbContext, username: str, new_password: str) -> None:

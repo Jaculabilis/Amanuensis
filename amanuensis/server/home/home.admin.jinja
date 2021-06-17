@@ -10,11 +10,11 @@
 
 {% block main %}
 <p>Users:</p>
-{% for user in userq.get_all_users(db) %}
+{% for user in userq.get_all(db) %}
 {{ macros.dashboard_user_item(user) }}
 {% endfor %}
 <p>Lexicons:</p>
-{% for lexicon in lexiq.get_all_lexicons(db) %}
+{% for lexicon in lexiq.get_all(db) %}
 {{ macros.dashboard_lexicon_item(lexicon) }}
 {% endfor %}
 {% endblock %}
