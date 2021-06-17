@@ -1,4 +1,12 @@
+from argparse import BooleanOptionalAction
 import logging
+
+from sqlalchemy import update
+
+import amanuensis.backend.lexicon as lexiq
+import amanuensis.backend.membership as memq
+import amanuensis.backend.user as userq
+from amanuensis.db import DbContext, Lexicon
 
 from .helpers import add_argument
 
@@ -9,22 +17,51 @@ COMMAND_HELP = "Interact with lexicons."
 LOG = logging.getLogger(__name__)
 
 
+@add_argument("lexicon")
+@add_argument("user")
+@add_argument("--editor", action="store_true")
+def command_add(args) -> int:
+    db: DbContext = args.get_db()
+    lexicon = lexiq.from_name(db, args.lexicon)
+    user = userq.from_username(db, args.user)
+    assert user is not None
+    memq.create(db, user.id, lexicon.id, args.editor)
+    LOG.info(f"Added {args.user} to lexicon {args.lexicon}")
+    return 0
+
+
+@add_argument("name")
 def command_create(args):
     """
     Create a lexicon.
     """
-    raise NotImplementedError()
+    db: DbContext = args.get_db()
+    lexiq.create(db, args.name, None, f"Prompt for Lexicon {args.name}")
+    LOG.info(f"Created lexicon {args.name}")
+    return 0
 
 
-def command_delete(args):
+@add_argument("name")
+@add_argument("--public", action=BooleanOptionalAction)
+@add_argument("--join", action=BooleanOptionalAction)
+def command_edit(args):
     """
-    Delete a lexicon.
+    Update a lexicon's configuration.
     """
-    raise NotImplementedError()
+    db: DbContext = args.get_db()
+    values = {}
 
+    if args.public == True:
+        values["public"] = True
+    elif args.public == False:
+        values["public"] = False
 
-def command_list(args):
-    """
-    List all lexicons and their statuses.
-    """
-    raise NotImplementedError()
+    if args.join == True:
+        values["joinable"] = True
+    elif args.join == False:
+        values["joinable"] = False
+
+    result = db(update(Lexicon).where(Lexicon.name == args.name).values(**values))
+    LOG.info(f"Updated {result.rowcount} lexicons")
+    db.session.commit()
+    return 0 if result.rowcount == 1 else -1

@@ -3,11 +3,11 @@ Lexicon query interface
 """
 
 import re
-from typing import Sequence
+from typing import Sequence, Optional
 
 from sqlalchemy import select, func
 
-from amanuensis.db import DbContext, Lexicon
+from amanuensis.db import DbContext, Lexicon, Membership
 from amanuensis.errors import ArgumentError
 
 
@@ -17,7 +17,7 @@ RE_ALPHANUM_DASH_UNDER = re.compile(r"^[A-Za-z0-9-_]*$")
 def create(
     db: DbContext,
     name: str,
-    title: str,
+    title: Optional[str],
     prompt: str,
 ) -> Lexicon:
     """
@@ -55,6 +55,21 @@ def create(
     return new_lexicon
 
 
+def from_name(db: DbContext, name: str) -> Lexicon:
+    """Get a lexicon by its name."""
+    return db(select(Lexicon).where(Lexicon.name == name)).scalar_one()
+
+
 def get_all(db: DbContext) -> Sequence[Lexicon]:
     """Get all lexicons."""
     return db(select(Lexicon)).scalars()
+
+
+def get_joined(db: DbContext, user_id: int) -> Sequence[Lexicon]:
+    """Get all lexicons that a player is in."""
+    return db(select(Lexicon).join(Lexicon.memberships).where(Membership.user_id == user_id)).scalars()
+
+
+def get_public(db: DbContext) -> Sequence[Lexicon]:
+    """Get all publicly visible lexicons."""
+    return db(select(Lexicon).where(Lexicon.public == True)).scalars()
