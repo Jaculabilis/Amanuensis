@@ -12,9 +12,15 @@
 {% endfor %}
 
 {% if current_user.is_authenticated %}
+{% set joined = lexiq.get_joined(db, current_user.id)|list %}
+{% else %}
+{% set joined = [] %}
+{% endif %}
+
+{% if current_user.is_authenticated %}
 <h2>Your games</h2>
-{% if user_lexicons %}
-{% for lexicon in user_lexicons %}
+{% if joined %}
+{% for lexicon in joined %}
 {{ macros.dashboard_lexicon_item(lexicon) }}
 {% endfor %}
 {% else %}
@@ -22,9 +28,10 @@
 {% endif %}
 {% endif %}
 
+{% set public = lexiq.get_public(db)|reject("in", joined)|list %}
 <h2>Public games</h2>
-{% if public_lexicons %}
-{% for lexicon in public_lexicons %}
+{% if public %}
+{% for lexicon in public %}
 {{ macros.dashboard_lexicon_item(lexicon) }}
 {% endfor %}
 {% else %}
@@ -34,7 +41,7 @@
 {% endblock %}
 {% set template_content_blocks = [self.main()] %}
 
-{% if current_user.cfg.is_admin %}
+{% if current_user.is_site_admin %}
 {% block admin_dash %}
 <a href="{{ url_for('home.admin') }}" style="display:block; text-align:center;">Admin dashboard</a>
 {% endblock %}

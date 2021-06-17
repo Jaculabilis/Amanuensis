@@ -4,6 +4,8 @@ import os
 
 from flask import Flask, g
 
+import amanuensis.backend.lexicon
+import amanuensis.backend.user
 from amanuensis.config import AmanuensisConfig, CommandLineConfig
 from amanuensis.db import DbContext
 import amanuensis.server.auth as auth
@@ -57,6 +59,11 @@ def get_app(
         return adjusted.strftime(formatstr)
 
     app.template_filter("date")(date_format)
+
+    def include_backend():
+        return {"db": db, "lexiq": amanuensis.backend.lexicon, "userq": amanuensis.backend.user}
+
+    app.context_processor(include_backend)
 
     # Set up Flask-Login
     auth.get_login_manager().init_app(app)

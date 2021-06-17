@@ -4,7 +4,7 @@
 {% block header %}<h2>Amanuensis - Admin Dashboard</h2>{% endblock %}
 
 {# TODO #}
-{% block sb_home %}<a href="#{#{ url_for('home.home') }#}">Home</a>{% endblock %}
+{% block sb_home %}<a href="{{ url_for('home.home') }}">Home</a>{% endblock %}
 {% block sb_create %}<a href="#{#{ url_for('home.admin_create') }#}">Create a lexicon</a>{% endblock %}
 {% set template_sidebar_rows = [self.sb_home(), self.sb_create()] %}
 

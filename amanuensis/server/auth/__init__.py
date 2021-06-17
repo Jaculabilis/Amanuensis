@@ -69,11 +69,11 @@ def login():
     login_user(user, remember=remember_me)
     userq.update_logged_in(g.db, username)
     LOG.info("Logged in user {0.username} ({0.id})".format(user))
-    return redirect(url_for("home.admin"))
+    return redirect(url_for("home.home"))
 
 
 @bp.get("/logout/")
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("home.admin"))
+    return redirect(url_for("home.home"))

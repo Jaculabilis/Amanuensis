@@ -3,33 +3,35 @@
 <div class="dashboard-lexicon-item dashboard-lexicon-{{ status }}">
     <p>
         <span class="dashboard-lexicon-item-title">
-            <a href="#{#{ url_for('lexicon.contents', name=lexicon.cfg.name) }#}">
-                {{ lexicon.full_title }}</a>
+            <a href="#{#{ url_for('lexicon.contents', name=lexicon.cfg.name) }#}">{{ lexicon.full_title }}</a>
         </span>
-        [{{ lexicon.status.capitalize() }}]
+        [{{ status.capitalize() }}]
     </p>
     <p><i>{{ lexicon.prompt }}</i></p>
     {% if current_user.is_authenticated %}
     <p>
-        {# TODO #}
-        {# {%
-            if current_user.uid in lexicon.cfg.join.joined
+        {#- 
+            Show detailed player information if the current user is a member of the lexicon or if the current user is a site admin. The filter sequence must be converted to a list because it returns a generator, which is truthy.
+        -#}
+        {%-
+            if lexicon.memberships|map(attribute="user_id")|select("equalto", current_user.id)|list
             or current_user.is_site_admin
-        %} #}
-        Editor: {#{ lexicon.cfg.editor|user_attr('username') }#} /
-        Players:
-        {# {% for uid in lexicon.cfg.join.joined %} #}
-        {# {{ uid|user_attr('username') }}{% if not loop.last %}, {% endif %} #}
-        {# {% endfor %} #}
-        {# ({{ lexicon.cfg.join.joined|count }}/{{ lexicon.cfg.join.max_players }}) #}
-        {# {% else %} #}
-        {# Players: {{ lexicon.cfg.join.joined|count }}/{{ lexicon.cfg.join.max_players }} #}
-        {# {% if lexicon.cfg.join.public and lexicon.cfg.join.open %} #}
-        {# / <a href="{{ url_for('lexicon.join', name=lexicon.cfg.name) }}"> #}
-            {# Join game #}
-        {# </a> #}
-        {# {% endif %} #}
-        {# {% endif %} #}
+        -%}
+        Editor: {{
+            lexicon.memberships|selectattr("is_editor")|map(attribute="user")|map(attribute="username")|join(", ")
+        }} / Players: {{
+            lexicon.memberships|map(attribute="user")|map(attribute="username")|join(", ")
+        }} ({{ lexicon.memberships|count }}
+        {%- if lexicon.player_limit is not none -%}
+        /{{ lexicon.player_limit }}
+        {%- endif -%})
+        {%- else -%}
+        Players: {{ lexicon.memberships|count }}{% if lexicon.player_limit is not none %} / {{ lexicon.player_limit }}{% endif -%}
+        {%-
+            if lexicon.public and lexicon.joinable
+        %} / <a href="#{#{ url_for('lexicon.join', name=lexicon.cfg.name) }#}">Join game</a>
+        {%- endif -%}
+        {%- endif -%}
     </p>
     {% endif %}
 </div>
