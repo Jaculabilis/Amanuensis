@@ -1,8 +1,9 @@
-from amanuensis.db.models import User
+import os
+
 import pytest
 
-from amanuensis.db import DbContext
 import amanuensis.backend.user as userq
+from amanuensis.db import DbContext, User
 from amanuensis.errors import ArgumentError
 
 
@@ -50,3 +51,26 @@ def test_create_user(db: DbContext):
     user2_kw: dict = {**defaults, "username": "user2", "display_name": None}
     user2: User = userq.create(**user2_kw)
     assert user2.display_name is not None
+
+
+def test_user_from(db: DbContext, make):
+    """Test userq.from_*."""
+    user1: User = make.user()
+    user2: User = make.user()
+    assert userq.from_id(db, user1.id) == user1
+    assert userq.from_username(db, user1.username) == user1
+    assert userq.from_id(db, user2.id) == user2
+    assert userq.from_username(db, user2.username) == user2
+
+
+def test_user_password(db: DbContext, make):
+    """Test user password functions."""
+    pw1 = os.urandom(8).hex()
+    pw2 = os.urandom(8).hex()
+    user: User = make.user(password=pw1)
+    assert userq.password_check(db, user.username, pw1)
+    assert not userq.password_check(db, user.username, pw2)
+
+    userq.password_set(db, user.username, pw2)
+    assert not userq.password_check(db, user.username, pw1)
+    assert userq.password_check(db, user.username, pw2)

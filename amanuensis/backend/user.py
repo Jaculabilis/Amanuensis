@@ -61,7 +61,7 @@ def create(
 
     new_user = User(
         username=username,
-        password=password,
+        password=generate_password_hash(password),
         display_name=display_name,
         email=email,
         is_site_admin=is_site_admin,
