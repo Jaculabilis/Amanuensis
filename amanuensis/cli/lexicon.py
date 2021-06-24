@@ -1,4 +1,3 @@
-from argparse import BooleanOptionalAction
 import logging
 
 from sqlalchemy import update
@@ -42,8 +41,10 @@ def command_create(args):
 
 
 @add_argument("name")
-@add_argument("--public", action=BooleanOptionalAction)
-@add_argument("--join", action=BooleanOptionalAction)
+@add_argument("--public", dest="public", action="store_const", const=True)
+@add_argument("--no-public", dest="public", action="store_const", const=False)
+@add_argument("--join", dest="join", action="store_const", const=True)
+@add_argument("--no-join", dest="join", action="store_const", const=False)
 def command_edit(args):
     """
     Update a lexicon's configuration.
