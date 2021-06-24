@@ -20,6 +20,9 @@ LOG = logging.getLogger(__name__)
 @add_argument("user")
 @add_argument("--editor", action="store_true")
 def command_add(args) -> int:
+    """
+    Add a user to a lexicon.
+    """
     db: DbContext = args.get_db()
     lexicon = lexiq.from_name(db, args.lexicon)
     user = userq.from_username(db, args.user)

@@ -67,7 +67,9 @@ def get_all(db: DbContext) -> Sequence[Lexicon]:
 
 def get_joined(db: DbContext, user_id: int) -> Sequence[Lexicon]:
     """Get all lexicons that a player is in."""
-    return db(select(Lexicon).join(Lexicon.memberships).where(Membership.user_id == user_id)).scalars()
+    return db(
+        select(Lexicon).join(Lexicon.memberships).where(Membership.user_id == user_id)
+    ).scalars()
 
 
 def get_public(db: DbContext) -> Sequence[Lexicon]:
