@@ -8,7 +8,7 @@ authors = ["Tim Van Baak <tim.vanbaak@gmail.com>"]
 python = "^3.8"
 Flask = "^2.0.1"
 Flask-Login = "^0.5.0"
-Flask-WTF = "^0.14.3"
+Flask-WTF = "^0.15.1"
 SQLAlchemy = "^1.4.12"
 
 [tool.poetry.dev-dependencies]
