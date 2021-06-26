@@ -22,11 +22,11 @@ amanuensis-cli = "amanuensis.cli:main"
 amanuensis-server = "amanuensis.server:run"
 
 [tool.black]
-extend-exclude = "^/amanuensis/lexicon/.*|^/amanuensis/models/.*|^/amanuensis/resources/.*|^/amanuensis/server/.*|^/amanuensis/user/.*|^/amanuensis/__main__.py"
+extend-exclude = "^/amanuensis/lexicon/.*|^/amanuensis/server/[^/]*py|^/amanuensis/server/lexicon/.*|^/amanuensis/server/session/.*|"
 
 [tool.mypy]
 ignore_missing_imports = true
-exclude = "amanuensis/cli/.*|amanuensis/config/.*|amanuensis/lexicon/.*|amanuensis/log/.*|amanuensis/models/.*|amanuensis/resources/.*|amanuensis/server/.*|amanuensis/user/.*|amanuensis/__main__.py"
+exclude = "|amanuensis/lexicon/.*|amanuensis/server/.*|amanuensis/server/lexicon/.*|amanuensis/server/session/.*|"
 
 [tool.pytest.ini_options]
 addopts = "--show-capture=log"

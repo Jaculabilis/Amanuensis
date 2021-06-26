@@ -10,7 +10,7 @@ bp = Blueprint("home", __name__, url_prefix="/home", template_folder=".")
 
 @bp.get("/")
 def home():
-    return render_template('home.root.jinja')
+    return render_template("home.root.jinja")
 
 
 @bp.get("/admin/")
