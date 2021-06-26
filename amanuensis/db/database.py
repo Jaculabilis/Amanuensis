@@ -44,16 +44,26 @@ class DbContext:
         # Create an engine and enable foreign key constraints in sqlite
         self.engine = create_engine(self.db_uri, echo=echo)
 
-        @event.listens_for(self.engine, "connect")
         def set_sqlite_pragma(dbapi_connection, connection_record):
             cursor = dbapi_connection.cursor()
             cursor.execute("PRAGMA foreign_keys=ON")
             cursor.close()
 
+        event.listens_for(self.engine, "connect")(set_sqlite_pragma)
+
         # Create a thread-safe session factory
-        self.session = scoped_session(
-            sessionmaker(bind=self.engine), scopefunc=get_ident
-        )
+        sm = sessionmaker(bind=self.engine)
+
+        def add_lifecycle_hook(sm, from_state, to_state):
+            def object_lifecycle_hook(_, obj):
+                print(f"object moved from {from_state} to {to_state}: {obj}")
+
+            event.listens_for(sm, f"{from_state}_to_{to_state}")(object_lifecycle_hook)
+
+        if echo:
+            add_lifecycle_hook(sm, "persistent", "detached")
+
+        self.session = scoped_session(sm, scopefunc=get_ident)
 
     def __call__(self, *args, **kwargs):
         """Provides shortcut access to session.execute."""

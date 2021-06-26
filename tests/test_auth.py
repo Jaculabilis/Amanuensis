@@ -11,7 +11,7 @@ def test_auth_circuit(app: Flask, make):
     """Test the user login/logout path."""
     username: str = f"user_{os.urandom(8).hex()}"
     ub: bytes = username.encode("utf8")
-    user: User = make.user(username=username, password=username)
+    assert make.user(username=username, password=username)
 
     with app.test_client() as client:
         # User should not be logged in
