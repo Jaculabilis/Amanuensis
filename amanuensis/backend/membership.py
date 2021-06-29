@@ -64,3 +64,12 @@ def create(
     db.session.add(new_membership)
     db.session.commit()
     return new_membership
+
+
+def try_from_ids(db: DbContext, user_id: int, lexicon_id: int) -> Membership:
+    """Get a membership by the user and lexicon ids, or None if no such membership was found."""
+    return db(
+        select(Membership)
+        .where(Membership.user_id == user_id)
+        .where(Membership.lexicon_id == lexicon_id)
+    ).scalar_one_or_none()

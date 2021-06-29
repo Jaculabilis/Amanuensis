@@ -16,6 +16,7 @@ class BackendArgumentTypeError(ArgumentError):
     A call to a backend function was made with a value of an invalid type for the parameter.
     Specify the invalid parameter and value as a kwarg.
     """
+
     def __init__(self, obj_type, **kwarg):
         if not kwarg:
             raise ValueError("Missing kwarg")
