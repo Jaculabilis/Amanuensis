@@ -1,7 +1,7 @@
 import pytest
 
+from amanuensis.backend import charq
 from amanuensis.db import *
-import amanuensis.backend.character as charq
 from amanuensis.errors import ArgumentError
 
 

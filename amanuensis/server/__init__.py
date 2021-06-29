@@ -4,8 +4,7 @@ import os
 
 from flask import Flask, g
 
-import amanuensis.backend.lexicon
-import amanuensis.backend.user
+from amanuensis.backend import lexiq, userq
 from amanuensis.config import AmanuensisConfig, CommandLineConfig
 from amanuensis.db import DbContext
 import amanuensis.server.auth as auth
@@ -61,7 +60,7 @@ def get_app(
     app.template_filter("date")(date_format)
 
     def include_backend():
-        return {"db": db, "lexiq": amanuensis.backend.lexicon, "userq": amanuensis.backend.user}
+        return {"db": db, "lexiq": lexiq, "userq": userq}
 
     app.context_processor(include_backend)
 

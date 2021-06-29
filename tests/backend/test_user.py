@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-import amanuensis.backend.user as userq
+from amanuensis.backend import userq
 from amanuensis.db import DbContext, User
 from amanuensis.errors import ArgumentError
 

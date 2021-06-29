@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
 
-import amanuensis.backend.user as userq
+from amanuensis.backend import userq
 from amanuensis.db import DbContext, User
 
 from .helpers import add_argument

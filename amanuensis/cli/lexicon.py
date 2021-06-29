@@ -2,9 +2,7 @@ import logging
 
 from sqlalchemy import update
 
-import amanuensis.backend.lexicon as lexiq
-import amanuensis.backend.membership as memq
-import amanuensis.backend.user as userq
+from amanuensis.backend import lexiq, memq, userq
 from amanuensis.db import DbContext, Lexicon
 
 from .helpers import add_argument

@@ -1,7 +1,7 @@
 import pytest
 
+from amanuensis.backend import postq
 from amanuensis.db import DbContext
-import amanuensis.backend.post as postq
 
 from amanuensis.errors import ArgumentError
 

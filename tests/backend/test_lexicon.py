@@ -3,7 +3,7 @@ import time
 
 import pytest
 
-import amanuensis.backend.lexicon as lexiq
+from amanuensis.backend import lexiq
 from amanuensis.db import DbContext, Lexicon, User
 from amanuensis.errors import ArgumentError
 from tests.conftest import ObjectFactory

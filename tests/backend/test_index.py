@@ -1,8 +1,8 @@
 from amanuensis.db.models import IndexType
 import pytest
 
-import amanuensis.backend.index as indq
-from amanuensis.db import DbContext, Lexicon, User
+from amanuensis.backend import indq
+from amanuensis.db import DbContext, Lexicon
 
 from amanuensis.errors import ArgumentError
 

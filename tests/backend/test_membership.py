@@ -2,9 +2,9 @@ import pytest
 
 from sqlalchemy import select
 
+from amanuensis.backend import memq
 from amanuensis.db import *
 from amanuensis.errors import ArgumentError
-import amanuensis.backend.membership as memq
 
 
 def test_create_membership(db: DbContext, make):

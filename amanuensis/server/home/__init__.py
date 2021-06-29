@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, g
 
-import amanuensis.backend.user as userq
-import amanuensis.backend.lexicon as lexiq
+from amanuensis.backend import userq, lexiq
 
 # from .forms import LexiconCreateForm
 

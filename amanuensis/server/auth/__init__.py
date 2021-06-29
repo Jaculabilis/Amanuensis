@@ -17,7 +17,7 @@ from flask_login import (
     LoginManager,
 )
 
-import amanuensis.backend.user as userq
+from amanuensis.backend import userq
 from amanuensis.db import User
 
 from .forms import LoginForm

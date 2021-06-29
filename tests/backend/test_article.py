@@ -1,9 +1,9 @@
 import pytest
 import time
 
-from amanuensis.db import DbContext
-from amanuensis.db.models import Character, Lexicon, User
-import amanuensis.backend.article as artiq
+from amanuensis.backend import artiq
+from amanuensis.db import DbContext, Character, Lexicon, User
+
 from amanuensis.errors import ArgumentError
 from tests.conftest import ObjectFactory
 

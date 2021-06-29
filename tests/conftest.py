@@ -10,10 +10,7 @@ from bs4 import BeautifulSoup
 from flask.testing import FlaskClient
 from sqlalchemy.orm.session import close_all_sessions
 
-import amanuensis.backend.character as charq
-import amanuensis.backend.lexicon as lexiq
-import amanuensis.backend.membership as memq
-import amanuensis.backend.user as userq
+from amanuensis.backend import charq, lexiq, memq, userq
 from amanuensis.config import AmanuensisConfig
 from amanuensis.db import DbContext, User, Lexicon, Membership, Character
 from amanuensis.server import get_app
