@@ -55,11 +55,6 @@ def create(
     return new_lexicon
 
 
-def from_name(db: DbContext, name: str) -> Lexicon:
-    """Get a lexicon by its name."""
-    return db(select(Lexicon).where(Lexicon.name == name)).scalar_one()
-
-
 def get_all(db: DbContext) -> Sequence[Lexicon]:
     """Get all lexicons."""
     return db(select(Lexicon)).scalars()
@@ -75,3 +70,8 @@ def get_joined(db: DbContext, user_id: int) -> Sequence[Lexicon]:
 def get_public(db: DbContext) -> Sequence[Lexicon]:
     """Get all publicly visible lexicons."""
     return db(select(Lexicon).where(Lexicon.public == True)).scalars()
+
+
+def try_from_name(db: DbContext, name: str) -> Optional[Lexicon]:
+    """Get a lexicon by its name, or None if no such lexicon was found."""
+    return db(select(Lexicon).where(Lexicon.name == name)).scalar_one_or_none()

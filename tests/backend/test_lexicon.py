@@ -58,8 +58,8 @@ def test_lexicon_from(db: DbContext, make: ObjectFactory):
     """Test lexiq.from_*."""
     lexicon1: Lexicon = make.lexicon()
     lexicon2: Lexicon = make.lexicon()
-    assert lexiq.from_name(db, lexicon1.name) == lexicon1
-    assert lexiq.from_name(db, lexicon2.name) == lexicon2
+    assert lexiq.try_from_name(db, lexicon1.name) == lexicon1
+    assert lexiq.try_from_name(db, lexicon2.name) == lexicon2
 
 
 def test_get_lexicon(db: DbContext, make: ObjectFactory):

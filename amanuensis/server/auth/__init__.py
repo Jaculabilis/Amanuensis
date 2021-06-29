@@ -39,7 +39,7 @@ def get_login_manager() -> LoginManager:
             user_id = int(user_id_str)
         except:
             return None
-        return userq.from_id(g.db, user_id)
+        return userq.try_from_id(g.db, user_id)
 
     login_manager.user_loader(load_user)
 
@@ -58,7 +58,7 @@ def login():
     # POST with valid data
     username: str = form.username.data
     password: str = form.password.data
-    user: User = userq.from_username(g.db, username)
+    user: User = userq.try_from_username(g.db, username)
     if not user or not userq.password_check(g.db, username, password):
         # Bad creds
         flash("Login not recognized")

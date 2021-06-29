@@ -71,24 +71,6 @@ def create(
     return new_user
 
 
-def from_id(db: DbContext, user_id: int) -> Optional[User]:
-    """
-    Get a user by the user's id.
-    Returns None if no user was found.
-    """
-    user: User = db(select(User).where(User.id == user_id)).scalar_one_or_none()
-    return user
-
-
-def from_username(db: DbContext, username: str) -> Optional[User]:
-    """
-    Get a user by the user's username.
-    Returns None if no user was found.
-    """
-    user: User = db(select(User).where(User.username == username)).scalar_one_or_none()
-    return user
-
-
 def get_all(db: DbContext) -> Sequence[User]:
     """Get all users."""
     return db(select(User)).scalars()
@@ -107,6 +89,16 @@ def password_check(db: DbContext, username: str, password: str) -> bool:
         select(User.password).where(User.username == username)
     ).scalar_one()
     return check_password_hash(user_password_hash, password)
+
+
+def try_from_id(db: DbContext, user_id: int) -> Optional[User]:
+    """Get a user by the user's id, or None is no such user was found."""
+    return db(select(User).where(User.id == user_id)).scalar_one_or_none()
+
+
+def try_from_username(db: DbContext, username: str) -> Optional[User]:
+    """Get a user by the user's username, or None is no such user was found."""
+    return db(select(User).where(User.username == username)).scalar_one_or_none()
 
 
 def update_logged_in(db: DbContext, username: str) -> None:

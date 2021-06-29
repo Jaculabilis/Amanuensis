@@ -24,9 +24,12 @@ def command_add(args) -> int:
     Add a user to a lexicon.
     """
     db: DbContext = args.get_db()
-    lexicon = lexiq.from_name(db, args.lexicon)
-    user = userq.from_username(db, args.user)
-    assert user is not None
+    lexicon = lexiq.try_from_name(db, args.lexicon)
+    if not lexicon:
+        raise ValueError("Lexicon does not exist")
+    user = userq.try_from_username(db, args.user)
+    if not user:
+        raise ValueError("User does not exist")
     memq.create(db, user.id, lexicon.id, args.editor)
     LOG.info(f"Added {args.user} to lexicon {args.lexicon}")
     return 0

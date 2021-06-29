@@ -45,7 +45,7 @@ class UserClient:
 
     def login(self, client: FlaskClient):
         """Log the user in."""
-        user: Optional[User] = userq.from_id(self.db, self.user_id)
+        user: Optional[User] = userq.try_from_id(self.db, self.user_id)
         assert user is not None
 
         # Set the user's password so we know what it is later
