@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 import json
 import os
 
-from flask import Flask, g, url_for
+from flask import Flask, g, url_for, redirect
 
 from amanuensis.backend import lexiq, userq, memq
 from amanuensis.config import AmanuensisConfig, CommandLineConfig
@@ -10,6 +10,7 @@ from amanuensis.db import DbContext
 from amanuensis.parser import filesafe_title
 import amanuensis.server.auth as auth
 import amanuensis.server.home as home
+import amanuensis.server.lexicon as lexicon
 
 
 def date_format(dt: datetime, formatstr="%Y-%m-%d %H:%M:%S%z") -> str:
@@ -80,11 +81,13 @@ def get_app(
     # Register blueprints
     app.register_blueprint(auth.bp)
     app.register_blueprint(home.bp)
+    app.register_blueprint(lexicon.bp)
 
-    def test():
-        return "Hello, world!"
+    # Add a root redirect
+    def root():
+        return redirect(url_for("home.home"))
 
-    app.route("/")(test)
+    app.route("/")(root)
 
     return app
 

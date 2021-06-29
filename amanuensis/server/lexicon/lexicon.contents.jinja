@@ -14,7 +14,7 @@
 <ul>
 {% for article in indexed[index] %}
 <li><a href="{{ article.title|articlelink }}" class="{{ 'phantom' if not article.character else '' }}">
-	{{ article.title }}
+    {{ article.title }}
 </a></li>
 {% endfor %}
 </ul>

@@ -15,8 +15,9 @@ def lexicon_param(route):
     """
     @wraps(route)
     def with_lexicon(*args, **kwargs):
+        db: DbContext = g.db
         name: str = kwargs.get('name')
-        lexicon: Optional[Lexicon] = lexiq.try_from_name(name)
+        lexicon: Optional[Lexicon] = lexiq.try_from_name(db, name)
         if lexicon is None:
             flash(f"Couldn't find a lexicon with the name \"{name}\"")
             return redirect(url_for("home.home"))

@@ -76,19 +76,19 @@ def get_all(db: DbContext) -> Sequence[User]:
     return db(select(User)).scalars()
 
 
-def password_set(db: DbContext, username: str, new_password: str) -> None:
-    """Set a user's password."""
-    password_hash = generate_password_hash(new_password)
-    db(update(User).where(User.username == username).values(password=password_hash))
-    db.session.commit()
-
-
 def password_check(db: DbContext, username: str, password: str) -> bool:
     """Check if a password is correct."""
     user_password_hash: str = db(
         select(User.password).where(User.username == username)
     ).scalar_one()
     return check_password_hash(user_password_hash, password)
+
+
+def password_set(db: DbContext, username: str, new_password: str) -> None:
+    """Set a user's password."""
+    password_hash = generate_password_hash(new_password)
+    db(update(User).where(User.username == username).values(password=password_hash))
+    db.session.commit()
 
 
 def try_from_id(db: DbContext, user_id: int) -> Optional[User]:

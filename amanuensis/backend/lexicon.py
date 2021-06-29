@@ -5,7 +5,8 @@ Lexicon query interface
 import re
 from typing import Sequence, Optional
 
-from sqlalchemy import select, func
+from sqlalchemy import select, func, update
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from amanuensis.db import DbContext, Lexicon, Membership
 from amanuensis.errors import ArgumentError, BackendArgumentTypeError
@@ -70,6 +71,21 @@ def get_joined(db: DbContext, user_id: int) -> Sequence[Lexicon]:
 def get_public(db: DbContext) -> Sequence[Lexicon]:
     """Get all publicly visible lexicons."""
     return db(select(Lexicon).where(Lexicon.public == True)).scalars()
+
+
+def password_check(db: DbContext, lexicon_id: int, password: str) -> bool:
+    """Check if a password is correct."""
+    password_hash: str = db(
+        select(Lexicon.join_password).where(Lexicon.id == lexicon_id)
+    ).scalar_one()
+    return check_password_hash(password_hash, password)
+
+
+def password_set(db: DbContext, lexicon_id: int, new_password: Optional[str]) -> None:
+    """Set or clear a lexicon's password."""
+    password_hash = generate_password_hash(new_password) if new_password else None
+    db(update(Lexicon).where(Lexicon.id == lexicon_id).values(password=password_hash))
+    db.session.commit()
 
 
 def try_from_name(db: DbContext, name: str) -> Optional[Lexicon]:

@@ -9,5 +9,5 @@ def test_app_testing(app: Flask):
 def test_client(app: Flask):
     """Test that the test client works."""
     with app.test_client() as client:
-        response = client.get("/")
-        assert b"world" in response.data
+        response = client.get("/home/")
+        assert b"Amanuensis" in response.data

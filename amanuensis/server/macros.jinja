@@ -3,7 +3,7 @@
 <div class="dashboard-lexicon-item dashboard-lexicon-{{ status }}">
     <p>
         <span class="dashboard-lexicon-item-title">
-            <a href="#{#{ url_for('lexicon.contents', name=lexicon.cfg.name) }#}">{{ lexicon.full_title }}</a>
+            <a href="{{ url_for('lexicon.contents', name=lexicon.name) }}">{{ lexicon.full_title }}</a>
         </span>
         [{{ status.capitalize() }}]
     </p>
@@ -29,7 +29,7 @@
         Players: {{ lexicon.memberships|count }}{% if lexicon.player_limit is not none %} / {{ lexicon.player_limit }}{% endif -%}
         {%-
             if lexicon.public and lexicon.joinable
-        %} / <a href="#{#{ url_for('lexicon.join', name=lexicon.cfg.name) }#}">Join game</a>
+        %} / <a href="{{ url_for('lexicon.join', name=lexicon.name) }}">Join game</a>
         {%- endif -%}
         {%- endif -%}
     </p>

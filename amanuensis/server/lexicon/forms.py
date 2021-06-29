@@ -3,6 +3,7 @@ from wtforms import StringField, SubmitField
 
 
 class LexiconJoinForm(FlaskForm):
-	"""/lexicon/<name>/join/"""
-	password = StringField('Password')
-	submit = SubmitField('Submit')
+    """/lexicon/<name>/join/"""
+
+    password = StringField("Password")
+    submit = SubmitField("Submit")

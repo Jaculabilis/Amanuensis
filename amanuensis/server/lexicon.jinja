@@ -1,44 +1,44 @@
 {% extends "page_2col.jinja" %}
-{% set lexicon_title = g.lexicon.title %}
+{% set lexicon_title = g.lexicon.full_title %}
 
 {% block header %}
 <h2>{{ lexicon_title }}</h2>
-<p><i>{{ g.lexicon.cfg.prompt }}</i></p>
+<p><i>{{ g.lexicon.prompt }}</i></p>
 {% endblock %}
 
 {% block sb_logo %}{% endblock %}
 {% block sb_home %}<a href="{{ url_for('home.home') }}">Home</a>
 {% endblock %}
 {% block sb_contents %}<a 
-	{% if current_page == "contents" %}class="current-page"
-	{% else %}href="{{ url_for('lexicon.contents', name=g.lexicon.cfg.name) }}"
-	{% endif %}>Contents</a>{% endblock %}
+    {% if current_page == "contents" %}class="current-page"
+    {% else %}href="{{ url_for('lexicon.contents', name=g.lexicon.name) }}"
+    {% endif %}>Contents</a>{% endblock %}
 {% block sb_rules %}<a 
-	{% if current_page == "rules" %}class="current-page"
-	{% else %}href="{{ url_for('lexicon.rules', name=g.lexicon.cfg.name) }}"
-	{% endif %}>Rules</a>{% endblock %}
+    {% if current_page == "rules" %}class="current-page"
+    {% else %}href="{{ url_for('lexicon.rules', name=g.lexicon.name) }}"
+    {% endif %}>Rules</a>{% endblock %}
 {% block sb_session %}<a 
-	{% if current_page == "session" %}class="current-page"
-	{% else %}href="{{ url_for('session.session', name=g.lexicon.cfg.name) }}"
-	{% endif %}>Session</a>{% endblock %}
+    {% if current_page == "session" %}class="current-page"
+    {% else %}href="#{#{ url_for('session.session', name=g.lexicon.name) }#}"
+    {% endif %}>Session</a>{% endblock %}
 {% block sb_stats %}<a 
-	{% if current_page == "statistics" %}class="current-page"
-	{% else %}href="{{ url_for('lexicon.stats', name=g.lexicon.cfg.name) }}"
-	{% endif %}>Statistics</a>{% endblock %}
+    {% if current_page == "statistics" %}class="current-page"
+    {% else %}href="{{ url_for('lexicon.stats', name=g.lexicon.name) }}"
+    {% endif %}>Statistics</a>{% endblock %}
 
-{% if current_user.uid in g.lexicon.cfg.join.joined %}
-	{# self.sb_logo(), #}
+{% if current_user.is_authenticated and memq.try_from_ids(g.db, current_user.id, g.lexicon.id) %}
+    {# self.sb_logo(), #}
 {% set template_sidebar_rows = [
-	self.sb_home(),
-	self.sb_contents(),
-	self.sb_rules(),
-	self.sb_session(),
-	self.sb_stats()] %}
+    self.sb_home(),
+    self.sb_contents(),
+    self.sb_rules(),
+    self.sb_session(),
+    self.sb_stats()] %}
 {% else %}
-	{# self.sb_logo(), #}
+    {# self.sb_logo(), #}
 {% set template_sidebar_rows = [
-	self.sb_home(),
-	self.sb_contents(),
-	self.sb_rules(),
-	self.sb_stats()] %}
+    self.sb_home(),
+    self.sb_contents(),
+    self.sb_rules(),
+    self.sb_stats()] %}
 {% endif %}

@@ -1,14 +1,16 @@
 {% extends "lexicon.jinja" %}
-{% block title %}Join | {{ lexicon_title }}{% endblock %}
+{% block title %}Join | {{ g.lexicon.full_title }}{% endblock %}
 
 {% block main %}
 
 <form id="lexicon-join" action="" method="post" novalidate>
-	{{ form.hidden_tag() }}
-	{% if g.lexicon.cfg.join.password %}
-	<p>{{ form.password.label }}<br>{{ form.password(size=32) }}</p>
-	{% endif %}
-	<p>{{ form.submit() }}</p>
+    {{ form.hidden_tag() }}
+    {% if g.lexicon.join_password %}
+    <p>{{ form.password.label }}<br>{{ form.password(size=32) }}</p>
+    {% else %}
+    <p>Join {{ g.lexicon.full_title }}?</p>
+    {% endif %}
+    <p>{{ form.submit() }}</p>
 </form>
 
 {% for message in get_flashed_messages() %}
