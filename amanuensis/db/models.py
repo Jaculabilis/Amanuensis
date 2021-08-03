@@ -11,6 +11,7 @@ from sqlalchemy import (
     DateTime,
     Enum,
     ForeignKey,
+    func,
     Integer,
     String,
     Text,
@@ -81,7 +82,7 @@ class User(ModelBase):
     ####################
 
     # The timestamp the user was created
-    created = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+    created = Column(DateTime, nullable=False, server_default=func.now())
 
     # The timestamp the user last logged in
     # This is NULL if the user has never logged in
@@ -149,11 +150,11 @@ class Lexicon(ModelBase):
     ####################
 
     # The timestamp the lexicon was created
-    created = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+    created = Column(DateTime, nullable=False, server_default=func.now())
 
     # The timestamp of the last change in game state
     last_updated = Column(
-        DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP")
+        DateTime, nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # The timestamp the first turn was started
@@ -287,7 +288,7 @@ class Membership(ModelBase):
     ####################
 
     # Timestamp the user joined the game
-    joined = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+    joined = Column(DateTime, nullable=False, server_default=func.now())
 
     # Timestamp of the last time the user viewed the post feed
     # This is NULL if the player has never viewed posts
@@ -420,7 +421,7 @@ class Article(ModelBase):
 
     # Timestamp the content of the article was last updated
     last_updated = Column(
-        DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP")
+        DateTime, nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Timestamp the article was last submitted
@@ -646,7 +647,7 @@ class Post(ModelBase):
     ################
 
     # The timestamp the post was created
-    created = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+    created = Column(DateTime, nullable=False, server_default=func.now())
 
     # The body of the post
     body = Column(Text, nullable=False)

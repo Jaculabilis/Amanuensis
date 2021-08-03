@@ -1,10 +1,12 @@
 import datetime
+import time
 
 import pytest
 
 import amanuensis.backend.lexicon as lexiq
 from amanuensis.db import DbContext, Lexicon, User
 from amanuensis.errors import ArgumentError
+from tests.conftest import ObjectFactory
 
 
 def test_create_lexicon(db: DbContext):
@@ -52,7 +54,7 @@ def test_create_lexicon(db: DbContext):
         lexiq.create(**defaults)
 
 
-def test_lexicon_from(db: DbContext, make):
+def test_lexicon_from(db: DbContext, make: ObjectFactory):
     """Test lexiq.from_*."""
     lexicon1: Lexicon = make.lexicon()
     lexicon2: Lexicon = make.lexicon()
@@ -60,7 +62,7 @@ def test_lexicon_from(db: DbContext, make):
     assert lexiq.from_name(db, lexicon2.name) == lexicon2
 
 
-def test_get_lexicon(db: DbContext, make):
+def test_get_lexicon(db: DbContext, make: ObjectFactory):
     """Test the various scoped get functions."""
     user: User = make.user()
 
@@ -97,3 +99,13 @@ def test_get_lexicon(db: DbContext, make):
     assert private_joined not in get_public
     assert public_open in get_public
     assert private_open not in get_public
+
+
+def test_lexicon_update_ts(db: DbContext, make: ObjectFactory):
+    """Test the update timestamp."""
+    lexicon: Lexicon = make.lexicon()
+    assert lexicon.created == lexicon.last_updated
+    time.sleep(1)  # The update timestamp has only second-level precision
+    lexicon.prompt = "New prompt, who dis"
+    db.session.commit()
+    assert lexicon.created != lexicon.last_updated
