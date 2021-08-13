@@ -4,7 +4,7 @@ import pytest
 
 from amanuensis.backend import userq
 from amanuensis.db import DbContext, User
-from amanuensis.errors import ArgumentError
+from amanuensis.errors import ArgumentError, BackendArgumentTypeError
 
 
 def test_create_user(db: DbContext):
@@ -33,7 +33,7 @@ def test_create_user(db: DbContext):
         userq.create(**kwargs)
 
     # No password
-    with pytest.raises(ArgumentError):
+    with pytest.raises(BackendArgumentTypeError):
         kwargs = {**defaults, "password": None}
         userq.create(**kwargs)
 

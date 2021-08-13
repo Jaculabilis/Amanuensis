@@ -6,7 +6,7 @@ from sqlalchemy import select, func
 
 from amanuensis.db import DbContext, Membership
 from amanuensis.db.models import Lexicon
-from amanuensis.errors import ArgumentError
+from amanuensis.errors import ArgumentError, BackendArgumentTypeError
 
 
 def create(
@@ -20,11 +20,11 @@ def create(
     """
     # Verify argument types are correct
     if not isinstance(user_id, int):
-        raise ArgumentError("user_id")
+        raise BackendArgumentTypeError(int, user_id=user_id)
     if not isinstance(lexicon_id, int):
-        raise ArgumentError("lexicon_id")
+        raise BackendArgumentTypeError(int, lexicon_id=lexicon_id)
     if not isinstance(is_editor, bool):
-        raise ArgumentError("is_editor")
+        raise BackendArgumentTypeError(bool, is_editor=is_editor)
 
     # Verify user has not already joined lexicon
     if (

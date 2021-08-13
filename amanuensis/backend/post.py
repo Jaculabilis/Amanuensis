@@ -8,7 +8,7 @@ from sqlalchemy import select
 
 from amanuensis.db import DbContext, Post
 from amanuensis.db.models import Lexicon
-from amanuensis.errors import ArgumentError
+from amanuensis.errors import ArgumentError, BackendArgumentTypeError
 
 
 def create(
@@ -23,15 +23,15 @@ def create(
 
     # Verify lexicon id
     if not isinstance(lexicon_id, int):
-        raise ArgumentError("Lexicon id must be an integer.")
+        raise BackendArgumentTypeError(int, lexicon_id=lexicon_id)
 
     # Verify user_id
-    if not (isinstance(user_id, int) or user_id is None):
-        raise ArgumentError("User id must be an integer.")
+    if user_id is not None and not isinstance(user_id, int):
+        raise BackendArgumentTypeError(int, user_id=user_id)
 
     # Verify body
     if not isinstance(body, str):
-        raise ArgumentError("Post body must be a string.")
+        raise BackendArgumentTypeError(str, body=body)
     if not body.strip():
         raise ArgumentError("Post body cannot be empty.")
 

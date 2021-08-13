@@ -10,7 +10,7 @@ from sqlalchemy import select, func, update
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from amanuensis.db import DbContext, User
-from amanuensis.errors import ArgumentError
+from amanuensis.errors import ArgumentError, BackendArgumentTypeError
 
 
 RE_NO_LETTERS = re.compile(r"^[0-9-_]*$")
@@ -30,7 +30,7 @@ def create(
     """
     # Verify username
     if not isinstance(username, str):
-        raise ArgumentError("Username must be a string")
+        raise BackendArgumentTypeError(str, username=username)
     if len(username) < 3 or len(username) > 32:
         raise ArgumentError("Username must be between 3 and 32 characters")
     if RE_NO_LETTERS.match(username):
@@ -42,18 +42,18 @@ def create(
 
     # Verify password
     if not isinstance(password, str):
-        raise ArgumentError("Password must be a string")
+        raise BackendArgumentTypeError(str, password=password)
 
     # Verify display name
     if display_name is not None and not isinstance(display_name, str):
-        raise ArgumentError("Display name must be a string")
+        raise BackendArgumentTypeError(str, display_name=display_name)
     # If display name is not provided, use the username
     if not display_name or not display_name.strip():
         display_name = username
 
     # Verify email
     if not isinstance(email, str):
-        raise ArgumentError("Email must be a string")
+        raise BackendArgumentTypeError(str, email=email)
 
     # Query the db to make sure the username isn't taken
     if db(select(func.count(User.id)).where(User.username == username)).scalar() > 0:

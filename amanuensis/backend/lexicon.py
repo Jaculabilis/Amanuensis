@@ -8,7 +8,7 @@ from typing import Sequence, Optional
 from sqlalchemy import select, func
 
 from amanuensis.db import DbContext, Lexicon, Membership
-from amanuensis.errors import ArgumentError
+from amanuensis.errors import ArgumentError, BackendArgumentTypeError
 
 
 RE_ALPHANUM_DASH_UNDER = re.compile(r"^[A-Za-z0-9-_]*$")
@@ -25,7 +25,7 @@ def create(
     """
     # Verify name
     if not isinstance(name, str):
-        raise ArgumentError("Lexicon name must be a string")
+        raise BackendArgumentTypeError(str, name=name)
     if not name.strip():
         raise ArgumentError("Lexicon name must not be blank")
     if not RE_ALPHANUM_DASH_UNDER.match(name):
@@ -34,12 +34,12 @@ def create(
         )
 
     # Verify title
-    if title is not None and not isinstance(name, str):
-        raise ArgumentError("Lexicon name must be a string")
+    if title is not None and not isinstance(title, str):
+        raise BackendArgumentTypeError(str, title=title)
 
     # Verify prompt
     if not isinstance(prompt, str):
-        raise ArgumentError("Lexicon prompt must be a string")
+        raise BackendArgumentTypeError(str, prompt=prompt)
 
     # Query the db to make sure the lexicon name isn't taken
     if db(select(func.count(Lexicon.id)).where(Lexicon.name == name)).scalar() > 0:

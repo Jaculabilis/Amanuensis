@@ -3,7 +3,7 @@ import pytest
 from amanuensis.backend import postq
 from amanuensis.db import DbContext
 
-from amanuensis.errors import ArgumentError
+from amanuensis.errors import ArgumentError, BackendArgumentTypeError
 
 
 def test_create_post(db: DbContext, lexicon_with_editor):
@@ -20,19 +20,16 @@ def test_create_post(db: DbContext, lexicon_with_editor):
     kwargs: dict
 
     # ids are integers
-    with pytest.raises(ArgumentError):
+    with pytest.raises(BackendArgumentTypeError):
         kwargs = {**defaults, "user_id": "zero"}
         postq.create(**kwargs)
-    with pytest.raises(ArgumentError):
+    with pytest.raises(BackendArgumentTypeError):
         kwargs = {**defaults, "lexicon_id": "zero"}
         postq.create(**kwargs)
 
     # empty arguments don't work
-    with pytest.raises(ArgumentError):
-        kwargs = {**defaults, "lexicon_id": ""}
-        postq.create(**kwargs)
-    with pytest.raises(ArgumentError):
-        kwargs = {**defaults, "user_id": ""}
+    with pytest.raises(BackendArgumentTypeError):
+        kwargs = {**defaults, "lexicon_id": None}
         postq.create(**kwargs)
     with pytest.raises(ArgumentError):
         kwargs = {**defaults, "body": ""}

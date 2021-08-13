@@ -2,7 +2,7 @@ import pytest
 
 from amanuensis.backend import charq
 from amanuensis.db import *
-from amanuensis.errors import ArgumentError
+from amanuensis.errors import ArgumentError, BackendArgumentTypeError
 
 
 def test_create_character(db: DbContext, lexicon_with_editor, make):
@@ -20,13 +20,13 @@ def test_create_character(db: DbContext, lexicon_with_editor, make):
     kwargs: dict
 
     # Bad argument types
-    with pytest.raises(ArgumentError):
+    with pytest.raises(BackendArgumentTypeError):
         kwargs = {**defaults, "name": b"bytestring"}
         charq.create(**kwargs)
-    with pytest.raises(ArgumentError):
+    with pytest.raises(BackendArgumentTypeError):
         kwargs = {**defaults, "name": None}
         charq.create(**kwargs)
-    with pytest.raises(ArgumentError):
+    with pytest.raises(BackendArgumentTypeError):
         kwargs = {**defaults, "signature": b"bytestring"}
         charq.create(**kwargs)
 

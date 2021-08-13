@@ -5,7 +5,7 @@ import pytest
 
 from amanuensis.backend import lexiq
 from amanuensis.db import DbContext, Lexicon, User
-from amanuensis.errors import ArgumentError
+from amanuensis.errors import ArgumentError, BackendArgumentTypeError
 from tests.conftest import ObjectFactory
 
 
@@ -20,7 +20,7 @@ def test_create_lexicon(db: DbContext):
     kwargs: dict
 
     # Test name constraints
-    with pytest.raises(ArgumentError):
+    with pytest.raises(BackendArgumentTypeError):
         kwargs = {**defaults, "name": None}
         lexiq.create(**kwargs)
     with pytest.raises(ArgumentError):

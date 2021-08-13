@@ -6,7 +6,7 @@ import re
 from typing import Optional
 
 from amanuensis.db import DbContext, ArticleIndex, IndexType
-from amanuensis.errors import ArgumentError
+from amanuensis.errors import ArgumentError, BackendArgumentTypeError
 
 
 def create(
@@ -23,17 +23,17 @@ def create(
     """
     # Verify argument types are correct
     if not isinstance(lexicon_id, int):
-        raise ArgumentError("lexicon_id")
+        raise BackendArgumentTypeError(int, lexicon_id=lexicon_id)
     if not isinstance(index_type, IndexType):
-        raise ArgumentError("index_type")
+        raise BackendArgumentTypeError(IndexType, index_type=index_type)
     if not isinstance(pattern, str):
-        raise ArgumentError("pattern")
+        raise BackendArgumentTypeError(str, pattern=pattern)
     if not isinstance(logical_order, int):
-        raise ArgumentError("logical_order")
+        raise BackendArgumentTypeError(int, logical_order=logical_order)
     if not isinstance(display_order, int):
-        raise ArgumentError("display_order")
+        raise BackendArgumentTypeError(int, display_order=display_order)
     if capacity is not None and not isinstance(capacity, int):
-        raise ArgumentError("capacity")
+        raise BackendArgumentTypeError(int, capacity=capacity)
 
     # Verify the pattern is valid for the index type:
     if index_type == IndexType.CHAR:

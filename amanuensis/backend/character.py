@@ -7,7 +7,7 @@ from typing import Optional
 from sqlalchemy import select, func
 
 from amanuensis.db import *
-from amanuensis.errors import ArgumentError
+from amanuensis.errors import ArgumentError, BackendArgumentTypeError
 
 
 def create(
@@ -22,13 +22,13 @@ def create(
     """
     # Verify argument types are correct
     if not isinstance(lexicon_id, int):
-        raise ArgumentError("lexicon_id")
+        raise BackendArgumentTypeError(int, lexicon_id=lexicon_id)
     if not isinstance(user_id, int):
-        raise ArgumentError("user_id")
+        raise BackendArgumentTypeError(int, user_id=user_id)
     if not isinstance(name, str):
-        raise ArgumentError("name")
+        raise BackendArgumentTypeError(str, name=name)
     if signature is not None and not isinstance(signature, str):
-        raise ArgumentError("signature")
+        raise BackendArgumentTypeError(str, signature=signature)
 
     # Verify character name is valid
     if not name.strip():

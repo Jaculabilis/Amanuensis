@@ -7,7 +7,7 @@ from typing import Optional
 from sqlalchemy import select
 
 from amanuensis.db import *
-from amanuensis.errors import ArgumentError
+from amanuensis.errors import ArgumentError, BackendArgumentTypeError
 
 
 def create(
@@ -21,11 +21,11 @@ def create(
     """
     # Verify argument types are correct
     if not isinstance(lexicon_id, int):
-        raise ArgumentError("lexicon_id")
+        raise BackendArgumentTypeError(int, lexicon_id=lexicon_id)
     if not isinstance(user_id, int):
-        raise ArgumentError("user_id")
+        raise BackendArgumentTypeError(int, user_id=user_id)
     if character_id is not None and not isinstance(character_id, int):
-        raise ArgumentError("character_id")
+        raise BackendArgumentTypeError(int, character_id=character_id)
 
     # Check that the user is a member of this lexicon
     mem: Membership = db(
