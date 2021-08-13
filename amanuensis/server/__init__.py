@@ -2,13 +2,31 @@ from datetime import datetime, timezone
 import json
 import os
 
-from flask import Flask, g
+from flask import Flask, g, url_for
 
-from amanuensis.backend import lexiq, userq
+from amanuensis.backend import lexiq, userq, memq
 from amanuensis.config import AmanuensisConfig, CommandLineConfig
 from amanuensis.db import DbContext
+from amanuensis.parser import filesafe_title
 import amanuensis.server.auth as auth
 import amanuensis.server.home as home
+
+
+def date_format(dt: datetime, formatstr="%Y-%m-%d %H:%M:%S%z") -> str:
+    """Convert datetime to human-readable string"""
+    if dt is None:
+        return "never"
+    # Cast db time to UTC, then convert to local timezone
+    adjusted = dt.replace(tzinfo=timezone.utc).astimezone()
+    return adjusted.strftime(formatstr)
+
+
+def article_link(title):
+    """Get the url for a lexicon by its title"""
+    return url_for(
+        'lexicon.article',
+        name=g.lexicon.name,
+        title=filesafe_title(title))
 
 
 def get_app(
@@ -48,20 +66,12 @@ def get_app(
     app.teardown_appcontext(db_teardown)
 
     # Configure jinja options
-    app.jinja_options.update(trim_blocks=True, lstrip_blocks=True)
-
-    def date_format(dt: datetime, formatstr="%Y-%m-%d %H:%M:%S%z") -> str:
-        if dt is None:
-            return "never"
-        # Cast db time to UTC, then convert to local timezone
-        adjusted = dt.replace(tzinfo=timezone.utc).astimezone()
-        return adjusted.strftime(formatstr)
-
-    app.template_filter("date")(date_format)
-
     def include_backend():
-        return {"db": db, "lexiq": lexiq, "userq": userq}
+        return {"db": db, "lexiq": lexiq, "userq": userq, "memq": memq}
 
+    app.jinja_options.update(trim_blocks=True, lstrip_blocks=True)
+    app.template_filter("date")(date_format)
+    app.template_filter("articlelink")(article_link)
     app.context_processor(include_backend)
 
     # Set up Flask-Login
