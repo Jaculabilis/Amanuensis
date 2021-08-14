@@ -26,7 +26,10 @@
     {% else %}href="{{ url_for('lexicon.stats', name=g.lexicon.name) }}"
     {% endif %}>Statistics</a>{% endblock %}
 
-{% if current_user.is_authenticated and memq.try_from_ids(g.db, current_user.id, g.lexicon.id) %}
+{% if current_user.is_authenticated and (
+    current_user.is_site_admin
+    or memq.try_from_ids(g.db, current_user.id, g.lexicon.id)
+ ) %}
     {# self.sb_logo(), #}
 {% set template_sidebar_rows = [
     self.sb_home(),
