@@ -5,6 +5,7 @@ import os
 from typing import Callable
 
 import amanuensis.cli.admin
+import amanuensis.cli.character
 import amanuensis.cli.lexicon
 import amanuensis.cli.user
 from amanuensis.db import DbContext
@@ -108,6 +109,7 @@ def main():
     # Add commands from cli submodules
     subparsers = parser.add_subparsers(metavar="COMMAND")
     add_subcommand(subparsers, amanuensis.cli.admin)
+    add_subcommand(subparsers, amanuensis.cli.character)
     add_subcommand(subparsers, amanuensis.cli.lexicon)
     add_subcommand(subparsers, amanuensis.cli.user)
 
