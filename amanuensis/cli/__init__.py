@@ -50,7 +50,7 @@ def add_subcommand(subparsers, module) -> None:
     command_parser: ArgumentParser = subparsers.add_parser(
         command_name, help=command_help
     )
-    command_parser.set_defaults(func=lambda args: command_parser.print_usage())
+    command_parser.set_defaults(func=lambda args: command_parser.print_help())
 
     # Add all subcommands in the command module
     subcommands = command_parser.add_subparsers(metavar="SUBCOMMAND")
@@ -97,7 +97,7 @@ def main():
     parser = ArgumentParser()
     parser.set_defaults(
         parser=parser,
-        func=lambda args: parser.print_usage(),
+        func=lambda args: parser.print_help(),
         get_db=None,
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
