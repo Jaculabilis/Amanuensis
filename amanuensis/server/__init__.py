@@ -4,7 +4,7 @@ import os
 
 from flask import Flask, g, url_for, redirect
 
-from amanuensis.backend import lexiq, userq, memq
+from amanuensis.backend import *
 from amanuensis.config import AmanuensisConfig, CommandLineConfig
 from amanuensis.db import DbContext
 from amanuensis.parser import filesafe_title
@@ -68,7 +68,7 @@ def get_app(
 
     # Configure jinja options
     def include_backend():
-        return {"db": db, "lexiq": lexiq, "userq": userq, "memq": memq}
+        return {"db": db, "lexiq": lexiq, "userq": userq, "memq": memq, "charq": charq}
 
     app.jinja_options.update(trim_blocks=True, lstrip_blocks=True)
     app.template_filter("date")(date_format)

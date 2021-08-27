@@ -6,10 +6,12 @@ from amanuensis.db import DbContext, Lexicon, User
 from amanuensis.errors import ArgumentError
 from amanuensis.server.helpers import lexicon_param, player_required_if_not_public
 
+from .characters import bp as characters_bp
 from .forms import LexiconJoinForm
 
 
 bp = Blueprint("lexicon", __name__, url_prefix="/lexicon/<name>", template_folder=".")
+bp.register_blueprint(characters_bp)
 
 
 @bp.route("/join/", methods=["GET", "POST"])

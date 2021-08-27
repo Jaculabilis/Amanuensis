@@ -9,6 +9,10 @@
 {% block sb_logo %}{% endblock %}
 {% block sb_home %}<a href="{{ url_for('home.home') }}">Home</a>
 {% endblock %}
+{% block sb_characters %}<a 
+    {% if current_page == "characters" %}class="current-page"
+    {% else %}href="{{ url_for('lexicon.characters.characters', name=g.lexicon.name) }}"
+    {% endif %}>Characters</a>{% endblock %}
 {% block sb_contents %}<a 
     {% if current_page == "contents" %}class="current-page"
     {% else %}href="{{ url_for('lexicon.contents', name=g.lexicon.name) }}"
@@ -33,6 +37,7 @@
     {# self.sb_logo(), #}
 {% set template_sidebar_rows = [
     self.sb_home(),
+    self.sb_characters(),
     self.sb_contents(),
     self.sb_rules(),
     self.sb_session(),
@@ -41,6 +46,7 @@
     {# self.sb_logo(), #}
 {% set template_sidebar_rows = [
     self.sb_home(),
+    self.sb_characters(),
     self.sb_contents(),
     self.sb_rules(),
     self.sb_stats()] %}

@@ -2,7 +2,7 @@
 Character query interface
 """
 
-from typing import Optional
+from typing import Optional, Sequence
 
 from sqlalchemy import select, func
 
@@ -68,3 +68,8 @@ def create(
     db.session.add(new_character)
     db.session.commit()
     return new_character
+
+
+def get_in_lexicon(db: DbContext, lexicon_id: int) -> Sequence[Character]:
+    """Get all characters in a lexicon."""
+    return db(select(Character).where(Character.lexicon_id == lexicon_id)).scalars()

@@ -126,6 +126,19 @@ div.dashboard-lexicon-item {
 	padding: 0 10px;
 	border-left: 3px solid black;
 }
+ul.blockitem-list {
+	list-style: none;
+	margin-block-start: 1em;
+	margin-block-end: 1em;
+	margin-inline-start: 0.5em;
+	margin-inline-end: 0.5em;
+	padding-inline-start: 0;
+	padding-inline-end: 0;
+}
+ul.blockitem-list li {
+	border-inline-start: 3px solid black;
+	padding-inline-start: 0.5em;
+}
 div.dashboard-lexicon-unstarted {
 	border-left-color: blue;
 }

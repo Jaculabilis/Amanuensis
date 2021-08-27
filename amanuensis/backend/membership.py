@@ -2,6 +2,8 @@
 Membership query interface
 """
 
+from typing import Sequence
+
 from sqlalchemy import select, func
 
 from amanuensis.db import DbContext, Membership
@@ -64,6 +66,11 @@ def create(
     db.session.add(new_membership)
     db.session.commit()
     return new_membership
+
+
+def get_players_in_lexicon(db: DbContext, lexicon_id: int) -> Sequence[Membership]:
+    """Get all users who are members of a lexicon."""
+    return db(select(Membership).where(Membership.lexicon_id == lexicon_id)).scalars()
 
 
 def try_from_ids(db: DbContext, user_id: int, lexicon_id: int) -> Membership:
