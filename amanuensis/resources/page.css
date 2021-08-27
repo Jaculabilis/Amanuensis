@@ -95,9 +95,6 @@ div.contentblock {
 	border-radius: 5px;
 	word-break: break-word;
 }
-div.contentblock h3 {
-	margin: 0.3em 0;
-}
 a.phantom {
 	color: #cc2200;
 }
@@ -139,9 +136,20 @@ ul.blockitem-list li {
 	border-inline-start: 3px solid black;
 	padding-inline-start: 0.5em;
 }
-ul.blockitem-list p {
+ul.blockitem-list * {
 	margin-block-start: 0.5em;
 	margin-block-end: 0.5em;
+}
+ul.blockitem-list pre {
+	background-color: lightgray;
+	padding-block-start: 2px;
+	padding-block-end: 2px;
+	padding-inline-start: 2px;
+	padding-inline-end: 2px;
+	border: 1px solid gray;
+	border-radius: 2px;
+	font-size: smaller;
+	white-space: break-spaces;
 }
 div.dashboard-lexicon-unstarted {
 	border-left-color: blue;

@@ -1,4 +1,5 @@
 {% extends "lexicon.jinja" %}
+{% set current_page = "characters" %}
 {% block title %}Character | {{ lexicon_title }}{% endblock %}
 
 {% block main %}
@@ -10,9 +11,18 @@
 <span style="color:#ff0000">{{ message }}</span><br>
 {% endfor %}
 <ul class="blockitem-list">
+{% if characters|map(attribute="user_id")|select("equalto", current_user.id)|list|count < g.lexicon.character_limit %}
+<li>
+<h3><a href="{{ url_for('lexicon.characters.new', name=name) }}">Create a new character</a></h3>
+<p>You have created {{ characters|map(attribute="user_id")|select("equalto", current_user.id)|list|count }} out of {{ g.lexicon.character_limit }} allowed characters.</p>
+</li>
+{% endif %}
 {% for character in characters %}
 <li>
 <h3>{{ character.name }}</h3>
+{% if character.user == current_user %}
+<pre>{{ character.signature }}</pre>
+{% endif %}
 <p>Player: {{ character.user.username }}</p>
 {% if character.user == current_user %}
 <p><a href="{{ url_for('lexicon.characters.edit', name=g.lexicon.name, character_id=character.public_id) }}">Edit this character</a></p>

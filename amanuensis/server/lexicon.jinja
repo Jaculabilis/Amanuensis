@@ -9,7 +9,7 @@
 {% block sb_logo %}{% endblock %}
 {% block sb_characters %}<a 
     {% if current_page == "characters" %}class="current-page"
-    {% else %}href="{{ url_for('lexicon.characters.characters', name=g.lexicon.name) }}"
+    {% else %}href="{{ url_for('lexicon.characters.list', name=g.lexicon.name) }}"
     {% endif %}>Characters</a>{% endblock %}
 {% block sb_contents %}<a 
     {% if current_page == "contents" %}class="current-page"
