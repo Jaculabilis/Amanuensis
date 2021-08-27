@@ -3,6 +3,7 @@ Character query interface
 """
 
 from typing import Optional, Sequence
+from uuid import UUID
 
 from sqlalchemy import select, func
 
@@ -73,3 +74,8 @@ def create(
 def get_in_lexicon(db: DbContext, lexicon_id: int) -> Sequence[Character]:
     """Get all characters in a lexicon."""
     return db(select(Character).where(Character.lexicon_id == lexicon_id)).scalars()
+
+
+def try_from_public_id(db: DbContext, public_id: UUID) -> Optional[Character]:
+    """Get a character by its public id."""
+    return db(select(Character).where(Character.public_id == public_id)).scalar_one_or_none()

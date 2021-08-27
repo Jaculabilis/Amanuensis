@@ -1,0 +1,24 @@
+{% extends "lexicon.jinja" %}
+{% block title %}Edit {{ character.name }} | {{ lexicon_title }}{% endblock %}
+
+{% block main %}
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.name.label }}<br>{{ form.name(size=32) }}
+    </p>
+    {% for error in form.name.errors %}
+    <span style="color: #ff0000">{{ error }}</span><br>
+    {% endfor %}</p>
+    <p>
+        {{ form.signature.label }}<br>{{ form.signature(class_='fullwidth') }}
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+
+{% for message in get_flashed_messages() %}
+<span style="color:#ff0000">{{ message }}</span><br>
+{% endfor %}
+
+{% endblock %}
+{% set template_content_blocks = [self.main()] %}

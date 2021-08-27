@@ -1,7 +1,14 @@
-from flask import Blueprint, render_template, url_for
+from typing import Optional
+import uuid
+
+from flask import Blueprint, render_template, url_for, g, flash
 from werkzeug.utils import redirect
 
+from amanuensis.backend import charq
+from amanuensis.db import Character
 from amanuensis.server.helpers import lexicon_param, player_required
+
+from .forms import CharacterCreateForm
 
 
 bp = Blueprint("characters", __name__, url_prefix="/characters", template_folder=".")
@@ -14,54 +21,40 @@ def characters(name):
     return render_template('characters.jinja')
 
 
-@bp.post('/')
+@bp.route('/edit/<character_id>', methods=['GET', 'POST'])
 @lexicon_param
 @player_required
-def update(name):
-    return redirect(url_for('lexicon.statistics', name=name))
+def edit(name, character_id):
+    try:
+        char_uuid = uuid.UUID(character_id)
+    except:
+        flash("Character not found")
+        return redirect(url_for('lexicon.characters.characters', name=name))
+    character: Optional[Character] = charq.try_from_public_id(g.db, char_uuid)
+    if not character:
+        flash("Character not found")
+        return redirect(url_for('lexicon.characters.characters', name=name))
 
+    form = CharacterCreateForm()
 
-# @bp.route('/', methods=['GET', 'POST'])
-# @lexicon_param
-# @player_required
-# def characters(name):
-#     return render_template("characters.jinja")
-    # form = LexiconCharacterForm()
-    # cid = request.args.get('cid')
-    # if not cid:
-    #     # No character specified, creating a new character
-    #     return create_character(name, form)
+    if not form.is_submitted():
+        # GET
+        form.name.data = character.name
+        form.signature.data = character.signature
+        return render_template('characters.edit.jinja', character=character, form=form)
 
-    # character = g.lexicon.cfg.character.get(cid)
-    # if not character:
-    #     # Bad character id, abort
-    #     flash('Character not found')
-    #     return redirect(url_for('session.session', name=name))
-    # if current_user.uid not in (character.player, g.lexicon.cfg.editor):
-    #     # Only its owner and the editor can edit a character
-    #     flash('Access denied')
-    #     return redirect(url_for('session.session', name=name))
-    # # Edit allowed
-    # return edit_character(name, form, character)
+    else:
+        # POST
+        if form.validate():
+            # Data is valid
+            character.name = form.name.data
+            character.signature = form.signature.data
+            g.db.session.commit()
+            return redirect(url_for('lexicon.characters.characters', name=name))
 
-
-# def edit_character(name, form, character):
-#     if not form.is_submitted():
-#         # GET, populate with values
-#         return render_template(
-#             'session.character.jinja', form=form.for_character(character))
-
-#     if not form.validate():
-#         # POST with invalid data, return unchanged
-#         return render_template('session.character.jinja', form=form)
-
-#     # POST with valid data, update character
-#     with g.lexicon.ctx.edit_config() as cfg:
-#         char = cfg.character[character.cid]
-#         char.name = form.characterName.data
-#         char.signature = form.defaultSignature.data
-#     flash('Character updated')
-#     return redirect(url_for('session.session', name=name))
+        else:
+            # POST submitted invalid data
+            return render_template('characters.edit.jinja', character=character, form=form)
 
 
 # def create_character(name: str, form: LexiconCharacterForm):

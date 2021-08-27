@@ -2,36 +2,23 @@
 {% block title %}Character | {{ lexicon_title }}{% endblock %}
 
 {% block main %}
-
 <h1>Characters</h1>
 {% set players = memq.get_players_in_lexicon(db, g.lexicon.id)|list %}
 {% set characters = charq.get_in_lexicon(db, g.lexicon.id)|list %}
 <p>This lexicon has <b>{{ players|count }}</b> player{% if players|count > 1 %}s{% endif %} and <b>{{ characters|count }}</b> character{% if characters|count > 1 %}s{% endif %}.</p>
+{% for message in get_flashed_messages() %}
+<span style="color:#ff0000">{{ message }}</span><br>
+{% endfor %}
 <ul class="blockitem-list">
 {% for character in characters %}
 <li>
-<h2>{{ character.name }}</h2>
+<h3>{{ character.name }}</h3>
 <p>Player: {{ character.user.username }}</p>
+{% if character.user == current_user %}
+<p><a href="{{ url_for('lexicon.characters.edit', name=g.lexicon.name, character_id=character.public_id) }}">Edit this character</a></p>
+{% endif %}
 </li>
 {% endfor %}
 </ul>
-{# <form action="" method="post" novalidate>
-    {{ form.hidden_tag() }}
-    <p>
-        {{ form.characterName.label }}<br>{{ form.characterName(size=32) }}
-    </p>
-    {% for error in form.characterName.errors %}
-    <span style="color: #ff0000">{{ error }}</span><br>
-    {% endfor %}</p>
-    <p>
-        {{ form.defaultSignature.label }}<br>{{ form.defaultSignature(class_='fullwidth') }}
-    </p>
-    <p>{{ form.submit() }}</p>
-</form> #}
-
-{# {% for message in get_flashed_messages() %}
-<span style="color:#ff0000">{{ message }}</span><br>
-{% endfor %} #}
-
 {% endblock %}
 {% set template_content_blocks = [self.main()] %}
