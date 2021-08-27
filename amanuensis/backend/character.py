@@ -78,4 +78,6 @@ def get_in_lexicon(db: DbContext, lexicon_id: int) -> Sequence[Character]:
 
 def try_from_public_id(db: DbContext, public_id: UUID) -> Optional[Character]:
     """Get a character by its public id."""
-    return db(select(Character).where(Character.public_id == public_id)).scalar_one_or_none()
+    return db(
+        select(Character).where(Character.public_id == public_id)
+    ).scalar_one_or_none()
