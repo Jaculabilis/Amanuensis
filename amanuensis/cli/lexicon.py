@@ -49,6 +49,7 @@ def command_create(args):
 @add_argument("--no-public", dest="public", action="store_const", const=False)
 @add_argument("--join", dest="join", action="store_const", const=True)
 @add_argument("--no-join", dest="join", action="store_const", const=False)
+@add_argument("--char-limit", type=int, default=None)
 def command_edit(args):
     """
     Update a lexicon's configuration.
@@ -65,6 +66,9 @@ def command_edit(args):
         values["joinable"] = True
     elif args.join == False:
         values["joinable"] = False
+
+    if args.char_limit:
+        values["character_limit"] = args.char_limit
 
     result = db(update(Lexicon).where(Lexicon.name == args.name).values(**values))
     LOG.info(f"Updated {result.rowcount} lexicons")
