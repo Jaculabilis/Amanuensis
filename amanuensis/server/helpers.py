@@ -88,7 +88,7 @@ def editor_required(route):
         user: User = current_user
         lexicon: Lexicon = g.lexicon
         mem: Optional[Membership] = memq.try_from_ids(db, user.id, lexicon.id)
-        if not mem.is_editor:
+        if not mem or not mem.is_editor:
             flash("You must be the editor to view this page")
             return redirect(url_for('lexicon.contents', name=lexicon.name))
         return route(*args, **kwargs)
