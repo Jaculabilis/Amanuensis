@@ -1,11 +1,29 @@
 from functools import wraps
-from typing import Optional
+from typing import Optional, Any
+from uuid import UUID
 
 from flask import g, flash, redirect, url_for
 from flask_login import current_user
+from werkzeug.routing import BaseConverter, ValidationError
 
 from amanuensis.backend import lexiq, memq
 from amanuensis.db import DbContext, Lexicon, User, Membership
+
+
+class UuidConverter(BaseConverter):
+    """Converter that matches version 4 UUIDs"""
+    regex = r"[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-4[0-9A-Fa-f]{3}-[89aAbB][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}"
+
+    def to_python(self, value: str) -> Any:
+        try:
+            return UUID(value)
+        except:
+            return ValidationError(f"Invalid UUID: {value}")
+
+    def to_url(self, value: Any) -> str:
+        if not isinstance(value, UUID):
+            raise ValueError(f"Expected UUID, got {type(value)}: {value}")
+        return str(value)
 
 
 def lexicon_param(route):

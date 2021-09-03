@@ -22,16 +22,11 @@ def list(name):
     return render_template("characters.jinja", name=name)
 
 
-@bp.route("/edit/<character_id>", methods=["GET", "POST"])
+@bp.route("/edit/<uuid:character_id>", methods=["GET", "POST"])
 @lexicon_param
 @player_required
-def edit(name, character_id):
-    try:
-        char_uuid = uuid.UUID(character_id)
-    except:
-        flash("Character not found")
-        return redirect(url_for("lexicon.characters.list", name=name))
-    character: Optional[Character] = charq.try_from_public_id(g.db, char_uuid)
+def edit(name, character_id: uuid.UUID):
+    character: Optional[Character] = charq.try_from_public_id(g.db, character_id)
     if not character:
         flash("Character not found")
         return redirect(url_for("lexicon.characters.list", name=name))

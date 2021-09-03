@@ -9,6 +9,7 @@ from amanuensis.config import AmanuensisConfig, CommandLineConfig
 from amanuensis.db import DbContext
 from amanuensis.parser import filesafe_title
 import amanuensis.server.auth as auth
+from amanuensis.server.helpers import UuidConverter
 import amanuensis.server.home as home
 import amanuensis.server.lexicon as lexicon
 
@@ -74,6 +75,9 @@ def get_app(
     app.template_filter("date")(date_format)
     app.template_filter("articlelink")(article_link)
     app.context_processor(include_backend)
+
+    # Set up uuid route converter
+    app.url_map.converters["uuid"] = UuidConverter
 
     # Set up Flask-Login
     auth.get_login_manager().init_app(app)
