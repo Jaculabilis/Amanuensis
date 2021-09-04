@@ -50,7 +50,7 @@ def edit(lexicon_name, character_id: uuid.UUID):
             # Data is valid
             character.name = form.name.data
             character.signature = form.signature.data
-            g.db.session.commit()
+            g.db.session.commit()  # TODO refactor into backend
             return redirect(
                 url_for("lexicon.characters.list", lexicon_name=lexicon_name)
             )

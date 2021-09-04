@@ -5,12 +5,24 @@
 <a{% if page_name != page %} href="{{ url_for('lexicon.settings.' + page, lexicon_name=lexicon_name) }}"{% endif %}>{{ text }}</a>
 {%- endmacro %}
 
+{% macro flag_setting(field) %}
+{{ field() }}
+{{ field.label }}<br>
+{% endmacro %}
+
+{% macro number_setting(field) %}
+{{ field(autocomplete="off", class_="smallnumber") }}
+{{ field.label }}<br>
+{% for error in field.errors %}
+<span style="color: #ff0000">{{ error }}</span><br>
+{% endfor %}
+{% endmacro %}
+
 {% block main %}
 {% if current_membership.is_editor %}
 <ul class="unordered-tabs">
     <li>{{ settings_page_link("player", "Player") }}</li>
-    <li>{{ settings_page_link("general", "General") }}</li>
-    <li>{{ settings_page_link("join", "Visibility and Joining") }}</li>
+    <li>{{ settings_page_link("setup", "Game Setup") }}</li>
     <li>{{ settings_page_link("progress", "Game Progress") }}</li>
     <li>{{ settings_page_link("publish", "Turn Publishing") }}</li>
     <li>{{ settings_page_link("article", "Article Requirements") }}</li>
@@ -19,14 +31,56 @@
 
 {% if page_name == "player" %}
     <h3>Player Settings</h3>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {% if current_membership.is_editor %}{{ flag_setting(form.notify_ready) }}{% endif %}
+            {{ flag_setting(form.notify_reject) }}
+            {{ flag_setting(form.notify_approve) }}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+
+    {% for message in get_flashed_messages() %}
+    <span style="color:#ff0000">{{ message }}</span><br>
+    {% endfor %}
 {% endif %}
 
-{% if page_name == "general" %}
-    <h3>General Settings</h3>
-{% endif %}
-
-{% if page_name == "join" %}
-    <h3>Visibility and Joining</h3>
+{% if page_name == "setup" %}
+    <h3>Game Setup</h3>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.title.label }}:<br>
+            {{ form.title(autocomplete="off", placeholder="Lexicon " + lexicon_name, class_="fullwidth") }}<br>
+        </p>
+        <p>
+            {{ form.prompt.label }}: {{ form.prompt(class_="fullwidth") }}
+            {% for error in form.prompt.errors %}
+            <span style="color: #ff0000">{{ error }}</span><br>
+            {% endfor %}
+        </p>
+        <p>
+            {{ flag_setting(form.public) }}
+            {{ flag_setting(form.joinable) }}
+            {{ form.has_password() }}
+            {{ form.has_password.label }}:<br>
+            {{ form.password(autocomplete="off") }}
+        </p>
+        <p>
+            {{ number_setting(form.turn_count) }}
+        </p>
+        <p>
+            {{ number_setting(form.player_limit) }}
+        </p>
+        <p>
+            {{ number_setting(form.character_limit) }}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+    {% for message in get_flashed_messages() %}
+    <span style="color:#ff0000">{{ message }}</span><br>
+    {% endfor %}
 {% endif %}
 
 {% if page_name == "progress" %}

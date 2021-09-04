@@ -114,6 +114,10 @@ textarea.fullwidth {
 	width: 100%;
 	box-sizing: border-box;
 }
+input.fullwidth {
+	width: 100%;
+	box-sizing: border-box;
+}
 input.smallnumber {
 	width: 4em;
 }

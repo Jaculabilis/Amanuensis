@@ -84,7 +84,11 @@ def password_check(db: DbContext, lexicon_id: int, password: str) -> bool:
 def password_set(db: DbContext, lexicon_id: int, new_password: Optional[str]) -> None:
     """Set or clear a lexicon's password."""
     password_hash = generate_password_hash(new_password) if new_password else None
-    db(update(Lexicon).where(Lexicon.id == lexicon_id).values(password=password_hash))
+    db(
+        update(Lexicon)
+        .where(Lexicon.id == lexicon_id)
+        .values(join_password=password_hash)
+    )
     db.session.commit()
 
 
