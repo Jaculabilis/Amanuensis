@@ -1,3 +1,8 @@
+:root {
+	--button-default: #dddddd;
+	--button-hover: #cccccc;
+	--button-current: #bbbbbb;
+}
 body {
 	background-color: #eeeeee;
 	line-height: 1.4;
@@ -57,7 +62,7 @@ div.misclinks table td a {
 table a {
 	display: flex;
 	padding: 3px;
-	background-color: #dddddd;
+	background-color: var(--button-default);
 	border-radius: 5px;
 	text-decoration: none;
 }
@@ -65,13 +70,13 @@ div#sidebar table a {
 	justify-content: center;
 }
 table a:hover {
-	background-color: #cccccc;
+	background-color: var(--button-hover);
 }
 div#sidebar table a.current-page {
-	background-color: #bbbbbb;
+	background-color: var(--button-current);
 }
 div#sidebar table a.current-page:hover {
-	background-color: #bbbbbb;
+	background-color: var(--button-current);
 }
 div#sidebar table td {
 	padding: 0px; margin: 3px 0;
