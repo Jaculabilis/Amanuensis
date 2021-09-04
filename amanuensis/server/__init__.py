@@ -9,7 +9,7 @@ from amanuensis.config import AmanuensisConfig, CommandLineConfig
 from amanuensis.db import DbContext
 from amanuensis.parser import filesafe_title
 import amanuensis.server.auth as auth
-from amanuensis.server.helpers import UuidConverter
+from amanuensis.server.helpers import UuidConverter, current_lexicon, current_membership
 import amanuensis.server.home as home
 import amanuensis.server.lexicon as lexicon
 
@@ -68,13 +68,21 @@ def get_app(
     app.teardown_appcontext(db_teardown)
 
     # Configure jinja options
-    def include_backend():
-        return {"db": db, "lexiq": lexiq, "userq": userq, "memq": memq, "charq": charq}
+    def add_jinja_context():
+        return {
+            "db": db,
+            "lexiq": lexiq,
+            "userq": userq,
+            "memq": memq,
+            "charq": charq,
+            "current_lexicon": current_lexicon,
+            "current_membership": current_membership
+        }
 
     app.jinja_options.update(trim_blocks=True, lstrip_blocks=True)
     app.template_filter("date")(date_format)
     app.template_filter("articlelink")(article_link)
-    app.context_processor(include_backend)
+    app.context_processor(add_jinja_context)
 
     # Set up uuid route converter
     app.url_map.converters["uuid"] = UuidConverter

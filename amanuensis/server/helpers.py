@@ -2,8 +2,17 @@ from functools import wraps
 from typing import Optional, Any
 from uuid import UUID
 
-from flask import g, flash, redirect, url_for
+from flask import (
+    _request_ctx_stack,
+    flash,
+    g,
+    has_request_context,
+    redirect,
+    request,
+    url_for,
+)
 from flask_login import current_user
+from werkzeug.local import LocalProxy
 from werkzeug.routing import BaseConverter, ValidationError
 
 from amanuensis.backend import lexiq, memq
@@ -24,6 +33,45 @@ class UuidConverter(BaseConverter):
         if not isinstance(value, UUID):
             raise ValueError(f"Expected UUID, got {type(value)}: {value}")
         return str(value)
+
+
+def get_current_lexicon():
+    # Check if the request context is for a lexicon page
+    if not has_request_context():
+        return None
+    lexicon_name = request.view_args.get("lexicon_name")
+    if not lexicon_name:
+        return None
+    # Pull up the lexicon if it exists and cache it in the request context
+    if not hasattr(_request_ctx_stack.top, "lexicon"):
+        db: DbContext = g.db
+        lexicon: Optional[Lexicon] = lexiq.try_from_name(db, lexicon_name)
+        setattr(_request_ctx_stack.top, "lexicon", lexicon)
+    # Return the cached lexicon
+    return getattr(_request_ctx_stack.top, "lexicon", None)
+
+
+current_lexicon = LocalProxy(get_current_lexicon)
+
+
+def get_current_membership():
+    # Base the current membership on the current user and the current lexicon
+    user: User = current_user
+    if not user or not user.is_authenticated:
+        return None
+    lexicon: Lexicon = current_lexicon
+    if not lexicon:
+        return None
+    # Pull up the membership and cache it in the request context
+    if not hasattr(_request_ctx_stack.top, "membership"):
+        db: DbContext = g.db
+        mem: Membership = memq.try_from_ids(db, user.id, lexicon.id)
+        setattr(_request_ctx_stack.top, "membership", mem)
+    # Return cached membership
+    return getattr(_request_ctx_stack.top, "membership", None)
+
+
+current_membership = LocalProxy(get_current_membership)
 
 
 def lexicon_param(route):
