@@ -1,0 +1,45 @@
+{% extends "lexicon.jinja" %}
+{% block title %}Edit | {{ lexicon_title }}{% endblock %}
+
+{% macro settings_page_link(page, text) -%}
+<a{% if page_name != page %} href="{{ url_for('lexicon.settings.' + page, lexicon_name=lexicon_name) }}"{% endif %}>{{ text }}</a>
+{%- endmacro %}
+
+{% block main %}
+{% if current_membership.is_editor %}
+<ul class="unordered-tabs">
+    <li>{{ settings_page_link("player", "Player") }}</li>
+    <li>{{ settings_page_link("general", "General") }}</li>
+    <li>{{ settings_page_link("join", "Visibility and Joining") }}</li>
+    <li>{{ settings_page_link("progress", "Game Progress") }}</li>
+    <li>{{ settings_page_link("publish", "Turn Publishing") }}</li>
+    <li>{{ settings_page_link("article", "Article Requirements") }}</li>
+</ul>
+{% endif %}
+
+{% if page_name == "player" %}
+    <h3>Player Settings</h3>
+{% endif %}
+
+{% if page_name == "general" %}
+    <h3>General Settings</h3>
+{% endif %}
+
+{% if page_name == "join" %}
+    <h3>Visibility and Joining</h3>
+{% endif %}
+
+{% if page_name == "progress" %}
+    <h3>Game Progress</h3>
+{% endif %}
+
+{% if page_name == "publish" %}
+    <h3>Turn Publishing</h3>
+{% endif %}
+
+{% if page_name == "article" %}
+    <h3>Article Requirements</h3>
+{% endif %}
+{% endblock %}
+
+{% set template_content_blocks = [self.main()] %}
