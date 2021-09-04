@@ -13,7 +13,7 @@
 <ul class="blockitem-list">
 {% if characters|map(attribute="user_id")|select("equalto", current_user.id)|list|count < g.lexicon.character_limit %}
 <li>
-<h3><a href="{{ url_for('lexicon.characters.new', name=name) }}">Create a new character</a></h3>
+<h3><a href="{{ url_for('lexicon.characters.new', lexicon_name=lexicon_name) }}">Create a new character</a></h3>
 <p>You have created {{ characters|map(attribute="user_id")|select("equalto", current_user.id)|list|count }} out of {{ g.lexicon.character_limit }} allowed characters.</p>
 </li>
 {% endif %}
@@ -25,7 +25,7 @@
 {% endif %}
 <p>Player: {{ character.user.username }}</p>
 {% if character.user == current_user %}
-<p><a href="{{ url_for('lexicon.characters.edit', name=g.lexicon.name, character_id=character.public_id) }}">Edit this character</a></p>
+<p><a href="{{ url_for('lexicon.characters.edit', lexicon_name=lexicon_name, character_id=character.public_id) }}">Edit this character</a></p>
 {% endif %}
 </li>
 {% endfor %}

@@ -27,7 +27,7 @@ def article_link(title):
     """Get the url for a lexicon by its title"""
     return url_for(
         'lexicon.article',
-        name=g.lexicon.name,
+        lexicon_name=g.lexicon.name,
         title=filesafe_title(title))
 
 

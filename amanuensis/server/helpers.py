@@ -34,7 +34,7 @@ def lexicon_param(route):
     @wraps(route)
     def with_lexicon(*args, **kwargs):
         db: DbContext = g.db
-        name: str = kwargs.get('name')
+        name: str = kwargs.get('lexicon_name')
         lexicon: Optional[Lexicon] = lexiq.try_from_name(db, name)
         if lexicon is None:
             flash(f"Couldn't find a lexicon with the name \"{name}\"")
@@ -71,7 +71,7 @@ def player_required(route):
         if not mem:
             flash("You must be a player to view this page")
             if lexicon.public:
-                return redirect(url_for('lexicon.contents', name=lexicon.name))
+                return redirect(url_for('lexicon.contents', lexicon_name=lexicon.name))
             else:
                 return redirect(url_for('home.home'))
         return route(*args, **kwargs)
@@ -108,6 +108,6 @@ def editor_required(route):
         mem: Optional[Membership] = memq.try_from_ids(db, user.id, lexicon.id)
         if not mem or not mem.is_editor:
             flash("You must be the editor to view this page")
-            return redirect(url_for('lexicon.contents', name=lexicon.name))
+            return redirect(url_for('lexicon.contents', lexicon_name=lexicon.name))
         return route(*args, **kwargs)
     return editor_route

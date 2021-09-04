@@ -32,12 +32,12 @@ def test_character_view(db: DbContext, app: Flask, make: ObjectFactory):
         assert mem
 
         # The character page exists
-        list_url = url_for("lexicon.characters.list", name=lexicon.name)
+        list_url = url_for("lexicon.characters.list", lexicon_name=lexicon.name)
         response = client.get(list_url)
         assert response.status_code == 200
         assert charname.encode("utf8") not in response.data
         assert char_sig.encode("utf8") not in response.data
-        new_url = url_for("lexicon.characters.new", name=lexicon.name)
+        new_url = url_for("lexicon.characters.new", lexicon_name=lexicon.name)
         assert new_url.encode("utf8") in response.data
 
         # The character creation endpoint works

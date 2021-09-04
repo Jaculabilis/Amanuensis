@@ -18,18 +18,18 @@ bp = Blueprint("characters", __name__, url_prefix="/characters", template_folder
 @bp.get("/")
 @lexicon_param
 @player_required
-def list(name):
-    return render_template("characters.jinja", name=name)
+def list(lexicon_name):
+    return render_template("characters.jinja", lexicon_name=lexicon_name)
 
 
 @bp.route("/edit/<uuid:character_id>", methods=["GET", "POST"])
 @lexicon_param
 @player_required
-def edit(name, character_id: uuid.UUID):
+def edit(lexicon_name, character_id: uuid.UUID):
     character: Optional[Character] = charq.try_from_public_id(g.db, character_id)
     if not character:
         flash("Character not found")
-        return redirect(url_for("lexicon.characters.list", name=name))
+        return redirect(url_for("lexicon.characters.list", lexicon_name=lexicon_name))
 
     form = CharacterCreateForm()
 
@@ -37,7 +37,12 @@ def edit(name, character_id: uuid.UUID):
         # GET
         form.name.data = character.name
         form.signature.data = character.signature
-        return render_template("characters.edit.jinja", character=character, form=form)
+        return render_template(
+            "characters.edit.jinja",
+            lexicon_name=lexicon_name,
+            character=character,
+            form=form,
+        )
 
     else:
         # POST
@@ -46,24 +51,33 @@ def edit(name, character_id: uuid.UUID):
             character.name = form.name.data
             character.signature = form.signature.data
             g.db.session.commit()
-            return redirect(url_for("lexicon.characters.list", name=name))
+            return redirect(
+                url_for("lexicon.characters.list", lexicon_name=lexicon_name)
+            )
 
         else:
             # POST submitted invalid data
             return render_template(
-                "characters.edit.jinja", character=character, form=form
+                "characters.edit.jinja",
+                lexicon_name=lexicon_name,
+                character=character,
+                form=form,
             )
 
 
 @bp.get("/new/")
 @lexicon_param
 @player_required
-def new(name):
+def new(lexicon_name):
     dummy_name = f"{current_user.username}'s new character"
     dummy_signature = "~"
     char = charq.create(
         g.db, g.lexicon.id, current_user.id, dummy_name, dummy_signature
     )
     return redirect(
-        url_for("lexicon.characters.edit", name=name, character_id=char.public_id)
+        url_for(
+            "lexicon.characters.edit",
+            lexicon_name=lexicon_name,
+            character_id=char.public_id,
+        )
     )
