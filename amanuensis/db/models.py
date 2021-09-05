@@ -463,6 +463,9 @@ class IndexType(enum.Enum):
     PREFIX = 2
     ETC = 3
 
+    def __str__(self):
+        return self.name
+
 
 class ArticleIndex(ModelBase):
     """
