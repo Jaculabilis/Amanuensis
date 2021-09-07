@@ -3,7 +3,9 @@ Index query interface
 """
 
 import re
-from typing import Optional
+from typing import Optional, Sequence
+
+from sqlalchemy import select
 
 from amanuensis.db import DbContext, ArticleIndex, IndexType
 from amanuensis.errors import ArgumentError, BackendArgumentTypeError
@@ -72,3 +74,52 @@ def create(
     db.session.add(new_index)
     db.session.commit()
     return new_index
+
+
+def get_for_lexicon(db: DbContext, lexicon_id: int) -> Sequence[ArticleIndex]:
+    """Returns all index rules for a lexicon."""
+    return db(
+        select(ArticleIndex).where(ArticleIndex.lexicon_id == lexicon_id)
+    ).scalars()
+
+
+
+def update(db: DbContext, lexicon_id: int, indices: Sequence[ArticleIndex]) -> None:
+    """
+    Update the indices for a lexicon. Indices are matched by type and pattern.
+    An extant index not matched to an input is deleted, and an input index not
+    matched to a an extant index is created. Matched indexes are updated with
+    the input logical and display orders and capacity.
+    """
+    extant_indices: Sequence[ArticleIndex] = list(get_for_lexicon(db, lexicon_id))
+    s = lambda i: f"{i.index_type}:{i.pattern}"
+    for extant_index in extant_indices:
+        match = None
+        for new_index in indices:
+            is_match = (
+                extant_index.index_type == new_index.index_type
+                and extant_index.pattern == new_index.pattern
+            )
+            if is_match:
+                match = new_index
+                break
+        if match:
+            extant_index.logical_order = new_index.logical_order
+            extant_index.display_order = new_index.display_order
+            extant_index.capacity = new_index.capacity
+        else:
+            db.session.delete(extant_index)
+    for new_index in indices:
+        match = None
+        for extant_index in extant_indices:
+            is_match = (
+                extant_index.index_type == new_index.index_type
+                and extant_index.pattern == new_index.pattern
+            )
+            if is_match:
+                match = extant_index
+                break
+        if not match:
+            new_index.lexicon_id = lexicon_id
+            db.session.add(new_index)
+    db.session.commit()

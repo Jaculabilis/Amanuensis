@@ -1,14 +1,19 @@
 from flask_wtf import FlaskForm
 from wtforms import (
     BooleanField,
+    FieldList,
+    FormField,
     IntegerField,
     PasswordField,
+    SelectField,
     StringField,
     SubmitField,
     TextAreaField,
 )
-from wtforms.validators import Optional, DataRequired
+from wtforms.validators import Optional, DataRequired, ValidationError
 from wtforms.widgets.html5 import NumberInput
+
+from amanuensis.db import ArticleIndex, IndexType
 
 
 class PlayerSettingsForm(FlaskForm):
@@ -42,4 +47,51 @@ class SetupSettingsForm(FlaskForm):
         widget=NumberInput(),
         validators=[Optional()],
     )
+    submit = SubmitField("Submit")
+
+
+def parse_index_type(type_str):
+    if not type_str:
+        return None
+    return getattr(IndexType, type_str)
+
+
+class IndexDefinitionForm(FlaskForm):
+    """/lexicon/<name>/settings/index/"""
+
+    class Meta:
+        # Disable CSRF on the individual index definitions, since the schema
+        # form will have one
+        csrf = False
+
+    TYPE_CHOICES = [("", "")] + [(str(t), str(t).lower()) for t in IndexType]
+
+    index_type = SelectField(choices=TYPE_CHOICES, coerce=parse_index_type)
+    pattern = StringField()
+    logical_order = IntegerField(
+        widget=NumberInput(min=-99, max=99), validators=[Optional()]
+    )
+    display_order = IntegerField(
+        widget=NumberInput(min=-99, max=99), validators=[Optional()]
+    )
+    capacity = IntegerField(widget=NumberInput(min=0, max=99), validators=[Optional()])
+
+    def validate_pattern(form, field):
+        if form.index_type.data and not field.data:
+            raise ValidationError("Pattern must be defined")
+
+    def to_model(self):
+        return ArticleIndex(
+            index_type=self.index_type.data,
+            pattern=self.pattern.data,
+            logical_order=self.logical_order.data,
+            display_order=self.display_order.data,
+            capacity=self.capacity.data,
+        )
+
+
+class IndexSchemaForm(FlaskForm):
+    """/lexicon/<name>/settings/index/"""
+
+    indices = FieldList(FormField(IndexDefinitionForm))
     submit = SubmitField("Submit")

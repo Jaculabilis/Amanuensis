@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from flask import Blueprint, render_template, url_for, g, flash, redirect
 
 from amanuensis.backend import *
@@ -10,7 +12,7 @@ from amanuensis.server.helpers import (
     current_lexicon,
 )
 
-from .forms import PlayerSettingsForm, SetupSettingsForm
+from .forms import PlayerSettingsForm, SetupSettingsForm, IndexSchemaForm
 
 
 bp = Blueprint("settings", __name__, url_prefix="/settings", template_folder=".")
@@ -118,13 +120,61 @@ def setup(lexicon_name):
             )
 
 
-@bp.get("/progress/")
+@bp.get("/index/")
 @lexicon_param
 @editor_required
-def progress(lexicon_name):
-    return render_template(
-        "settings.jinja", lexicon_name=lexicon_name, page_name=progress.__name__
+def index(lexicon_name):
+    # Get the current indices
+    indices: Sequence[ArticleIndex] = indq.get_for_lexicon(g.db, current_lexicon.id)
+    index_data = [
+        {
+            "index_type": str(index.index_type),
+            "pattern": index.pattern,
+            "logical_order": index.logical_order,
+            "display_order": index.display_order,
+            "capacity": index.capacity,
+        }
+        for index in indices
+    ]
+    # Add a blank index to allow for adding rules
+    index_data.append(
+        {
+            "index_type": "",
+            "pattern": None,
+            "logical_order": None,
+            "display_order": None,
+            "capacity": None,
+        }
     )
+    form = IndexSchemaForm(indices=index_data)
+    return render_template(
+        "settings.jinja", lexicon_name=lexicon_name, page_name=index.__name__, form=form
+    )
+
+
+@bp.post("/index/")
+@lexicon_param
+@editor_required
+def index_post(lexicon_name):
+    # Initialize the form
+    form = IndexSchemaForm()
+    if form.validate():
+        # Valid data, strip out all indexes with the blank type
+        indices = [
+            index_def.to_model()
+            for index_def in form.indices.entries
+            if index_def.index_type.data
+        ]
+        indq.update(g.db, current_lexicon.id, indices)
+        return redirect(url_for("lexicon.settings.index", lexicon_name=lexicon_name))
+    else:
+        # Invalid data
+        return render_template(
+            "settings.jinja",
+            lexicon_name=lexicon_name,
+            page_name=index.__name__,
+            form=form,
+        )
 
 
 @bp.get("/publish/")

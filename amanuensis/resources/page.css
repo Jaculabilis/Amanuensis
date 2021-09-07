@@ -46,11 +46,8 @@ div#sidebar {
 img#logo {
 	max-width: 200px;
 }
-table {
-	table-layout: fixed;
-	width: 100%;
-}
 div#sidebar table {
+	width: 100%;
 	border-collapse: collapse;
 }
 div.citeblock table td:first-child + td a {
@@ -117,9 +114,6 @@ textarea.fullwidth {
 input.fullwidth {
 	width: 100%;
 	box-sizing: border-box;
-}
-input.smallnumber {
-	width: 4em;
 }
 form#session-settings p {
 	line-height: 1.8em;
@@ -206,6 +200,20 @@ ul.unordered-tabs li a[href] {
 ul.unordered-tabs li a[href]:hover {
 	background-color: var(--button-hover);
 	border-color: var(--button-hover);
+}
+#index-definition-help {
+	margin-block-start: 1em;
+	margin-block-end: 1em;
+}
+#index-definition-table td:nth-child(2) {
+	width: 100%;
+}
+#index-definition-table td:nth-child(2) *:only-child {
+	box-sizing: border-box;
+	width: 100%;
+}
+#index-definition-table td input[type=number] {
+	width: 4em;
 }
 @media only screen and (max-width: 816px) {
 	div#wrapper {

@@ -473,6 +473,7 @@ class ArticleIndex(ModelBase):
     """
 
     __tablename__ = "article_index"
+    __table_args__ = (UniqueConstraint("lexicon_id", "index_type", "pattern"),)
 
     ##############
     # Index info #

@@ -15,7 +15,6 @@ def test_character_view(db: DbContext, app: Flask, make: ObjectFactory):
     username: str = f"user_{os.urandom(8).hex()}"
     charname: str = f"char_{os.urandom(8).hex()}"
     char_sig: str = f"signature_{os.urandom(8).hex()}"
-    # ub: bytes = username.encode("utf8")
 
     with app.test_client() as client:
         # Create the user and log in
@@ -63,7 +62,6 @@ def test_character_view(db: DbContext, app: Flask, make: ObjectFactory):
             created_redirect,
             data={"name": charname, "signature": char_sig, "csrf_token": csrf_token},
         )
-        print(response.data.decode("utf8"))
         assert 300 <= response.status_code <= 399
 
         # The character is updated

@@ -75,6 +75,7 @@ def get_app(
             "userq": userq,
             "memq": memq,
             "charq": charq,
+            "indq": indq,
             "current_lexicon": current_lexicon,
             "current_membership": current_membership
         }
