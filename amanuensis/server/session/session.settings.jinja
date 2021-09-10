@@ -45,14 +45,8 @@
 
 	<h3>General</h3>
 	<p>
-		{{ form.title.label }}:<br>
-		{{ form.title(autocomplete="off", size=32, style="width:100%") }}<br>
 		{{ form.editor.label }}: {{ form.editor(autocomplete="off") }}<br>
 		{% for error in form.editor.errors %}
-		<span style="color: #ff0000">{{ error }}</span><br>
-		{% endfor %}
-		{{ form.prompt.label }}: {{ form.prompt(class_="fullwidth") }}
-		{% for error in form.prompt.errors %}
 		<span style="color: #ff0000">{{ error }}</span><br>
 		{% endfor %}
 	</p>
@@ -60,32 +54,12 @@
 	<h3>Game Progress</h3>
 	<p>
 		{{ number_setting(form.turnCurrent) }}
-		{{ number_setting(form.turnMax) }}
-		{{ form.articleIndexList.label }}:<br>
-		{{ form.articleIndexList(class_="fullwidth", rows=10) }}
-		{% for error in form.articleIndexList.errors %}
-		<span style="color: #ff0000">{{ error }}</span><br>
-		{% endfor %}
-		{{ number_setting(form.articleIndexCapacity) }}
 		{{ form.turnAssignment.label }}:<br>
 		{{ form.turnAssignment(class_="fullwidth", rows=10) }}
 	</p>
 
-	<h3>Visibility and Joining</h3>
-	<p>
-		{{ flag_setting(form.joinPublic) }}
-		{{ flag_setting(form.joinOpen) }}
-		{{ form.joinPassword(autocomplete="off") }}
-		{{ form.joinPassword.label }}<br>
-		{{ number_setting(form.joinMaxPlayers) }}
-		{{ number_setting(form.joinCharsPerPlayer) }}
-	</p>
-
 	<h3>Turn Publishing</h3>
 	<p>
-		{{ flag_setting(form.publishNotifyEditorOnReady) }}
-		{{ flag_setting(form.publishNotifyPlayerOnReject) }}
-		{{ flag_setting(form.publishNotifyPlayerOnAccept) }}
 		{{ form.publishDeadlines(autocomplete="off") }}
 		{{ form.publishDeadlines.label }}<br>
 		{{ flag_setting(form.publishAsap) }}

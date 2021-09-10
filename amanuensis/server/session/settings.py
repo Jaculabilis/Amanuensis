@@ -158,15 +158,9 @@ class Settings():
 			if name.startswith('s_'):
 				yield name, setting
 
-	s_title = Setting('title',
-		StringField('Title override', validators=[Optional()]))
-
 	s_editor = Setting('editor',
 		SelectField('Editor', validators=[DataRequired(), User(True)]),
 		translator=UsernameTranslator())
-
-	s_prompt = Setting('prompt',
-		TextAreaField('Prompt', validators=[DataRequired()]))
 
 	s_turnCurrent = Setting('turn.current',
 		IntegerField(
@@ -174,48 +168,9 @@ class Settings():
 			widget=NumberInput(),
 			validators=[Optional()]))
 
-	s_turnMax = Setting('turn.max',
-		IntegerField(
-			'Number of turns',
-			widget=NumberInput(),
-			validators=[DataRequired()]))
-
 	s_turnAssignment = Setting('turn.assignment',
 		TextAreaField('index assignment raw'),
 		translator=TmpAsgnTranslator())
-
-	s_joinPublic = Setting('join.public',
-		BooleanField('Show game on public pages'))
-
-	s_joinOpen = Setting('join.open',
-		BooleanField('Allow players to join game'))
-
-	s_joinPassword = Setting('join.password',
-		StringField('Password to join game', validators=[Optional()]))
-
-	s_joinMaxPlayers = Setting('join.max_players',
-		IntegerField(
-			'Maximum number of players',
-			widget=NumberInput(),
-			validators=[DataRequired()]))
-
-	s_joinCharsPerPlayer = Setting('join.chars_per_player',
-		IntegerField(
-			'Characters per player',
-			widget=NumberInput(),
-			validators=[DataRequired()]))
-
-	s_publishNotifyEditorOnReady = Setting('publish.notify_editor_on_ready',
-		BooleanField(
-			'Notify the editor when a player marks an article as ready'))
-
-	s_publishNotifyPlayerOnReject = Setting('publish.notify_player_on_reject',
-		BooleanField(
-			'Notify a player when their article is rejected by the editor'))
-
-	s_publishNotifyPlayerOnAccept = Setting('publish.notify_player_on_accept',
-		BooleanField(
-			'Notify a player when their article is accepted by the editor'))
 
 	s_publishDeadlines = Setting('publish.deadlines',
 		StringField(
@@ -235,18 +190,6 @@ class Settings():
 	s_publishBlockOnReady = Setting('publish.block_on_ready',
 		BooleanField(
 			'Block turn publish if any articles are awaiting editor review'))
-
-	s_articleIndexList = Setting('article.index.list',
-		TextAreaField(
-			'Index specifications',
-			validators=[IndexList]),
-		translator=IndexListTranslator())
-
-	s_articleIndexCapacity = Setting('article.index.capacity',
-		IntegerField(
-			'Index capacity override',
-			widget=NumberInput(),
-			validators=[Optional()]))
 
 	s_articleCitationAllowSelf = Setting('article.citation.allow_self',
 		BooleanField('Allow players to cite themselves'))
