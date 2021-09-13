@@ -248,7 +248,7 @@ class Lexicon(ModelBase):
     memberships = relationship("Membership", back_populates="lexicon")
     characters = relationship("Character", back_populates="lexicon")
     articles = relationship("Article", back_populates="lexicon")
-    indexes = relationship("ArticleIndex", back_populates="lexicon")
+    indices = relationship("ArticleIndex", back_populates="lexicon")
     index_rules = relationship("ArticleIndexRule", back_populates="lexicon")
     content_rules = relationship("ArticleContentRule", back_populates="lexicon")
     posts = relationship("Post", back_populates="lexicon")
@@ -502,7 +502,7 @@ class ArticleIndex(ModelBase):
     # Foreign key relationships #
     #############################
 
-    lexicon = relationship("Lexicon", back_populates="indexes")
+    lexicon = relationship("Lexicon", back_populates="indices")
     index_rules = relationship("ArticleIndexRule", back_populates="index")
 
 

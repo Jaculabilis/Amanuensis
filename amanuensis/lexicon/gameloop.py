@@ -392,7 +392,7 @@ def sort_by_index_spec(articles, index_specs, key=None):
 	indexed = OrderedDict()
 	for index in index_list_order:
 		indexed[index.pattern] = []
-	# Sort articles into indexes
+	# Sort articles into indices
 	for article in articles_titlesorted:
 		for index in index_eval_order:
 			if index_match(index, key(article)):

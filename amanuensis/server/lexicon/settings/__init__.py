@@ -159,7 +159,7 @@ def index_post(lexicon_name):
     # Initialize the form
     form = IndexSchemaForm()
     if form.validate():
-        # Valid data, strip out all indexes with the blank type
+        # Valid data, strip out all indices with the blank type
         indices = [
             index_def.to_model()
             for index_def in form.indices.entries

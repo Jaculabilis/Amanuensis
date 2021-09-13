@@ -8,7 +8,7 @@ from .helpers import add_argument
 
 
 COMMAND_NAME = "index"
-COMMAND_HELP = "Interact with indexes."
+COMMAND_HELP = "Interact with indices."
 
 LOG = logging.getLogger(__name__)
 

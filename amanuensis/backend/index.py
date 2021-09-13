@@ -87,7 +87,7 @@ def update(db: DbContext, lexicon_id: int, indices: Sequence[ArticleIndex]) -> N
     """
     Update the indices for a lexicon. Indices are matched by type and pattern.
     An extant index not matched to an input is deleted, and an input index not
-    matched to a an extant index is created. Matched indexes are updated with
+    matched to a an extant index is created. Matched indices are updated with
     the input logical and display orders and capacity.
     """
     extant_indices: Sequence[ArticleIndex] = list(get_for_lexicon(db, lexicon_id))
