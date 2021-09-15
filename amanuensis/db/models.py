@@ -99,7 +99,6 @@ class User(ModelBase):
 
     memberships = relationship("Membership", back_populates="user")
     characters = relationship("Character", back_populates="user")
-    articles = relationship("Article", back_populates="user")
     posts = relationship("Post", back_populates="user")
 
     #########################
@@ -393,11 +392,7 @@ class Article(ModelBase):
     lexicon_id = Column(Integer, ForeignKey("lexicon.id"), nullable=False)
 
     # The character who is the author of this article
-    # If this is NULL, the article is written by Ersatz Scrivener
-    character_id = Column(Integer, ForeignKey("character.id"), nullable=True)
-
-    # The user who owns this article
-    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+    character_id = Column(Integer, ForeignKey("character.id"), nullable=False)
 
     # The article to which this is an addendum
     addendum_to = Column(Integer, ForeignKey("article.id"), nullable=True)
@@ -415,6 +410,9 @@ class Article(ModelBase):
 
     # The number of times the article has been submitted
     submit_nonce = Column(Integer, nullable=False, default=0)
+
+    # Whether the article is an Ersatz Scrivener article
+    ersatz = Column(Boolean, nullable=False, default=False)
 
     ####################
     # History tracking #
@@ -449,7 +447,6 @@ class Article(ModelBase):
 
     lexicon = relationship("Lexicon", back_populates="articles")
     character = relationship("Character", back_populates="articles")
-    user = relationship("User", back_populates="articles")
     addenda = relationship("Article", backref=backref("parent", remote_side=[id]))
 
 

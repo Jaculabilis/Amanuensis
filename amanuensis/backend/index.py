@@ -83,7 +83,6 @@ def get_for_lexicon(db: DbContext, lexicon_id: int) -> Sequence[ArticleIndex]:
     ).scalars()
 
 
-
 def update(db: DbContext, lexicon_id: int, indices: Sequence[ArticleIndex]) -> None:
     """
     Update the indices for a lexicon. Indices are matched by type and pattern.
