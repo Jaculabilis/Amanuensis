@@ -12,7 +12,12 @@ from amanuensis.server.helpers import (
     current_lexicon,
 )
 
-from .forms import PlayerSettingsForm, SetupSettingsForm, IndexSchemaForm
+from .forms import (
+    PlayerSettingsForm,
+    SetupSettingsForm,
+    IndexSchemaForm,
+    IndexAssignmentsForm,
+)
 
 
 bp = Blueprint("settings", __name__, url_prefix="/settings", template_folder=".")
@@ -167,7 +172,7 @@ def index_post(lexicon_name):
                 pattern=index_def.pattern.data,
                 logical_order=index_def.logical_order.data,
                 display_order=index_def.display_order.data,
-                capacity=index_def.capacity.data
+                capacity=index_def.capacity.data,
             )
             for index_def in form.indices.entries
             if index_def.index_type.data
@@ -180,6 +185,89 @@ def index_post(lexicon_name):
             "settings.jinja",
             lexicon_name=lexicon_name,
             page_name=index.__name__,
+            form=form,
+        )
+
+
+@bp.get("/assign/")
+@lexicon_param
+@editor_required
+def assign(lexicon_name):
+    # Get the current assignments
+    rules: Sequence[ArticleIndexRule] = list(
+        irq.get_for_lexicon(g.db, current_lexicon.id)
+    )
+    rule_data = [
+        {
+            "turn": rule.turn,
+            "index": rule.index.name,
+            "character": str(rule.character.public_id),
+        }
+        for rule in rules
+    ]
+    # Add a blank rule to allow for adding rules
+    rule_data.append(
+        {
+            "turn": 0,
+            "index": "",
+            "character": "",
+        }
+    )
+    form = IndexAssignmentsForm(rules=rule_data)
+    form.populate(current_lexicon)
+    return render_template(
+        "settings.jinja",
+        lexicon_name=lexicon_name,
+        page_name=assign.__name__,
+        form=form,
+    )
+
+
+@bp.post("/assign/")
+@lexicon_param
+@editor_required
+def assign_post(lexicon_name):
+    # Initialize the form
+    form = IndexAssignmentsForm()
+    form.populate(current_lexicon)
+    if form.validate():
+        # Valid data
+        indices = list(current_lexicon.indices)
+        characters = list(current_lexicon.characters)
+        rules = []
+        for rule_def in form.rules.entries:
+            # Strip out all assignments with no character
+            if not rule_def.character.data:
+                continue
+            # Look up the necessary ids from the public representations
+            character = [
+                c for c in characters if c.public_id == rule_def.character.data
+            ]
+            if not character:
+                return redirect(
+                    url_for("lexicon.settings.assign", lexicon_name=lexicon_name)
+                )
+            index = [i for i in indices if i.name == rule_def.index.data]
+            if not index:
+                return redirect(
+                    url_for("lexicon.settings.assign", lexicon_name=lexicon_name)
+                )
+            rules.append(
+                ArticleIndexRule(
+                    lexicon_id=current_lexicon.id,
+                    character_id=character[0].id,
+                    index_id=index[0].id,
+                    turn=rule_def.turn.data,
+                )
+            )
+        irq.update(g.db, current_lexicon.id, rules)
+        return redirect(url_for("lexicon.settings.assign", lexicon_name=lexicon_name))
+    else:
+        # Invalid data
+        return render_template(
+            "settings.jinja",
+            lexicon_name=lexicon_name,
+            page_name=assign.__name__,
             form=form,
         )
 

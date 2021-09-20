@@ -1,3 +1,5 @@
+import uuid
+
 from flask_wtf import FlaskForm
 from wtforms import (
     BooleanField,
@@ -13,7 +15,7 @@ from wtforms import (
 from wtforms.validators import Optional, DataRequired, ValidationError
 from wtforms.widgets.html5 import NumberInput
 
-from amanuensis.db import ArticleIndex, IndexType
+from amanuensis.db import IndexType, Lexicon
 
 
 class PlayerSettingsForm(FlaskForm):
@@ -86,3 +88,41 @@ class IndexSchemaForm(FlaskForm):
 
     indices = FieldList(FormField(IndexDefinitionForm))
     submit = SubmitField("Submit")
+
+
+def parse_uuid(uuid_str):
+    if not uuid_str:
+        return None
+    return uuid.UUID(uuid_str)
+
+
+class AssignmentDefinitionForm(FlaskForm):
+    """/lexicon/<name>/settings/assign/"""
+
+    class Meta:
+        # Disable CSRF on the individual assignment definitions, since the
+        # schema form will have one
+        csrf = False
+
+    turn = IntegerField(widget=NumberInput(min=0, max=99))
+    index = SelectField()
+    character = SelectField(coerce=parse_uuid)
+
+
+class IndexAssignmentsForm(FlaskForm):
+    """/lexicon/<name>/settings/assign/"""
+
+    rules = FieldList(FormField(AssignmentDefinitionForm))
+    submit = SubmitField("Submit")
+
+    def populate(self, lexicon: Lexicon):
+        """Populate the select fields with indices and characters"""
+        index_choices = []
+        for i in lexicon.indices:
+            index_choices.append((i.name, i.pattern))
+        char_choices = [("", "")]
+        for c in lexicon.characters:
+            char_choices.append((str(c.public_id), c.name))
+        for rule in self.rules:
+            rule.index.choices = index_choices
+            rule.character.choices = char_choices

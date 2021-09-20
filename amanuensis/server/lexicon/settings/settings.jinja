@@ -24,6 +24,7 @@
     <li>{{ settings_page_link("player", "Player Settings") }}</li>
     <li>{{ settings_page_link("setup", "Game Setup") }}</li>
     <li>{{ settings_page_link("index", "Article Indices") }}</li>
+    <li>{{ settings_page_link("assign", "Index Assignments") }}</li>
     <li>{{ settings_page_link("publish", "Turn Publishing") }}</li>
     <li>{{ settings_page_link("article", "Article Requirements") }}</li>
 </ul>
@@ -86,7 +87,7 @@
 
 {% if page_name == "index" %}
     <h3>Article Indexes</h3>
-    <details id="index-definition-help">
+    <details class="setting-help">
         <summary>Index definition help</summary>
         <p>An index is a rule that matches the title of a lexicon article based on its <em>index type</em> and <em>pattern</em>. A <em>char</em> index matches a title if the first letter of the title (excluding "A", "An", and "The") is one of the letters in the pattern. A <em>range</em> index has a pattern denoting a range of letters, such as "A-F", and matches a title if the first letter of the title is in the range. A <em>prefix</em> index matches any title that begins with the pattern. An <em>etc</em> index always matches a title.</p>
         <p>When a title is to be sorted under an index, indices are checked in order, sorted first by descending order of <em>logical priority</em>, and then by alphabetical order of index pattern. The title is sorted under the first index that matches it.</p>
@@ -111,6 +112,42 @@
                 <td>{{ index_form.logical_order() }}</td>
                 <td>{{ index_form.display_order() }}</td>
                 <td>{{ index_form.capacity() }}</td>
+            </tr>
+            {% for field in index_form %}
+            {% for error in field.errors %}
+            <tr>
+                <td colspan="5"><span style="color: #ff0000">{{ error }}</span></td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+            {% endfor %}
+        </table>
+        <p>{{ form.submit() }}</p>
+    </form>
+    {% for message in get_flashed_messages() %}
+    <span style="color:#ff0000">{{ message }}</span><br>
+    {% endfor %}
+{% endif %}
+
+{% if page_name == "assign" %}
+    <h3>Index Assignments</h3>
+    <details class="setting-help">
+        <summary>Index assignment help</summary>
+        <p>An index assignment is a rule that requires a player to write an article under certain indices for a particular turn. If more than one rule applies to a player, any index satisfying one of those rules is permitted. If no rule applies to a player, any index is permitted.</p>
+    </details>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <table id="index-definition-table2">
+            <tr>
+                <th>Turn</th>
+                <th>Index</th>
+                <th>Character</th>
+            </tr>
+            {% for rule_form in form.rules %}
+            <tr>
+                <td>{{ rule_form.turn() }}</td>
+                <td>{{ rule_form.index() }}</td>
+                <td>{{ rule_form.character() }}</td>
             </tr>
             {% for field in index_form %}
             {% for error in field.errors %}

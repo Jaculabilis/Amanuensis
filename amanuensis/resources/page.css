@@ -201,7 +201,7 @@ ul.unordered-tabs li a[href]:hover {
 	background-color: var(--button-hover);
 	border-color: var(--button-hover);
 }
-#index-definition-help {
+details.setting-help {
 	margin-block-start: 1em;
 	margin-block-end: 1em;
 }

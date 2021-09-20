@@ -518,6 +518,7 @@ class ArticleIndexRule(ModelBase):
     """
 
     __tablename__ = "article_index_rule"
+    __table_args__ = (UniqueConstraint("character_id", "index_id", "turn"),)
 
     ###################
     # Index rule info #

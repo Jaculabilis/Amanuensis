@@ -10,9 +10,9 @@ from bs4 import BeautifulSoup
 from flask.testing import FlaskClient
 from sqlalchemy.orm.session import close_all_sessions
 
-from amanuensis.backend import charq, lexiq, memq, userq
+from amanuensis.backend import *
 from amanuensis.config import AmanuensisConfig
-from amanuensis.db import DbContext, User, Lexicon, Membership, Character
+from amanuensis.db import *
 from amanuensis.server import get_app
 
 
@@ -121,6 +121,19 @@ class ObjectFactory:
         state["nonce"] += 1
         updated_kwargs: dict = {**default_kwargs, **kwargs}
         return charq.create(self.db, **updated_kwargs)
+
+    def index(self, state={"nonce": ord("A")}, **kwargs) -> ArticleIndex:
+        """Factory function for creating indices, with valid defaut values."""
+        default_kwargs: dict = {
+            "index_type": IndexType.CHAR,
+            "pattern": chr(state["nonce"]),
+            "logical_order": 0,
+            "display_order": 0,
+            "capacity": None,
+        }
+        state["nonce"] += 1
+        updated_kwargs = {**default_kwargs, **kwargs}
+        return indq.create(self.db, **updated_kwargs)
 
     def client(self, user_id: int) -> UserClient:
         """Factory function for user test clients."""
