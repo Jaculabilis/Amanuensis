@@ -161,7 +161,14 @@ def index_post(lexicon_name):
     if form.validate():
         # Valid data, strip out all indices with the blank type
         indices = [
-            index_def.to_model()
+            ArticleIndex(
+                lexicon_id=current_lexicon.id,
+                index_type=index_def.index_type.data,
+                pattern=index_def.pattern.data,
+                logical_order=index_def.logical_order.data,
+                display_order=index_def.display_order.data,
+                capacity=index_def.capacity.data
+            )
             for index_def in form.indices.entries
             if index_def.index_type.data
         ]

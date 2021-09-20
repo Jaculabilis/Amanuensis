@@ -80,15 +80,6 @@ class IndexDefinitionForm(FlaskForm):
         if form.index_type.data and not field.data:
             raise ValidationError("Pattern must be defined")
 
-    def to_model(self):
-        return ArticleIndex(
-            index_type=self.index_type.data,
-            pattern=self.pattern.data,
-            logical_order=self.logical_order.data,
-            display_order=self.display_order.data,
-            capacity=self.capacity.data,
-        )
-
 
 class IndexSchemaForm(FlaskForm):
     """/lexicon/<name>/settings/index/"""

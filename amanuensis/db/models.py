@@ -505,6 +505,10 @@ class ArticleIndex(ModelBase):
     lexicon = relationship("Lexicon", back_populates="indices")
     index_rules = relationship("ArticleIndexRule", back_populates="index")
 
+    @property
+    def name(self):
+        return f"{self.index_type}:{self.pattern}"
+
 
 class ArticleIndexRule(ModelBase):
     """

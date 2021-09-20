@@ -89,17 +89,16 @@ def update(db: DbContext, lexicon_id: int, indices: Sequence[ArticleIndex]) -> N
     An extant index not matched to an input is deleted, and an input index not
     matched to a an extant index is created. Matched indices are updated with
     the input logical and display orders and capacity.
+
+    Note that this scheme does not allow for an existing index to have its type
+    or pattern updated: such an operation will always result in the deletion of
+    the old index and the creation of a new index.
     """
     extant_indices: Sequence[ArticleIndex] = list(get_for_lexicon(db, lexicon_id))
-    s = lambda i: f"{i.index_type}:{i.pattern}"
     for extant_index in extant_indices:
         match = None
         for new_index in indices:
-            is_match = (
-                extant_index.index_type == new_index.index_type
-                and extant_index.pattern == new_index.pattern
-            )
-            if is_match:
+            if extant_index.name == new_index.name:
                 match = new_index
                 break
         if match:
@@ -111,14 +110,9 @@ def update(db: DbContext, lexicon_id: int, indices: Sequence[ArticleIndex]) -> N
     for new_index in indices:
         match = None
         for extant_index in extant_indices:
-            is_match = (
-                extant_index.index_type == new_index.index_type
-                and extant_index.pattern == new_index.pattern
-            )
-            if is_match:
+            if extant_index.name == new_index.name:
                 match = extant_index
                 break
         if not match:
-            new_index.lexicon_id = lexicon_id
             db.session.add(new_index)
     db.session.commit()
