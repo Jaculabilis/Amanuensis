@@ -1,0 +1,20 @@
+{% extends "lexicon.jinja" %}
+{% set current_page = "characters" %}
+{% block title %}Character | {{ lexicon_title }}{% endblock %}
+
+{% block main %}
+<section>
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <p>{{ form.body(class_='fullwidth') }}</p>
+    <p>{{ form.submit() }}</p>
+</form>
+</section>
+
+{% for post in current_lexicon.posts %}
+<section>
+<p>{{ render_post_body(post) }}</p>
+<p class="post-byline">Posted {% if post.user_id %}by {{ post.user.display_name }} {% endif %}at {{ post.created }}</p>
+</section>
+{% endfor %}
+{% endblock %}

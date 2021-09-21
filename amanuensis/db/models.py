@@ -251,7 +251,7 @@ class Lexicon(ModelBase):
     indices = relationship("ArticleIndex", back_populates="lexicon")
     index_rules = relationship("ArticleIndexRule", back_populates="lexicon")
     content_rules = relationship("ArticleContentRule", back_populates="lexicon")
-    posts = relationship("Post", back_populates="lexicon")
+    posts = relationship("Post", back_populates="lexicon", order_by="Post.created.desc()")
 
     #######################
     # Derived information #

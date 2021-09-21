@@ -15,6 +15,10 @@
     {% if current_page == "contents" %}class="current-page"
     {% else %}href="{{ url_for('lexicon.contents', lexicon_name=g.lexicon.name) }}"
     {% endif %}>Contents</a>{% endblock %}
+{% block sb_posts %}<a 
+    {% if current_page == "posts" %}class="current-page"
+    {% else %}href="{{ url_for('lexicon.posts.list', lexicon_name=g.lexicon.name) }}"
+    {% endif %}>Posts</a>{% endblock %}
 {% block sb_rules %}<a 
     {% if current_page == "rules" %}class="current-page"
     {% else %}href="{{ url_for('lexicon.rules', lexicon_name=g.lexicon.name) }}"
@@ -31,6 +35,7 @@
 {% set template_sidebar_rows = [
     self.sb_characters(),
     self.sb_contents(),
+    self.sb_posts(),
     self.sb_rules(),
     self.sb_settings(),
     self.sb_stats()] %}

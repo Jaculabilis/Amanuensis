@@ -215,6 +215,10 @@ details.setting-help {
 #index-definition-table td input[type=number] {
 	width: 4em;
 }
+p.post-byline {
+	color: #606060;
+	text-align: right;
+}
 @media only screen and (max-width: 816px) {
 	main {
 		padding: 5px;

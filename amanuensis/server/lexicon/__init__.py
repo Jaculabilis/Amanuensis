@@ -8,6 +8,7 @@ from amanuensis.server.helpers import lexicon_param, player_required_if_not_publ
 
 from .characters import bp as characters_bp
 from .forms import LexiconJoinForm
+from .posts import bp as posts_bp
 from .settings import bp as settings_bp
 
 
@@ -15,6 +16,7 @@ bp = Blueprint(
     "lexicon", __name__, url_prefix="/lexicon/<lexicon_name>", template_folder="."
 )
 bp.register_blueprint(characters_bp)
+bp.register_blueprint(posts_bp)
 bp.register_blueprint(settings_bp)
 
 
