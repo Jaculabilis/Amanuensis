@@ -2,7 +2,7 @@
 Post query interface
 """
 
-import re
+from typing import Optional
 
 from sqlalchemy import select
 
@@ -14,7 +14,7 @@ from amanuensis.errors import ArgumentError, BackendArgumentTypeError
 def create(
     db: DbContext,
     lexicon_id: int,
-    user_id: int,
+    user_id: Optional[int],
     body: str,
 ) -> Post:
     """
