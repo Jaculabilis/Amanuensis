@@ -17,7 +17,7 @@ div#editor-left {
 	display: flex;
 	align-items: stretch;
 }
-div#editor-left div.contentblock {
+div#editor-left section {
 	display: flex;
 	flex-direction: column;
 	margin: 10px 5px 10px 10px;
@@ -48,7 +48,7 @@ textarea#editor-content {
 div#editor-right {
 	overflow-y: scroll;
 }
-div#editor-right div.contentblock {
+div#editor-right section {
 	margin: 10px 5px 10px 10px;
 }
 span.message-warning {

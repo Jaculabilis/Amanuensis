@@ -34,7 +34,7 @@
 <body>
 	<div id="wrapper">
 		<div id="editor-left" class="column">
-			<div class="contentblock">
+			<section>
 				{# Thin header bar #}
 				<div id="editor-header">
 					{# Header always includes backlink to lexicon #}
@@ -103,16 +103,16 @@
 {#					#}{{ article.contents }}{#
 				#}</textarea>
 				{% endif %}
-			</div>
+			</section>
 		</div>
 		<div id="editor-right" class="column">
-			<div id="preview" class="contentblock">
+			<section id="preview">
 				<p>This editor requires Javascript to function.</p>
 			</div>
-			<div id="preview-citations" class="contentblock">
+			<section id="preview-citations">
 				<p>&nbsp;</p>
 			</div>
-			<div id="preview-control" class="contentblock">
+			<section id="preview-control">
 				<p>&nbsp;</p>
 			</div>
 		</div>
