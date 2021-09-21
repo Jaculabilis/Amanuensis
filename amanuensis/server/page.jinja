@@ -27,11 +27,7 @@
         </header>
         {% block sidebar %}{% endblock %}
         <article class="{% block content_class %}{% endblock %}">
-            {% if not template_content_blocks %}{% set template_content_blocks = [] %}{% endif %}
-            {% if not content_blocks %}{% set content_blocks = [] %}{% endif %}
-            {% for content_block in template_content_blocks + content_blocks -%}
-            <section>{{ content_block|safe }}</div>
-            {% endfor %}
+            {% block main %}{% endblock %}
         </article>
     </main>
 </body>

@@ -3,6 +3,7 @@
 {% block title %}Character | {{ lexicon_title }}{% endblock %}
 
 {% block main %}
+<section>
 <h1>Characters</h1>
 {% set players = memq.get_players_in_lexicon(db, g.lexicon.id)|list %}
 {% set characters = charq.get_in_lexicon(db, g.lexicon.id)|list %}
@@ -30,5 +31,5 @@
 </li>
 {% endfor %}
 </ul>
+</section>
 {% endblock %}
-{% set template_content_blocks = [self.main()] %}

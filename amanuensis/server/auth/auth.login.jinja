@@ -3,21 +3,22 @@
 {% block header %}<h2>Amanuensis - Login</h2>{% endblock %}
 {% block login_status_attr %}style="display:none"{% endblock %}
 {% block main %}
+<section>
 <form action="" method="post" novalidate>
-	{{ form.hidden_tag() }}
-	<p>{{ form.username.label }}<br>{{ form.username(size=32) }}
-	{% for error in form.username.errors %}
-	<br><span style="color: #ff0000">{{ error }}</span>
-	{% endfor %}</p>
-	<p>{{ form.password.label }}<br>{{ form.password(size=32) }}
-	{% for error in form.password.errors %}
-	<br><span style="color: #ff0000">{{ error }}</span>
-	{% endfor %}</p>
-	<p>{{ form.remember }} {{ form.remember.label }}</p>
-	<p>{{ form.submit() }}</p>
+    {{ form.hidden_tag() }}
+    <p>{{ form.username.label }}<br>{{ form.username(size=32) }}
+    {% for error in form.username.errors %}
+    <br><span style="color: #ff0000">{{ error }}</span>
+    {% endfor %}</p>
+    <p>{{ form.password.label }}<br>{{ form.password(size=32) }}
+    {% for error in form.password.errors %}
+    <br><span style="color: #ff0000">{{ error }}</span>
+    {% endfor %}</p>
+    <p>{{ form.remember }} {{ form.remember.label }}</p>
+    <p>{{ form.submit() }}</p>
 </form>
 {% for message in get_flashed_messages() %}
 <span style="color: #ff0000">{{ message }}</span><br>
 {% endfor %}
+</section>
 {% endblock %}
-{% set template_content_blocks = [self.main()] %}

@@ -9,6 +9,7 @@
 {% set template_sidebar_rows = [self.sb_home(), self.sb_create()] %}
 
 {% block main %}
+<section>
 <p>Users:</p>
 {% for user in userq.get_all(db) %}
 {{ macros.dashboard_user_item(user) }}
@@ -17,5 +18,5 @@
 {% for lexicon in lexiq.get_all(db) %}
 {{ macros.dashboard_lexicon_item(lexicon) }}
 {% endfor %}
+</section>
 {% endblock %}
-{% set template_content_blocks = [self.main()] %}

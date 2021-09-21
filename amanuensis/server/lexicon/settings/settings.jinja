@@ -19,6 +19,7 @@
 {% endmacro %}
 
 {% block main %}
+<section>
 {% if current_membership.is_editor %}
 <ul class="unordered-tabs">
     <li>{{ settings_page_link("player", "Player Settings") }}</li>
@@ -172,6 +173,5 @@
 {% if page_name == "article" %}
     <h3>Article Requirements</h3>
 {% endif %}
+</section>
 {% endblock %}
-
-{% set template_content_blocks = [self.main()] %}

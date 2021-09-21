@@ -2,6 +2,7 @@
 {% block title %}Edit {{ character.name }} | {{ lexicon_title }}{% endblock %}
 
 {% block main %}
+<section>
 <form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
     <p>
@@ -19,6 +20,5 @@
 {% for message in get_flashed_messages() %}
 <span style="color:#ff0000">{{ message }}</span><br>
 {% endfor %}
-
+</section>
 {% endblock %}
-{% set template_content_blocks = [self.main()] %}

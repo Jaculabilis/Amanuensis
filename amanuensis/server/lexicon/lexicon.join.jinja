@@ -2,7 +2,7 @@
 {% block title %}Join | {{ g.lexicon.full_title }}{% endblock %}
 
 {% block main %}
-
+<section>
 <form id="lexicon-join" action="" method="post" novalidate>
     {{ form.hidden_tag() }}
     {% if g.lexicon.join_password %}
@@ -16,6 +16,5 @@
 {% for message in get_flashed_messages() %}
 <span style="color:#ff0000">{{ message }}</span><br>
 {% endfor %}
-
+</section>
 {% endblock %}
-{% set template_content_blocks = [self.main()] %}

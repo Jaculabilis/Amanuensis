@@ -4,6 +4,13 @@
 {% block header %}<h2>Amanuensis - Home</h2>{% endblock %}
 
 {% block main %}
+{% if current_user.is_site_admin %}
+<section>
+<a href="{{ url_for('home.admin') }}" style="display:block; text-align:center;">Admin dashboard</a>
+</section>
+{% endif %}
+
+<section>
 <h1>Welcome to Amanuensis!</h1>
 <p>Amanuensis is a hub for playing Lexicon, the encyclopedia RPG. Log in to access your Lexicon games. If you do not have an account, contact the administrator.</p>
 
@@ -37,13 +44,5 @@
 {% else %}
 <p>No public games available.</p>
 {% endif %}
-
+</section>
 {% endblock %}
-{% set template_content_blocks = [self.main()] %}
-
-{% if current_user.is_site_admin %}
-{% block admin_dash %}
-<a href="{{ url_for('home.admin') }}" style="display:block; text-align:center;">Admin dashboard</a>
-{% endblock %}
-{% set template_content_blocks = [self.admin_dash()] + template_content_blocks %}
-{% endif %}
