@@ -2,6 +2,13 @@
 {% set current_page = "characters" %}
 {% block title %}Character | {{ lexicon_title }}{% endblock %}
 
+{% macro make_post(post, is_new) %}
+<section{% if is_new %} class="new-post"{% endif %}>
+<p>{{ render_post_body(post) }}</p>
+<p class="post-byline">Posted {% if post.user_id %}by {{ post.user.display_name }} {% endif %}at {{ post.created }}</p>
+</section>
+{% endmacro %}
+
 {% block main %}
 <section>
 <form action="" method="post" novalidate>
@@ -11,10 +18,10 @@
 </form>
 </section>
 
-{% for post in current_lexicon.posts %}
-<section>
-<p>{{ render_post_body(post) }}</p>
-<p class="post-byline">Posted {% if post.user_id %}by {{ post.user.display_name }} {% endif %}at {{ post.created }}</p>
-</section>
+{% for post in new_posts %}
+{{ make_post(post, True) }}
+{% endfor %}
+{% for post in old_posts %}
+{{ make_post(post, False) }}
 {% endfor %}
 {% endblock %}

@@ -7,7 +7,12 @@ from amanuensis.backend import postq
 from amanuensis.db import Post
 from amanuensis.parser import RenderableVisitor, parse_raw_markdown
 from amanuensis.parser.core import *
-from amanuensis.server.helpers import lexicon_param, player_required, current_lexicon
+from amanuensis.server.helpers import (
+    lexicon_param,
+    player_required,
+    current_lexicon,
+    current_membership,
+)
 
 from .forms import CreatePostForm
 
@@ -22,10 +27,10 @@ class PostFormatter(RenderableVisitor):
         return span.innertext
 
     def LineBreak(self, span: LineBreak):
-        return '<br>'
+        return "<br>"
 
     def ParsedArticle(self, span: ParsedArticle):
-        return '\n'.join(span.recurse(self))
+        return "\n".join(span.recurse(self))
 
     def BodyParagraph(self, span: BodyParagraph):
         return f'<p>{"".join(span.recurse(self))}</p>'
@@ -34,7 +39,7 @@ class PostFormatter(RenderableVisitor):
         return (
             '<hr><span class="signature"><p>'
             f'{"".join(span.recurse(self))}'
-            '</p></span>'
+            "</p></span>"
         )
 
     def BoldSpan(self, span: BoldSpan):
@@ -59,11 +64,14 @@ def render_post_body(post: Post) -> str:
 @player_required
 def list(lexicon_name):
     form = CreatePostForm()
+    new_posts, old_posts = postq.get_posts_for_membership(g.db, current_membership.id)
     return render_template(
         "posts.jinja",
         lexicon_name=lexicon_name,
         form=form,
         render_post_body=render_post_body,
+        new_posts=new_posts,
+        old_posts=old_posts,
     )
 
 

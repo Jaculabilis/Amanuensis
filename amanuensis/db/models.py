@@ -251,7 +251,9 @@ class Lexicon(ModelBase):
     indices = relationship("ArticleIndex", back_populates="lexicon")
     index_rules = relationship("ArticleIndexRule", back_populates="lexicon")
     content_rules = relationship("ArticleContentRule", back_populates="lexicon")
-    posts = relationship("Post", back_populates="lexicon", order_by="Post.created.desc()")
+    posts = relationship(
+        "Post", back_populates="lexicon", order_by="Post.created.desc()"
+    )
 
     #######################
     # Derived information #
@@ -654,7 +656,7 @@ class Post(ModelBase):
     ################
 
     # The timestamp the post was created
-    created = Column(DateTime, nullable=False, server_default=func.now())
+    created = Column(DateTime, nullable=False, server_default=func.utcnow())
 
     # The body of the post
     body = Column(Text, nullable=False)
