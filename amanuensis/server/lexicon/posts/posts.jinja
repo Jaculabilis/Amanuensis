@@ -10,6 +10,7 @@
 {% endmacro %}
 
 {% block main %}
+{% if current_lexicon.allow_post %}
 <section>
 <form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
@@ -17,7 +18,7 @@
     <p>{{ form.submit() }}</p>
 </form>
 </section>
-
+{% endif %}
 {% for post in new_posts %}
 {{ make_post(post, True) }}
 {% endfor %}

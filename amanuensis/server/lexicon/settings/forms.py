@@ -49,6 +49,7 @@ class SetupSettingsForm(FlaskForm):
         widget=NumberInput(),
         validators=[Optional()],
     )
+    allow_post = BooleanField("Allow players to make posts")
     submit = SubmitField("Submit")
 
 

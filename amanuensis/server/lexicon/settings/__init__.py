@@ -89,6 +89,7 @@ def setup(lexicon_name):
         form.turn_count.data = lexicon.turn_count
         form.player_limit.data = lexicon.player_limit
         form.character_limit.data = lexicon.character_limit
+        form.allow_post.data = lexicon.allow_post
         return render_template(
             "settings.jinja",
             lexicon_name=lexicon_name,
@@ -109,6 +110,7 @@ def setup(lexicon_name):
             lexicon.turn_count = form.turn_count.data
             lexicon.player_limit = form.player_limit.data
             lexicon.character_limit = form.character_limit.data
+            lexicon.allow_post = form.allow_post.data
             g.db.session.commit()  # TODO refactor into backend
             flash("Settings saved")
             return redirect(

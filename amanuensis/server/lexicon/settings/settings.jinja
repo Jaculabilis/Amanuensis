@@ -80,6 +80,7 @@
         <p>
             {{ number_setting(form.character_limit) }}
         </p>
+        <p>{{ flag_setting(form.allow_post) }}</p>
         <p>{{ form.submit() }}</p>
     </form>
     {% for message in get_flashed_messages() %}
