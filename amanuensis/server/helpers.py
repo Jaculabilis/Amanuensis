@@ -99,7 +99,7 @@ def admin_required(route):
     @wraps(route)
     def admin_route(*args, **kwargs):
         user: User = current_user
-        if not user.is_site_admin:
+        if not user.is_authenticated or not user.is_site_admin:
             flash("You must be an admin to view this page")
             return redirect(url_for('home.home'))
         return route(*args, **kwargs)
@@ -114,7 +114,13 @@ def player_required(route):
     def player_route(*args, **kwargs):
         db: DbContext = g.db
         user: User = current_user
-        lexicon: Lexicon = g.lexicon
+        lexicon: Lexicon = current_lexicon
+        if not user.is_authenticated:
+            flash("You must be a player to view this page")
+            if lexicon.public:
+                return redirect(url_for('lexicon.contents', lexicon_name=lexicon.name))
+            else:
+                return redirect(url_for('home.home'))
         mem: Optional[Membership] = memq.try_from_ids(db, user.id, lexicon.id)
         if not mem:
             flash("You must be a player to view this page")
@@ -134,8 +140,8 @@ def player_required_if_not_public(route):
     def player_route(*args, **kwargs):
         db: DbContext = g.db
         user: User = current_user
-        lexicon: Lexicon = g.lexicon
-        if not lexicon.public:
+        lexicon: Lexicon = current_lexicon
+        if not user.is_authenticated and not lexicon.public:
             mem: Optional[Membership] = memq.try_from_ids(db, user.id, lexicon.id)
             if not mem:
                 flash("You must be a player to view this page")
@@ -152,7 +158,13 @@ def editor_required(route):
     def editor_route(*args, **kwargs):
         db: DbContext = g.db
         user: User = current_user
-        lexicon: Lexicon = g.lexicon
+        lexicon: Lexicon = current_lexicon
+        if not user.is_authenticated:
+            flash("You must be a player to view this page")
+            if lexicon.public:
+                return redirect(url_for('lexicon.contents', lexicon_name=lexicon.name))
+            else:
+                return redirect(url_for('home.home'))
         mem: Optional[Membership] = memq.try_from_ids(db, user.id, lexicon.id)
         if not mem or not mem.is_editor:
             flash("You must be the editor to view this page")
