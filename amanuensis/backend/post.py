@@ -4,8 +4,7 @@ Post query interface
 
 from typing import Optional, Sequence, Tuple
 
-from sqlalchemy import select, update, func
-from sqlalchemy.sql.sqltypes import DateTime
+from sqlalchemy import select, update, func, or_, DateTime
 
 from amanuensis.db import DbContext, Post
 from amanuensis.db.models import Lexicon, Membership
@@ -87,3 +86,13 @@ def get_posts_for_membership(
     ).scalars()
 
     return new_posts, old_posts
+
+
+def get_unread_count(db: DbContext, membership_id: int) -> int:
+    """Get the number of posts that the member has not seen"""
+    return db(
+        select(func.count(Post.id))
+        .join(Membership, Membership.lexicon_id == Post.lexicon_id)
+        .where(or_(Membership.last_post_seen.is_(None), Post.created > Membership.last_post_seen))
+        .where(Membership.id == membership_id)
+    ).scalar()

@@ -656,7 +656,7 @@ class Post(ModelBase):
     ################
 
     # The timestamp the post was created
-    created = Column(DateTime, nullable=False, server_default=func.utcnow())
+    created = Column(DateTime, nullable=False, server_default=func.now())
 
     # The body of the post
     body = Column(Text, nullable=False)

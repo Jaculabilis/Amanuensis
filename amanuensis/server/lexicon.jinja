@@ -18,7 +18,7 @@
 {% block sb_posts %}<a 
     {% if current_page == "posts" %}class="current-page"
     {% else %}href="{{ url_for('lexicon.posts.list', lexicon_name=g.lexicon.name) }}"
-    {% endif %}>Posts</a>{% endblock %}
+    {% endif %}>Posts{% set unread_count = postq.get_unread_count(g.db, current_membership.id) if current_membership else None %}{% if unread_count %} ({{ unread_count }}){% endif %}</a>{% endblock %}
 {% block sb_rules %}<a 
     {% if current_page == "rules" %}class="current-page"
     {% else %}href="{{ url_for('lexicon.rules', lexicon_name=g.lexicon.name) }}"
