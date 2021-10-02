@@ -93,6 +93,11 @@ def get_unread_count(db: DbContext, membership_id: int) -> int:
     return db(
         select(func.count(Post.id))
         .join(Membership, Membership.lexicon_id == Post.lexicon_id)
-        .where(or_(Membership.last_post_seen.is_(None), Post.created > Membership.last_post_seen))
+        .where(
+            or_(
+                Membership.last_post_seen.is_(None),
+                Post.created > Membership.last_post_seen,
+            )
+        )
         .where(Membership.id == membership_id)
     ).scalar()
